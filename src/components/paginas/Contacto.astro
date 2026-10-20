@@ -1,0 +1,75 @@
+---
+// CONTACTO: "Sobre mí" + tus datos + WhatsApp + CV.
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { textos, type Idioma } from '../../i18n/textos';
+import { contacto, enlaceWhatsApp, url } from '../../utils/enlaces';
+import { imagen } from '../../utils/imagenes';
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+const t = textos[idioma];
+
+// Texto PROVISIONAL: sustitúyelo por el tuyo
+const sobreMi = {
+  es: [
+    'Soy Natalia Barrio Araúz de Robles, Tali. Trabajo entre la pintura y el diseño.',
+    'En mi pintura las formas se abrazan, se encajan y se desbordan: cuerpos y rostros que se convierten en volumen, color y estructura. En el diseño llevo ese mismo lenguaje al objeto, al mobiliario, a la moda y a la identidad de marca.',
+    'Si te interesa una obra, un encargo o una colaboración, escríbeme.',
+  ],
+  en: [
+    "I'm Natalia Barrio Araúz de Robles, Tali. I work between painting and design.",
+    'In my paintings, forms embrace, interlock and overflow: bodies and faces turned into volume, colour and structure. In design I take that same language into objects, furniture, fashion and brand identity.',
+    "If you're interested in a work, a commission or a collaboration, get in touch.",
+  ],
+}[idioma];
+---
+
+<Base idioma={idioma} pagina="contacto" titulo={t.contactoTitulo}>
+  <div class="contenedor">
+    <h1 class="titulo-pagina">{t.contactoTitulo}</h1>
+
+    <section class="sobre-mi">
+      <Image src={imagen('sobre-mi/retrato.jpg')} alt={contacto.nombre} widths={[400, 800]} sizes="(max-width: 800px) 100vw, 40vw" />
+      <div>
+        <h2 class="titulo-seccion">{t.sobreMi}</h2>
+        {sobreMi.map((p) => <p>{p}</p>)}
+      </div>
+    </section>
+
+    <section class="datos">
+      <dl>
+        <dt>{t.email}</dt>
+        <dd><a href={`mailto:${contacto.email}`}>{contacto.email}</a></dd>
+        <dt>{t.instagram}</dt>
+        <dd><a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener">@{contacto.instagram}</a></dd>
+        <dt>{t.telefono}</dt>
+        <dd><a href={`tel:${contacto.telefono.replace(/\s/g, '')}`}>{contacto.telefono}</a></dd>
+      </dl>
+      <div class="botones">
+        <a class="boton boton-whatsapp" href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">{t.escribemeWhatsApp}</a>
+        <a class="boton" href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV}</a>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .sobre-mi {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: clamp(1.5rem, 5vw, 4rem);
+    align-items: center;
+    margin-top: 2rem;
+  }
+  .sobre-mi img { width: 100%; }
+  @media (max-width: 800px) { .sobre-mi { grid-template-columns: 1fr; } }
+
+  .datos { margin-top: clamp(3rem, 8vw, 5rem); border-top: 1px solid var(--linea); padding-top: 2.5rem; }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 0.8rem 2rem; margin: 0 0 2.5rem; }
+  dt { font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--texto-suave); padding-top: 0.3rem; }
+  dd { margin: 0; font-size: 1.1rem; }
+  dd a { border-bottom: 1px solid var(--linea); }
+  dd a:hover { border-color: var(--texto); }
+  .botones { display: flex; flex-wrap: wrap; gap: 1rem; }
+  @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 0.2rem; } dd { margin-bottom: 0.8rem; word-break: break-word; } }
+</style>

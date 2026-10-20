@@ -1,0 +1,25 @@
+---
+// PINTURA: el scroll de cuadros, serie a serie (Formas → Open → Interfaces → Obras sueltas).
+import Base from '../../layouts/Base.astro';
+import GaleriaSerie from '../GaleriaSerie.astro';
+import { series } from '../../data/obras';
+import { textos, type Idioma } from '../../i18n/textos';
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+const t = textos[idioma];
+---
+
+<Base idioma={idioma} pagina="pintura" titulo={t.pinturaTitulo}>
+  <div class="contenedor">
+    <h1 class="titulo-pagina">{t.pinturaTitulo}</h1>
+    <nav class="indice" aria-label={t.pinturaTitulo}>
+      {series.map((s) => <a href={`#${s.id}`}>{t.series[s.id]}</a>)}
+    </nav>
+  </div>
+  {series.map((s) => <GaleriaSerie serie={s} idioma={idioma} />)}
+</Base>
+
+<style>
+  .indice { display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-suave); }
+  .indice a:hover { color: var(--texto); }
+</style>

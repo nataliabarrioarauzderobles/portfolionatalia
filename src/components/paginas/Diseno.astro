@@ -1,0 +1,32 @@
+---
+// DISEÑO: los proyectos en orden. El primero (Ojo y labios) incluye "Diseña tu pieza".
+import Base from '../../layouts/Base.astro';
+import ProyectoDiseno from '../ProyectoDiseno.astro';
+import DisenaTuPieza from '../DisenaTuPieza.astro';
+import VisorImagen from '../VisorImagen.astro';
+import { proyectos } from '../../data/proyectos';
+import { textos, type Idioma } from '../../i18n/textos';
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+const t = textos[idioma];
+---
+
+<Base idioma={idioma} pagina="diseno" titulo={t.disenoTitulo}>
+  <div class="contenedor">
+    <h1 class="titulo-pagina">{t.disenoTitulo}</h1>
+    <nav class="indice" aria-label={t.disenoTitulo}>
+      {proyectos.map((p) => <a href={`#${p.id}`}>{p.titulo[idioma]}</a>)}
+    </nav>
+  </div>
+  {proyectos.map((p, i) => (
+    <ProyectoDiseno proyecto={p} idioma={idioma} numero={i + 1}>
+      {p.piezaPersonalizada && <DisenaTuPieza idioma={idioma} />}
+    </ProyectoDiseno>
+  ))}
+  <VisorImagen idioma={idioma} />
+</Base>
+
+<style>
+  .indice { display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-suave); }
+  .indice a:hover { color: var(--texto); }
+</style>

@@ -1,0 +1,80 @@
+---
+// UN PROYECTO DE DISEÑO: título, texto y bloques de imágenes.
+// Cada imagen se puede ampliar (usa el visor compartido de VisorImagen.astro).
+import { Image, getImage } from 'astro:assets';
+import type { Proyecto } from '../data/proyectos';
+import { textos, type Idioma } from '../i18n/textos';
+import { imagen } from '../utils/imagenes';
+
+interface Props { proyecto: Proyecto; idioma: Idioma; numero: number }
+const { proyecto, idioma, numero } = Astro.props;
+const t = textos[idioma];
+
+// Para cada imagen preparamos la miniatura y una versión grande para el visor
+const bloques = await Promise.all(
+  proyecto.bloques.map(async (b) => ({
+    ...b,
+    imagenes: await Promise.all(
+      b.imagenes.map(async (ruta) => {
+        const src = imagen(ruta);
+        const grande = await getImage({ src, width: Math.min(src.width, 1800) });
+        return { src, grande: grande.src };
+      }),
+    ),
+  })),
+);
+---
+
+<article class="proyecto contenedor" id={proyecto.id}>
+  <header class="encabezado">
+    <span class="etiqueta">{String(numero).padStart(2, '0')}</span>
+    <h2 class="titulo-seccion">{proyecto.titulo[idioma]}</h2>
+    <p class="texto">{proyecto.texto[idioma]}</p>
+  </header>
+
+  {bloques.map((b) => (
+    <section class={`bloque ${b.disposicion ?? 'rejilla'}`}>
+      {b.subtitulo && <h3>{b.subtitulo[idioma]}</h3>}
+      <ul>
+        {b.imagenes.map((img) => (
+          <li>
+            <button type="button" class="ampliar" data-ampliar={img.grande} aria-label={t.verImagen}>
+              <Image
+                src={img.src}
+                alt={`${proyecto.titulo[idioma]}${b.subtitulo ? ' — ' + b.subtitulo[idioma] : ''}`}
+                widths={b.disposicion === 'ancho' ? [800, 1600] : [400, 800]}
+                sizes={b.disposicion === 'ancho' ? '100vw' : '(max-width: 700px) 50vw, 33vw'}
+                loading="lazy"
+              />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <slot />
+</article>
+
+<style>
+  .proyecto { margin-top: clamp(4rem, 10vw, 8rem); scroll-margin-top: 6rem; }
+  .encabezado { max-width: 680px; margin-bottom: 2.5rem; }
+  .encabezado .titulo-seccion { margin: 0.3rem 0 1rem; }
+  .texto { margin: 0; color: var(--texto); }
+
+  .bloque { margin-top: 2.5rem; }
+  .bloque h3 { font-size: 1.4rem; font-style: italic; margin-bottom: 1rem; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(0.8rem, 2vw, 1.5rem); }
+
+  .rejilla ul { grid-template-columns: repeat(3, 1fr); align-items: center; }
+  .trio ul { grid-template-columns: repeat(3, 1fr); align-items: center; }
+  .ancho ul { grid-template-columns: 1fr; }
+  @media (max-width: 700px) {
+    .rejilla ul, .trio ul { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .ampliar { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+  .ampliar img { width: 100%; transition: opacity 0.3s; }
+  .rejilla .ampliar img, .trio .ampliar img { aspect-ratio: 1; object-fit: cover; }
+  .ampliar:hover img { opacity: 0.88; }
+</style>

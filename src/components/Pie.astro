@@ -1,0 +1,37 @@
+---
+// PIE DE PÁGINA: aparece al final de todas las páginas.
+import { contacto } from '../utils/enlaces';
+import type { Idioma } from '../i18n/textos';
+
+interface Props { idioma: Idioma }
+const año = new Date().getFullYear();
+---
+
+<footer class="pie">
+  <div class="contenedor fila">
+    <span>© {año} {contacto.nombre}</span>
+    <span class="enlaces">
+      <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener">Instagram</a>
+      <a href={`mailto:${contacto.email}`}>Email</a>
+    </span>
+  </div>
+</footer>
+
+<style>
+  .pie {
+    margin-top: clamp(4rem, 10vw, 8rem);
+    border-top: 1px solid var(--linea);
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+  }
+  .fila {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  .enlaces { display: flex; gap: 1.5rem; }
+  a:hover { color: var(--texto); }
+</style>

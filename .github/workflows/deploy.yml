@@ -1,0 +1,34 @@
+# PUBLICACIÓN AUTOMÁTICA EN GITHUB PAGES
+# Cada vez que se suben cambios a la rama "main", GitHub construye la web
+# con Astro y la publica. No tienes que hacer nada más.
+name: Publicar web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permite lanzarlo a mano desde la pestaña "Actions"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+      - name: Construir la web con Astro
+        uses: withastro/action@v3
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacion.outputs.page_url }}
+    steps:
+      - name: Publicar en GitHub Pages
+        id: publicacion
+        uses: actions/deploy-pages@v4

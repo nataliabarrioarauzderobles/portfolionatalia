@@ -1,0 +1,101 @@
+/* ESTILOS GENERALES DE LA WEB
+   Las "variables" de :root son la paleta y las medidas de toda la web:
+   si cambias un color aquí, cambia en todas partes. */
+
+:root {
+  --fondo: #f6f2ec;          /* blanco roto */
+  --fondo-claro: #fbf9f5;
+  --texto: #3a3530;          /* gris cálido oscuro */
+  --texto-suave: #857a70;
+  --acento: #b39d82;         /* beige de la Serie Formas */
+  --acento-oscuro: #8d7760;
+  --linea: #e2d9cd;
+  --whatsapp: #25d366;
+
+  --fuente-titulos: 'Cormorant Garamond', Georgia, serif;
+  --fuente-texto: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+
+  --ancho-max: 1200px;
+  --margen: clamp(1rem, 4vw, 3rem);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente-texto);
+  font-weight: 300;
+  font-size: 1rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3 {
+  font-family: var(--fuente-titulos);
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.contenedor {
+  width: 100%;
+  max-width: var(--ancho-max);
+  margin: 0 auto;
+  padding: 0 var(--margen);
+}
+
+.titulo-pagina {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  margin: clamp(2rem, 6vw, 4rem) 0 1rem;
+}
+
+.titulo-seccion {
+  font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+  margin: 0 0 1.5rem;
+}
+
+.etiqueta {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+/* Botones */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.4rem;
+  border: 1px solid var(--texto);
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.boton:hover { background: var(--texto); color: var(--fondo); }
+
+.boton-whatsapp { border-color: var(--whatsapp); background: var(--whatsapp); color: #fff; }
+.boton-whatsapp:hover { background: #1ebe5a; color: #fff; }
+
+/* Visible solo para lectores de pantalla (accesibilidad) */
+.solo-lector {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+:focus-visible { outline: 2px solid var(--acento-oscuro); outline-offset: 3px; }

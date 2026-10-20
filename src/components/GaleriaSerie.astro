@@ -1,0 +1,217 @@
+---
+// GALERÍA DE UNA SERIE
+// Muestra la foto principal de cada obra. Al pulsarla se abre un visor (<dialog>)
+// con un carrusel (cuadro + mockups) y la ficha de la obra.
+import { Image } from 'astro:assets';
+import type { SerieObras } from '../data/obras';
+import { textos, type Idioma } from '../i18n/textos';
+import { enlaceWhatsApp } from '../utils/enlaces';
+import { imagenesDe } from '../utils/imagenes';
+
+interface Props { serie: SerieObras; idioma: Idioma }
+const { serie, idioma } = Astro.props;
+const t = textos[idioma];
+
+// la foto principal sale primero y después los mockups
+const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintura/${serie.id}/${obra.id}`) }));
+---
+
+<section class="serie contenedor" id={serie.id}>
+  <h2 class="titulo-seccion">{t.series[serie.id]}</h2>
+
+  <ul class="rejilla">
+    {obras.map((obra) => (
+      <li>
+        <button class="miniatura" type="button" data-abrir={`obra-${obra.id}`} aria-label={`${t.verObra}: ${obra.titulo}`}>
+          <Image src={obra.imagenes[0]} alt={obra.titulo} widths={[400, 700]} sizes="(max-width: 700px) 100vw, 33vw" loading="lazy" />
+        </button>
+        <p class="pie-obra">{obra.titulo}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+{obras.map((obra) => (
+  <dialog class="visor" id={`obra-${obra.id}`} aria-label={obra.titulo}>
+    <button class="cerrar" type="button" data-cerrar aria-label={t.cerrar}>×</button>
+    <div class="visor-cuerpo">
+      <div class="carrusel">
+        <div class="pista" data-pista>
+          {obra.imagenes.map((img, i) => (
+            <figure class="diapositiva">
+              <Image src={img} alt={i === 0 ? obra.titulo : `${obra.titulo} — mockup`} widths={[800, 1400]} sizes="(max-width: 900px) 100vw, 65vw" loading="lazy" />
+            </figure>
+          ))}
+        </div>
+        {obra.imagenes.length > 1 && (
+          <div class="controles">
+            <button type="button" data-anterior aria-label={t.anterior}>‹</button>
+            <span class="contador"><span data-actual>1</span> / {obra.imagenes.length}</span>
+            <button type="button" data-siguiente aria-label={t.siguiente}>›</button>
+          </div>
+        )}
+      </div>
+
+      <div class="ficha">
+        <h3>{obra.titulo}</h3>
+        <dl>
+          {obra.medidas && (<><dt>{t.medidas}</dt><dd>{obra.medidas} cm</dd></>)}
+          {serie.tecnica && (<><dt>{t.tecnica}</dt><dd>{t.tecnicas[serie.tecnica]}</dd></>)}
+          <dt>{t.precio}</dt>
+          <dd>{obra.vendida ? t.vendida : t.consultarPrecio}</dd>
+        </dl>
+        {!obra.vendida && (
+          <a class="boton boton-whatsapp" href={enlaceWhatsApp(t.mensajeObra(obra.titulo, obra.medidas))} target="_blank" rel="noopener">
+            {t.botonConsultar}
+          </a>
+        )}
+      </div>
+    </div>
+  </dialog>
+))}
+
+<style>
+  .serie { margin-top: clamp(3rem, 8vw, 6rem); scroll-margin-top: 6rem; }
+
+  /* La rejilla del scroll: 3 columnas en ordenador, 2 en tablet, 1 en móvil */
+  .rejilla {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2.5rem);
+    align-items: end;
+  }
+  @media (max-width: 900px) { .rejilla { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .rejilla { grid-template-columns: 1fr; } }
+
+  .miniatura {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+  .miniatura img {
+    width: 100%;
+    max-height: 520px;
+    object-fit: contain;
+    transition: transform 0.4s ease, opacity 0.3s;
+  }
+  .miniatura:hover img { transform: scale(1.02); opacity: 0.92; }
+  .pie-obra {
+    margin: 0.7rem 0 0;
+    font-family: var(--fuente-titulos);
+    font-size: 1.15rem;
+    font-style: italic;
+  }
+
+  /* VISOR */
+  .visor {
+    width: min(1300px, 94vw);
+    max-height: 92vh;
+    padding: 0;
+    border: 0;
+    background: var(--fondo-claro);
+    color: var(--texto);
+  }
+  .visor::backdrop { background: rgba(40, 34, 28, 0.6); }
+  .visor-cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+    gap: 2rem;
+    padding: clamp(1rem, 3vw, 2.5rem);
+    align-items: center;
+  }
+  @media (max-width: 900px) { .visor-cuerpo { grid-template-columns: 1fr; } }
+
+  .cerrar {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.8rem;
+    z-index: 2;
+    border: 0;
+    background: none;
+    font-size: 2.2rem;
+    line-height: 1;
+    color: var(--texto);
+    cursor: pointer;
+  }
+
+  /* Carrusel: una pista horizontal que se desliza (también con el dedo en el móvil) */
+  .pista {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .pista::-webkit-scrollbar { display: none; }
+  .diapositiva {
+    flex: 0 0 100%;
+    margin: 0;
+    scroll-snap-align: center;
+    display: flex;
+    justify-content: center;
+  }
+  .diapositiva img { max-height: 74vh; width: auto; object-fit: contain; }
+  .controles {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+  }
+  .controles button {
+    border: 1px solid var(--linea);
+    background: none;
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--texto);
+  }
+  .controles button:hover { border-color: var(--texto); }
+
+  .ficha h3 { font-size: 2rem; font-style: italic; margin-bottom: 1.2rem; }
+  dl { margin: 0 0 1.8rem; display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1.2rem; }
+  dt { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--texto-suave); padding-top: 0.25rem; }
+  dd { margin: 0; }
+</style>
+
+<script>
+  // Abre el visor al pulsar una obra
+  document.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((boton) => {
+    boton.addEventListener('click', () => {
+      const visor = document.getElementById(boton.dataset.abrir!) as HTMLDialogElement;
+      visor.showModal();
+    });
+  });
+
+  document.querySelectorAll<HTMLDialogElement>('dialog.visor').forEach((visor) => {
+    // Cerrar con la ×, o pulsando fuera de la imagen
+    visor.querySelector('[data-cerrar]')?.addEventListener('click', () => visor.close());
+    visor.addEventListener('click', (e) => { if (e.target === visor) visor.close(); });
+
+    const pista = visor.querySelector<HTMLElement>('[data-pista]');
+    const actual = visor.querySelector('[data-actual]');
+    if (!pista) return;
+    const mover = (dir: number) => pista.scrollBy({ left: dir * pista.clientWidth, behavior: 'smooth' });
+    visor.querySelector('[data-anterior]')?.addEventListener('click', () => mover(-1));
+    visor.querySelector('[data-siguiente]')?.addEventListener('click', () => mover(1));
+    visor.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') mover(-1);
+      if (e.key === 'ArrowRight') mover(1);
+    });
+    // Actualiza el contador "1 / 2"
+    pista.addEventListener('scroll', () => {
+      if (actual) actual.textContent = String(Math.round(pista.scrollLeft / pista.clientWidth) + 1);
+    });
+    // Al cerrar, vuelve a la primera imagen
+    visor.addEventListener('close', () => { pista.scrollLeft = 0; });
+  });
+</script>
