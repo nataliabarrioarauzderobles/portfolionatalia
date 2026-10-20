@@ -127,18 +127,12 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
     font-size: 0.85rem;
   }
   .destacada .pie-obra { justify-content: center; gap: 1.5rem; }
+  /* "Vendida": discreto, en gris claro junto al título */
   .vendida {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--texto-suave);
+    font-size: 0.7rem;
+    color: #a8a8a8;
     white-space: nowrap;
   }
-  /* el punto rojo de "vendida", como en las galerías */
-  .vendida::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #c8352e; }
 
   /* VISOR */
   .visor {

@@ -14,7 +14,7 @@ export const textos = {
     // Pintura
     pinturaTitulo: 'Pintura',
     series: {
-      formas: 'Serie Formas',
+      formas: 'Serie DE-Formano',
       open: 'Serie Open',
       interfaces: 'Serie Interfaces',
       sueltas: 'Obras sueltas',
@@ -61,7 +61,7 @@ export const textos = {
 
     pinturaTitulo: 'Painting',
     series: {
-      formas: 'Formas series',
+      formas: 'DE-Formano series',
       open: 'Open series',
       interfaces: 'Interfaces series',
       sueltas: 'Individual works',
