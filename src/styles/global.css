@@ -3,17 +3,18 @@
    si cambias un color aquí, cambia en todas partes. */
 
 :root {
-  --fondo: #f6f2ec;          /* blanco roto */
-  --fondo-claro: #fbf9f5;
-  --texto: #3a3530;          /* gris cálido oscuro */
-  --texto-suave: #857a70;
-  --acento: #b39d82;         /* beige de la Serie Formas */
-  --acento-oscuro: #8d7760;
-  --linea: #e2d9cd;
+  --fondo: #ffffff;          /* blanco */
+  --fondo-claro: #ffffff;
+  --fondo-suave: #f5f5f5;    /* gris muy claro para recuadros */
+  --texto: #111111;          /* casi negro */
+  --texto-suave: #6e6e6e;
+  --acento: #111111;
+  --acento-oscuro: #111111;
+  --linea: #e6e6e6;
   --whatsapp: #25d366;
 
-  --fuente-titulos: 'Cormorant Garamond', Georgia, serif;
-  --fuente-texto: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --fuente-titulos: 'Inter Tight', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --fuente-texto: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 
   --ancho-max: 1200px;
   --margen: clamp(1rem, 4vw, 3rem);
@@ -30,9 +31,9 @@ body {
   background: var(--fondo);
   color: var(--texto);
   font-family: var(--fuente-texto);
-  font-weight: 300;
-  font-size: 1rem;
-  line-height: 1.7;
+  font-weight: 400;
+  font-size: 0.95rem;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -42,8 +43,9 @@ a { color: inherit; text-decoration: none; }
 
 h1, h2, h3 {
   font-family: var(--fuente-titulos);
-  font-weight: 400;
-  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   margin: 0;
 }
 

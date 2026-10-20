@@ -1,5 +1,5 @@
 ---
-// HOME: de momento, tu nombre en grande sobre el blanco roto.
+// HOME: de momento, tu nombre en grande sobre fondo blanco.
 import Base from '../../layouts/Base.astro';
 import type { Idioma } from '../../i18n/textos';
 interface Props { idioma: Idioma }
@@ -21,9 +21,9 @@ const { idioma } = Astro.props;
     text-align: center;
   }
   h1 {
-    font-size: clamp(2.6rem, 8vw, 6.5rem);
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    line-height: 1.05;
+    font-size: clamp(2.4rem, 7.5vw, 6rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1;
   }
 </style>

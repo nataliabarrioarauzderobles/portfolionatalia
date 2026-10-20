@@ -100,7 +100,7 @@ const tx = {
   .pieza {
     margin-top: 3rem;
     padding: clamp(1.5rem, 4vw, 3rem);
-    background: var(--fondo-claro);
+    background: var(--fondo-suave);
     border: 1px solid var(--linea);
   }
   .pieza h3 { font-size: clamp(1.6rem, 3vw, 2.1rem); }
@@ -117,7 +117,7 @@ const tx = {
   .modelo input { position: absolute; opacity: 0; }
   .modelo:has(input:checked) { border-color: var(--texto); background: var(--fondo); }
   .modelo:has(input:focus-visible) { outline: 2px solid var(--acento-oscuro); }
-  .libre-icono { display: grid; place-items: center; width: 100%; aspect-ratio: 1; font-size: 2rem; color: var(--acento-oscuro); background: var(--fondo); }
+  .libre-icono { display: grid; place-items: center; width: 100%; aspect-ratio: 1; font-size: 2rem; color: var(--texto-suave); background: var(--fondo); }
 
   .colores { display: flex; flex-wrap: wrap; gap: 0.6rem; }
   .color input { position: absolute; opacity: 0; }

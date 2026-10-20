@@ -19,15 +19,23 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
 <section class="serie contenedor" id={serie.id}>
   <h2 class="titulo-seccion">{t.series[serie.id]}</h2>
 
+  <!-- Filas de altura igual: cada obra ocupa el ancho que le corresponde según su proporción (--r) -->
   <ul class="rejilla">
-    {obras.map((obra) => (
-      <li>
-        <button class="miniatura" type="button" data-abrir={`obra-${obra.id}`} aria-label={`${t.verObra}: ${obra.titulo}`}>
-          <Image src={obra.imagenes[0]} alt={obra.titulo} widths={[400, 700]} sizes="(max-width: 700px) 100vw, 33vw" loading="lazy" />
-        </button>
-        <p class="pie-obra">{obra.titulo}</p>
-      </li>
-    ))}
+    {obras.map((obra) => {
+      const principal = obra.imagenes[0];
+      const proporcion = (principal.width / principal.height).toFixed(3);
+      return (
+        <li class:list={{ destacada: obra.destacada }} style={`--r:${proporcion}`}>
+          <button class="miniatura" type="button" data-abrir={`obra-${obra.id}`} aria-label={`${t.verObra}: ${obra.titulo}`}>
+            <Image src={principal} alt={obra.titulo} widths={[500, 900, 1400]} sizes={obra.destacada ? '100vw' : '(max-width: 700px) 100vw, 40vw'} loading="lazy" />
+          </button>
+          <p class="pie-obra">
+            <span>{obra.titulo}</span>
+            {obra.vendida && <span class="vendida">{t.vendida}</span>}
+          </p>
+        </li>
+      );
+    })}
   </ul>
 </section>
 
@@ -73,18 +81,29 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
 <style>
   .serie { margin-top: clamp(3rem, 8vw, 6rem); scroll-margin-top: 6rem; }
 
-  /* La rejilla del scroll: 3 columnas en ordenador, 2 en tablet, 1 en móvil */
+  /* LA REJILLA DEL SCROLL
+     Filas de la misma altura (--alto). Cada obra crece en proporción a su forma (--r = ancho/alto),
+     así un cuadro apaisado ocupa más ancho que uno vertical y todo queda alineado. */
   .rejilla {
+    --alto: 340px;
+    --hueco: clamp(1.25rem, 3vw, 2.5rem);
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2.5rem);
-    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--hueco) * 1.4) var(--hueco);
   }
-  @media (max-width: 900px) { .rejilla { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px) { .rejilla { grid-template-columns: 1fr; } }
+  /* evita que la última fila se estire de más */
+  .rejilla::after { content: ''; flex-grow: 999; }
+  .rejilla li { flex: var(--r) 1 calc(var(--r) * var(--alto)); min-width: 0; }
+
+  /* La obra destacada (Arquitectura del abrazo) ocupa una fila entera */
+  .rejilla li.destacada { flex-basis: 100%; }
+  .rejilla li.destacada img { max-height: 72vh; width: auto; margin: 0 auto; }
+
+  @media (max-width: 900px) { .rejilla { --alto: 240px; } }
+  @media (max-width: 560px) { .rejilla li { flex-basis: 100%; } }
 
   .miniatura {
     display: block;
@@ -96,17 +115,30 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
   }
   .miniatura img {
     width: 100%;
-    max-height: 520px;
-    object-fit: contain;
-    transition: transform 0.4s ease, opacity 0.3s;
+    height: auto;
+    transition: opacity 0.3s;
   }
-  .miniatura:hover img { transform: scale(1.02); opacity: 0.92; }
+  .miniatura:hover img { opacity: 0.85; }
   .pie-obra {
-    margin: 0.7rem 0 0;
-    font-family: var(--fuente-titulos);
-    font-size: 1.15rem;
-    font-style: italic;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.6rem 0 0;
+    font-size: 0.85rem;
   }
+  .destacada .pie-obra { justify-content: center; gap: 1.5rem; }
+  .vendida {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    white-space: nowrap;
+  }
+  /* el punto rojo de "vendida", como en las galerías */
+  .vendida::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #c8352e; }
 
   /* VISOR */
   .visor {
@@ -177,7 +209,7 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
   }
   .controles button:hover { border-color: var(--texto); }
 
-  .ficha h3 { font-size: 2rem; font-style: italic; margin-bottom: 1.2rem; }
+  .ficha h3 { font-size: 1.8rem; margin-bottom: 1.2rem; }
   dl { margin: 0 0 1.8rem; display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1.2rem; }
   dt { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--texto-suave); padding-top: 0.25rem; }
   dd { margin: 0; }

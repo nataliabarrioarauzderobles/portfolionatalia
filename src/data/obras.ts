@@ -13,6 +13,7 @@ export interface Obra {
   titulo: string;    // título tal como se ve en la web
   medidas?: string;  // en cm, p. ej. '90 x 70'
   vendida?: boolean;
+  destacada?: boolean; // ocupa una fila entera en el scroll
 }
 
 export interface SerieObras {
@@ -25,29 +26,31 @@ export const series: SerieObras[] = [
   {
     id: 'formas',
     tecnica: 'oleo',
+    // Orden pensado para que las filas queden equilibradas:
+    // apaisados junto a verticales, cuadrados juntos y la obra grande sola arriba.
     obras: [
-      { id: 'arquitectura-del-abrazo', titulo: 'Arquitectura del abrazo', medidas: '280 x 135', vendida: true },
+      { id: 'arquitectura-del-abrazo', titulo: 'Arquitectura del abrazo', medidas: '280 x 135', vendida: true, destacada: true },
       { id: 'desglose', titulo: 'Desglose', medidas: '90 x 70' },
-      { id: 'estructura', titulo: 'Estructura', medidas: '120 x 90' },
       { id: 'encuentro', titulo: 'Encuentro', medidas: '130 x 90' },
       { id: 'despersonificacion', titulo: 'Despersonificación', medidas: '130 x 90' },
+      { id: 'estructura', titulo: 'Estructura', medidas: '120 x 90' },
       { id: 'escapatoria', titulo: 'Escapatoria', medidas: '130 x 90' },
-      { id: 'logica-del-espacio', titulo: 'Lógica del espacio', medidas: '85 x 70' },
-      { id: 'masa', titulo: 'Masa', medidas: '107 x 65' },
-      { id: 'deconstruccion-grafica', titulo: 'Deconstrucción gráfica', medidas: '107 x 85' },
       { id: 'nudo', titulo: 'Nudo', medidas: '80 x 60' },
-      { id: 'mascara', titulo: 'Máscara', medidas: '60 x 60' },
       { id: 'el-limite-del-gesto', titulo: 'El límite del gesto', medidas: '60 x 40' },
-      { id: 'organo', titulo: 'Órgano', medidas: '40 x 40' },
+      { id: 'mascara', titulo: 'Máscara', medidas: '60 x 60', vendida: true },
+      { id: 'logica-del-espacio', titulo: 'Lógica del espacio', medidas: '85 x 70' },
+      { id: 'deconstruccion-grafica', titulo: 'Deconstrucción gráfica', medidas: '107 x 85' },
       { id: 'principio-de-la-forma', titulo: 'Principio de la forma', medidas: '190 x 40' },
+      { id: 'masa', titulo: 'Masa', medidas: '107 x 65', vendida: true },
+      { id: 'organo', titulo: 'Órgano', medidas: '40 x 40' },
     ],
   },
   {
     id: 'open',
     tecnica: 'mixta',
     obras: [
-      { id: 'open-i', titulo: 'Open I', medidas: '120 x 90' },
-      { id: 'open-ii', titulo: 'Open II', medidas: '85 x 66' },
+      { id: 'open-i', titulo: 'Open I', medidas: '120 x 90', vendida: true },
+      { id: 'open-ii', titulo: 'Open II', medidas: '85 x 66', vendida: true },
       // Obras sobre papel: faltan las medidas
       { id: 'open-iii', titulo: 'Open III' },
       { id: 'open-iv', titulo: 'Open IV' },
