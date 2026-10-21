@@ -1,8 +1,8 @@
 ---
 // CONTACTO
-// Arriba, en el centro, una foto tuya pequeña. Cada pocos segundos la siguiente aparece detrás
-// y la que estaba se agranda por la pantalla hasta desaparecer, dejando la nueva en su sitio.
-// Fotos: src/assets/sobre-mi/cartas (todas del mismo tamaño). Sin bordes.
+// Arriba, una "hoja de contactos": tus fotos en blanco y negro, todas del mismo tamaño y numeradas,
+// en una tira que avanza despacio y sin fin (se detiene al pasar el cursor).
+// Fotos: src/assets/sobre-mi/fotos (preparadas en blanco y negro).
 // Debajo, el texto "Sobre mí", centrado y justificado, y después los datos y botones de contacto.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
@@ -13,7 +13,7 @@ import { imagenesDe } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
-const fotos = imagenesDe('sobre-mi/cartas');
+const fotos = imagenesDe('sobre-mi/fotos');
 
 // Texto del cuadernillo (CUADERNILLO_VENEZUELA); el inglés es traducción
 const sobreMi = {
@@ -29,15 +29,22 @@ const sobreMi = {
 ---
 
 <Base idioma={idioma} pagina="contacto" titulo={t.contactoTitulo}>
-  <!-- la foto del centro: se van relevando -->
-  <section class="galeria" aria-label={t.sobreMi}>
-    <div class="marco" data-relevo>
-      {fotos.map((img, i) => (
-        <Image src={img} alt={i === 0 ? contacto.nombre : ''} widths={[320, 640]} sizes="(max-width: 700px) 50vw, 260px" loading="eager" class:list={['foto', { actual: i === 0 }]} />
+  <!-- HOJA DE CONTACTOS: una tira de fotos en blanco y negro que avanza despacio y sin fin.
+       Al pasar el cursor se detiene, la foto crece un poco y las demás se apagan. -->
+  <section class="tira-fotos" aria-label={t.sobreMi}>
+    <div class="pista">
+      {[0, 1].map((copia) => (
+        <ul aria-hidden={copia === 1 ? 'true' : undefined}>
+          {fotos.map((img, i) => (
+            <li>
+              <Image src={img} alt={copia === 0 && i === 0 ? contacto.nombre : ''} widths={[260, 520]} sizes="(max-width: 700px) 140px, 220px" loading={i < 8 ? 'eager' : 'lazy'} />
+              <span class="mono">{String(i + 1).padStart(2, '0')}</span>
+            </li>
+          ))}
+        </ul>
       ))}
     </div>
   </section>
-
   <div class="contenedor columna">
     <h1 class="mono etiqueta">{t.sobreMi}</h1>
     {sobreMi.map((p) => <p class="texto" lang={idioma}>{p}</p>)}
@@ -69,16 +76,26 @@ const sobreMi = {
 </Base>
 
 <style>
-  /* FOTO DEL CENTRO */
-  .galeria { display: grid; place-items: center; padding: clamp(3rem, 9vh, 6rem) 0 clamp(3rem, 7vh, 5rem); }
-  .marco { position: relative; width: clamp(160px, 19vw, 260px); aspect-ratio: 4 / 5; }
-  .marco :global(.foto) {
-    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
-    opacity: 0; pointer-events: none; transform-origin: center;
+  /* HOJA DE CONTACTOS */
+  .tira-fotos {
+    --alto: clamp(170px, 27vh, 290px);
+    padding: clamp(3rem, 9vh, 6rem) 0 clamp(3rem, 8vh, 5rem);
+    overflow: hidden;
+    /* los extremos se funden con el blanco */
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
   }
-  .marco :global(.foto.actual) { opacity: 1; z-index: 2; }
-  .marco :global(.foto.siguiente) { opacity: 1; z-index: 1; }
-
+  .pista { display: flex; width: max-content; animation: avanzar 70s linear infinite; }
+  .tira-fotos:hover .pista { animation-play-state: paused; }
+  .pista ul { display: flex; gap: clamp(0.8rem, 1.6vw, 1.4rem); margin: 0; padding: 0 clamp(0.4rem, 0.8vw, 0.7rem); list-style: none; }
+  .pista li { display: grid; gap: 0.6rem; width: calc(var(--alto) * 0.8); transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .pista li :global(img) { display: block; width: 100%; aspect-ratio: 4 / 5; height: auto; object-fit: cover; }
+  .pista li span { color: var(--texto-tenue); }
+  /* al pasar: la foto crece un poco y las demás se apagan */
+  .pista:hover li { opacity: 0.35; }
+  .pista li:hover { opacity: 1; transform: scale(1.06); }
+  @keyframes avanzar { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .pista { animation: none; } .tira-fotos { overflow-x: auto; } }
   /* TEXTO Y CONTACTO */
   .columna { max-width: 460px; text-align: center; }
   .etiqueta { color: var(--texto-suave); margin: 0 0 1.4rem; font-weight: 400; }
@@ -94,45 +111,3 @@ const sobreMi = {
   .firma-animada { margin: clamp(4rem, 10vw, 7rem) 0 0; }
 </style>
 
-<script>
-  const marco = document.querySelector<HTMLElement>('[data-relevo]');
-  if (marco) {
-    const fotos = [...marco.querySelectorAll<HTMLImageElement>('.foto')];
-    const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let actual = 0;
-    const PAUSA = 2600, CRECER = 1300;
-
-    const preparar = () => {
-      const siguiente = (actual + 1) % fotos.length;
-      fotos.forEach((f, i) => {
-        f.classList.toggle('actual', i === actual);
-        f.classList.toggle('siguiente', i === siguiente);
-      });
-    };
-
-    // la foto de delante crece por la pantalla y se desvanece; la de detrás se queda
-    const relevar = () => {
-      const sale = fotos[actual];
-      actual = (actual + 1) % fotos.length;
-      const animacion = sinMovimiento
-        ? sale.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, easing: 'ease' })
-        : sale.animate(
-            [
-              { transform: 'scale(1)', opacity: 1 },
-              { transform: 'scale(1.9)', opacity: 0.55, offset: 0.45 },
-              { transform: 'scale(4.2)', opacity: 0 },
-            ],
-            { duration: CRECER, easing: 'cubic-bezier(.55,0,.35,1)' },
-          );
-      // durante el relevo, la que sale va por encima de todo
-      sale.style.zIndex = '3';
-      animacion.onfinish = () => { sale.style.zIndex = ''; };
-      preparar();
-    };
-
-    preparar();
-    // empieza cuando la primera foto está cargada
-    const empezar = () => setInterval(relevar, PAUSA + CRECER);
-    if (fotos[0].complete) empezar(); else fotos[0].addEventListener('load', empezar, { once: true });
-  }
-</script>
