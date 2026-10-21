@@ -1,11 +1,10 @@
 ---
 // DISEÑO
 //  1. Vitrina de las piezas decorativas (ojos y labios) con el configurador "Personaliza tu pieza".
-//  2. Índice de proyectos: portadas que se abren a pantalla completa.
+//  2. Proyectos: cada uno es una revista que se abre desde su portada.
 import Base from '../../layouts/Base.astro';
 import VitrinaPiezas from '../VitrinaPiezas.astro';
 import ProyectosIndice from '../ProyectosIndice.astro';
-import VisorImagen from '../VisorImagen.astro';
 import { textos, type Idioma } from '../../i18n/textos';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
@@ -24,5 +23,4 @@ const enlaces = idioma === 'es'
   </div>
   <VitrinaPiezas idioma={idioma} />
   <ProyectosIndice idioma={idioma} />
-  <VisorImagen idioma={idioma} />
 </Base>

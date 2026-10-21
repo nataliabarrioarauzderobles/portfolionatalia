@@ -24,7 +24,7 @@
 *::before,
 *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; } /* nunca scroll horizontal (sobre todo en el móvil) */
 
 body {
   margin: 0;

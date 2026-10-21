@@ -1,36 +1,38 @@
 ---
-// ÍNDICE DE PROYECTOS DE DISEÑO
-// Cada proyecto es una portada (una imagen central) que aparece al hacer scroll.
-// Al pulsarla se abre el proyecto completo a pantalla completa, sobre fondo blanco.
-import { Image } from 'astro:assets';
-import ProyectoDiseno from './ProyectoDiseno.astro';
+// PROYECTOS DE DISEÑO COMO REVISTAS
+// Índice: las portadas de las revistas, todas del mismo tamaño, en una cuadrícula.
+// Al pulsar una portada se abre la revista: en ordenador a doble página, en el móvil página a página.
+//  · Pasar página: flechas de abajo, teclado, pulsando la mitad izquierda/derecha de la revista o deslizando.
+//  · Cerrar: pulsando fuera de la revista, con la × o con Esc.
+//  · "Proyectos" (menú) para saltar a otra revista y "Guías" para ver la retícula de la maqueta.
+import PaginaRevista from './PaginaRevista.astro';
 import { proyectos } from '../data/proyectos';
+import { revistas } from '../data/revistas';
 import { textos, type Idioma } from '../i18n/textos';
-import { imagen } from '../utils/imagenes';
 
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { etiqueta: 'Proyectos', ver: 'Ver proyecto', volver: 'Volver', siguiente: 'Siguiente proyecto' },
-  en: { etiqueta: 'Projects', ver: 'View project', volver: 'Back', siguiente: 'Next project' },
+  es: { etiqueta: 'Proyectos', ver: 'Abrir revista', anterior: 'Página anterior', siguiente: 'Página siguiente', guias: 'Guías', ayuda: 'Pulsa fuera de la revista para cerrarla' },
+  en: { etiqueta: 'Projects', ver: 'Open magazine', anterior: 'Previous page', siguiente: 'Next page', guias: 'Guides', ayuda: 'Tap outside the magazine to close it' },
 }[idioma];
+const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p, revista: revistas[p.id] }));
 ---
 
 <section class="indice-proyectos contenedor" id="proyectos">
   <p class="mono etiqueta">{tx.etiqueta}</p>
-  <ul>
-    {proyectos.map((p, i) => (
+  <ul class="portadas">
+    {lista.map(({ proyecto, revista }, i) => (
       <li data-aparece style={`--retraso:${(i % 3) * 120}ms`}>
-        <button type="button" class="portada" data-abrir-proyecto={`proyecto-${p.id}`} aria-label={`${tx.ver}: ${p.titulo[idioma]}`}>
-          <span class="marco">
-            <Image src={imagen(p.portada)} alt={p.titulo[idioma]} widths={[500, 900, 1300]} sizes="(max-width: 760px) 90vw, 40vw" loading="lazy" />
+        <button type="button" class="abrir" data-abrir-revista={`revista-${proyecto.id}`} aria-label={`${tx.ver}: ${proyecto.titulo[idioma]}`}>
+          <span class="tapa">
+            <PaginaRevista pagina={revista.paginas[0]} proyecto={proyecto} revista={revista} idioma={idioma} numero={1} total={revista.paginas.length} miniatura />
           </span>
           <span class="pie mono">
-            <span class="numero">{String(i + 1).padStart(2, '0')}</span>
-            <span class="titulo">{p.titulo[idioma]}</span>
-            {p.año && <span class="año">{p.año}</span>}
-            <span class="ver">{tx.ver} →</span>
+            <span class="numero">Nº {revista.numero}</span>
+            <span class="titulo">{proyecto.titulo[idioma]}</span>
+            <span class="disciplina">{revista.disciplina[idioma]}</span>
           </span>
         </button>
       </li>
@@ -38,158 +40,243 @@ const tx = {
   </ul>
 </section>
 
-{proyectos.map((p, i) => {
-  const siguiente = proyectos[(i + 1) % proyectos.length];
-  return (
-    <dialog class="dialogo-proyecto" id={`proyecto-${p.id}`} aria-label={p.titulo[idioma]}>
-      <!-- barra fija: menú hamburguesa con todos los proyectos y botón para volver -->
-      <div class="barra">
-        <button type="button" class="hamburguesa mono" data-menu-proyectos aria-expanded="false">
-          <span class="lineas" aria-hidden="true"><i></i><i></i><i></i></span>
-          {tx.etiqueta}
-        </button>
-        <span class="mono actual">{String(i + 1).padStart(2, '0')} / {String(proyectos.length).padStart(2, '0')}</span>
-        <button type="button" class="cerrar mono" data-cerrar-proyecto>← {tx.volver}</button>
-        <nav class="lista-proyectos" aria-label={tx.etiqueta} hidden>
-          <ol>
-            {proyectos.map((q, j) => (
-              <li>
-                <button type="button" data-ir-proyecto={`proyecto-${q.id}`} aria-current={q.id === p.id ? 'true' : undefined}>
-                  <Image src={imagen(q.portada)} alt="" widths={[160]} sizes="80px" loading="lazy" />
-                  <span class="mono">{String(j + 1).padStart(2, '0')}</span>
-                  <span class="nombre-proyecto">{q.titulo[idioma]}</span>
-                </button>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      </div>
-      <ProyectoDiseno proyecto={p} idioma={idioma} numero={i + 1} />
-      <!-- al terminar, el siguiente proyecto -->
-      <button type="button" class="siguiente contenedor" data-ir-proyecto={`proyecto-${siguiente.id}`}>
-        <span class="mono">{tx.siguiente}</span>
-        <span class="titulo-seccion">{siguiente.titulo[idioma]} →</span>
+{lista.map(({ proyecto, revista }) => (
+  <dialog class="revista" id={`revista-${proyecto.id}`} aria-label={proyecto.titulo[idioma]} style={`--acento:${revista.acento}`}>
+    <!-- barra de arriba: proyectos, guías y cerrar -->
+    <div class="barra mono">
+      <button type="button" class="menu" data-menu-revistas aria-expanded="false">
+        <span class="lineas" aria-hidden="true"><i></i><i></i><i></i></span>{tx.etiqueta}
       </button>
-    </dialog>
-  );
-})}
+      <span class="nombre-revista">Nº {revista.numero} — {proyecto.titulo[idioma]}</span>
+      <button type="button" class="guias-boton" data-guias aria-pressed="false">{tx.guias}</button>
+      <button type="button" class="cerrar" data-cerrar-revista aria-label={t.cerrar}>×</button>
+      <nav class="lista-revistas" hidden aria-label={tx.etiqueta}>
+        <ol>
+          {lista.map((otro) => (
+            <li>
+              <button type="button" data-ir-revista={`revista-${otro.proyecto.id}`} aria-current={otro.proyecto.id === proyecto.id ? 'true' : undefined}>
+                <span>Nº {otro.revista.numero}</span>{otro.proyecto.titulo[idioma]}
+              </button>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </div>
+
+    <!-- la revista -->
+    <div class="escenario" data-escenario>
+      <div class="pliego" data-pliego>
+        {revista.paginas.map((pagina, n) => (
+          <PaginaRevista pagina={pagina} proyecto={proyecto} revista={revista} idioma={idioma} numero={n + 1} total={revista.paginas.length} />
+        ))}
+      </div>
+    </div>
+
+    <!-- pasar página -->
+    <div class="pasar mono">
+      <button type="button" data-anterior aria-label={tx.anterior}>←</button>
+      <span data-contador></span>
+      <button type="button" data-siguiente aria-label={tx.siguiente}>→</button>
+    </div>
+    <p class="ayuda mono">{tx.ayuda}</p>
+  </dialog>
+))}
 
 <style>
-  .indice-proyectos { margin-top: clamp(6rem, 14vw, 11rem); scroll-margin-top: 5rem; }
+  .indice-proyectos { margin-top: clamp(6rem, 14vw, 11rem); margin-bottom: clamp(4rem, 10vw, 7rem); scroll-margin-top: 5rem; }
   .etiqueta { color: var(--texto-suave); margin-bottom: clamp(2rem, 5vw, 3.5rem); }
 
-  /* Portadas a alturas y tamaños desiguales, con mucho aire (como blancagtarrio.com) */
-  .indice-proyectos ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(1rem, 3vw, 2.5rem); row-gap: clamp(3rem, 7vw, 6rem); align-items: start; }
-  .indice-proyectos li:nth-child(5n + 1) { grid-column: 1 / span 5; }
-  .indice-proyectos li:nth-child(5n + 2) { grid-column: 7 / span 4; margin-top: 8rem; }
-  .indice-proyectos li:nth-child(5n + 3) { grid-column: 2 / span 4; }
-  .indice-proyectos li:nth-child(5n + 4) { grid-column: 7 / span 5; margin-top: 5rem; }
-  .indice-proyectos li:nth-child(5n + 5) { grid-column: 4 / span 5; }
-  @media (max-width: 760px) {
-    .indice-proyectos ul { grid-template-columns: repeat(6, 1fr); row-gap: 3rem; }
-    .indice-proyectos li:nth-child(n) { grid-column: 1 / span 5; margin-top: 0; }
-    .indice-proyectos li:nth-child(2n) { grid-column: 2 / span 5; }
+  /* ÍNDICE: todas las portadas iguales */
+  .portadas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(2.5rem, 5vw, 4rem) clamp(1.2rem, 3vw, 2.6rem); }
+  @media (max-width: 760px) { .portadas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 1rem; } }
+  .abrir { display: grid; gap: 0.9rem; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--texto); }
+  .tapa { display: block; aspect-ratio: 3 / 4; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 30px -12px rgba(0,0,0,0.25); transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.5s; }
+  .tapa :global(.pagina) { width: 100%; height: 100%; }
+  .abrir:hover .tapa, .abrir:focus-visible .tapa { transform: translateY(-8px) rotate(-1.2deg); box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 24px 40px -16px rgba(0,0,0,0.35); }
+  .pie { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.9rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--linea); }
+  .numero, .disciplina { color: var(--texto-tenue); }
+  .disciplina { margin-left: auto; }
+  @media (max-width: 760px) { .disciplina { display: none; } }
+
+  /* LA REVISTA ABIERTA */
+  .revista {
+    width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; border: 0;
+    background: #ecebe8; color: var(--texto); overflow: hidden;
+  }
+  .revista[open] { display: grid; grid-template-rows: auto 1fr auto auto; animation: abrirRevista 0.5s ease; }
+  .revista::backdrop { background: #ecebe8; }
+  @keyframes abrirRevista { from { opacity: 0; } to { opacity: 1; } }
+
+  .barra { position: relative; z-index: 6; display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem var(--margen); }
+  .barra button { padding: 0.4rem 0.8rem; border: 1px solid rgba(0,0,0,0.15); border-radius: 999px; background: #fff; cursor: pointer; color: var(--texto); font: inherit; }
+  .barra button:hover, .barra button[aria-pressed='true'] { border-color: var(--texto); }
+  .guias-boton[aria-pressed='true'] { background: var(--texto) !important; color: #fff !important; }
+  .nombre-revista { color: var(--texto-suave); margin-right: auto; }
+  .cerrar { font-size: 1rem; line-height: 1; padding: 0.35rem 0.7rem !important; }
+  .menu { display: inline-flex; align-items: center; gap: 0.55rem; }
+  .lineas { display: grid; gap: 3px; width: 13px; }
+  .lineas i { height: 1px; background: currentColor; }
+  @media (max-width: 600px) { .nombre-revista { display: none; } .menu { margin-right: auto; } }
+
+  .lista-revistas { position: absolute; top: 100%; left: var(--margen); min-width: 240px; background: #fff; border: 1px solid rgba(0,0,0,0.1); padding: 0.4rem; animation: abrirRevista 0.25s ease; }
+  .lista-revistas ol { list-style: none; margin: 0; padding: 0; }
+  .lista-revistas button { display: flex; gap: 0.8rem; width: 100%; border: 0 !important; border-radius: 0 !important; text-align: left; padding: 0.6rem 0.7rem !important; background: none !important; }
+  .lista-revistas button:hover, .lista-revistas button[aria-current] { background: var(--fondo-suave) !important; }
+  .lista-revistas span { color: var(--texto-tenue); }
+
+  /* el escenario ocupa todo; pulsar en él (fuera de la revista) la cierra */
+  .escenario { display: grid; place-items: center; min-height: 0; padding: 0.5rem 1rem; perspective: 2400px; }
+  .pliego {
+    --alto: min(calc(100dvh - 9.5rem), calc((100vw - 3rem) / 1.5));
+    position: relative; display: flex; height: var(--alto); aspect-ratio: 3 / 2;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .pliego.sencillo { aspect-ratio: 3 / 4; }
+  /* sombra del lomo entre las dos páginas */
+  .pliego.doble-pagina::after {
+    content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 6%; transform: translateX(-50%); z-index: 4; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.12) 45%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.12) 55%, transparent);
+  }
+  .pliego :global(.pagina) { display: none; flex: 1 1 0; height: 100%; cursor: pointer; }
+  .pliego :global(.pagina.vista) { display: block; }
+  .pliego :global(.tipo-doble .guias) { display: none; }
+
+  /* móvil: una página cada vez */
+  @media (max-width: 899px) {
+    .pliego { --alto: min(calc(100dvh - 10rem), calc((100vw - 2rem) / 0.75)); aspect-ratio: 3 / 4; }
+    .pliego.es-doble { height: auto; width: calc(100vw - 2rem); aspect-ratio: 3 / 2; }
+    .pliego.es-doble::after { display: none; }
   }
 
-  .portada { display: grid; gap: 0.8rem; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--texto); }
-  .marco { display: block; overflow: hidden; }
-  .marco img { width: 100%; height: auto; transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.6s; }
-  .portada:hover .marco img { transform: scale(1.04); }
-  .pie { display: flex; align-items: baseline; gap: 0.9rem; padding-bottom: 0.45rem; border-bottom: 1px solid var(--linea); }
-  .numero, .año { color: var(--texto-tenue); }
-  .ver { margin-left: auto; color: var(--texto-suave); opacity: 0; transform: translateX(-6px); transition: opacity 0.4s, transform 0.4s; }
-  .portada:hover .ver, .portada:focus-visible .ver { opacity: 1; transform: none; }
-  @media (hover: none) { .ver { opacity: 1; transform: none; } }
-
-  /* El proyecto abierto, a pantalla completa sobre blanco */
-  .dialogo-proyecto {
-    width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; margin: 0; padding: 0 0 4rem;
-    border: 0; background: var(--fondo); overflow-y: auto;
-  }
-  .dialogo-proyecto[open] { animation: entrarProyecto 0.5s ease; }
-  .dialogo-proyecto::backdrop { background: #fff; }
-  .dialogo-proyecto :global(.proyecto) { margin-top: 1.5rem; }
-  /* Barra fija arriba del proyecto */
-  .barra {
-    position: sticky; top: 0; z-index: 6;
-    display: flex; align-items: center; gap: 1rem;
-    padding: 0.9rem var(--margen); background: color-mix(in srgb, var(--fondo) 94%, transparent); backdrop-filter: blur(6px);
-  }
-  .barra button { padding: 0.4rem 0.8rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--fondo); cursor: pointer; color: var(--texto); }
-  .barra button:hover { border-color: var(--texto); }
-  .actual { color: var(--texto-tenue); }
-  .cerrar { margin-left: auto; }
-  .hamburguesa { display: inline-flex; align-items: center; gap: 0.6rem; }
-  .lineas { display: grid; gap: 3px; width: 14px; }
-  .lineas i { display: block; height: 1px; background: currentColor; transition: transform 0.3s, opacity 0.3s; }
-  .hamburguesa[aria-expanded='true'] .lineas i:nth-child(1) { transform: translateY(4px) rotate(45deg); }
-  .hamburguesa[aria-expanded='true'] .lineas i:nth-child(2) { opacity: 0; }
-  .hamburguesa[aria-expanded='true'] .lineas i:nth-child(3) { transform: translateY(-4px) rotate(-45deg); }
-
-  /* Desplegable con todos los proyectos */
-  .lista-proyectos {
-    position: absolute; top: 100%; left: var(--margen); width: min(360px, calc(100vw - 2 * var(--margen)));
-    background: var(--fondo); border: 1px solid var(--linea); padding: 0.5rem; animation: desplegar 0.3s ease;
-  }
-  .lista-proyectos ol { list-style: none; margin: 0; padding: 0; }
-  .lista-proyectos button {
-    display: grid; grid-template-columns: 56px auto 1fr; align-items: center; gap: 0.9rem; width: 100%;
-    padding: 0.45rem; border: 0; border-radius: 0; text-align: left; background: none;
-  }
-  .lista-proyectos button:hover, .lista-proyectos button[aria-current] { background: var(--fondo-suave); }
-  .lista-proyectos img { width: 56px; height: 42px; object-fit: cover; }
-  .lista-proyectos .mono { color: var(--texto-tenue); }
-  .nombre-proyecto { font-family: var(--fuente-titulos); font-size: 0.95rem; }
-  @keyframes desplegar { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-
-  /* Enlace al siguiente proyecto, al final */
-  .siguiente {
-    display: grid; gap: 0.6rem; width: 100%; margin-top: clamp(5rem, 12vw, 9rem); padding-top: 2rem; padding-bottom: 2rem;
-    border: 0; border-top: 1px solid var(--linea); background: none; cursor: pointer; text-align: left; color: var(--texto);
-  }
-  .siguiente .mono { color: var(--texto-suave); }
-  .siguiente .titulo-seccion { margin: 0; font-size: clamp(1.6rem, 4vw, 2.8rem); transition: transform 0.4s; }
-  .siguiente:hover .titulo-seccion { transform: translateX(8px); }
-  @keyframes entrarProyecto { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+  .pasar { display: flex; justify-content: center; align-items: center; gap: 1.4rem; padding: 0.4rem 0 0.2rem; }
+  .pasar button { width: 2.4rem; height: 2.4rem; border: 1px solid rgba(0,0,0,0.15); border-radius: 50%; background: #fff; cursor: pointer; font-size: 0.9rem; color: var(--texto); }
+  .pasar button:hover:not(:disabled) { border-color: var(--texto); }
+  .pasar button:disabled { opacity: 0.3; cursor: default; }
+  .pasar span { min-width: 5.5rem; text-align: center; color: var(--texto-suave); }
+  .ayuda { margin: 0; padding: 0.3rem 0 0.9rem; text-align: center; color: var(--texto-tenue); }
 </style>
 
 <script>
-  const abrir = (id: string) => {
-    const dialogo = document.getElementById(id) as HTMLDialogElement | null;
-    if (!dialogo) return;
-    // si ya hay otro proyecto abierto, se cierra sin soltar el scroll de la página
-    document.querySelectorAll<HTMLDialogElement>('.dialogo-proyecto[open]').forEach((d) => {
-      if (d !== dialogo) d.close();
-    });
-    if (!dialogo.open) dialogo.showModal();
-    dialogo.scrollTop = 0;
+  const escritorio = matchMedia('(min-width: 900px)');
+  const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function abrir(id: string) {
+    const revista = document.getElementById(id) as HTMLDialogElement | null;
+    if (!revista) return;
+    document.querySelectorAll<HTMLDialogElement>('dialog.revista[open]').forEach((d) => d !== revista && d.close());
+    revista.dispatchEvent(new Event('abrir-revista'));
+    if (!revista.open) revista.showModal();
     document.documentElement.style.overflow = 'hidden';
-    // las imágenes del collage aparecen poco a poco dentro del proyecto
-    dialogo.querySelectorAll('.proyecto li').forEach((li, i) => {
-      li.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], {
-        duration: 700, delay: Math.min(i, 10) * 70, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards',
-      });
+  }
+
+  document.querySelectorAll<HTMLDialogElement>('dialog.revista').forEach((revista) => {
+    const pliego = revista.querySelector<HTMLElement>('[data-pliego]')!;
+    const paginas = [...pliego.querySelectorAll<HTMLElement>('.pagina')];
+    const contador = revista.querySelector<HTMLElement>('[data-contador]')!;
+    const anterior = revista.querySelector<HTMLButtonElement>('[data-anterior]')!;
+    const siguiente = revista.querySelector<HTMLButtonElement>('[data-siguiente]')!;
+    let vistas: number[][] = [];
+    let actual = 0;
+
+    // Agrupa las páginas en lo que se ve cada vez: en ordenador, la portada sola y después de dos en dos
+    // (la doble página va sola porque ya ocupa las dos). En el móvil, una a una.
+    const agrupar = () => {
+      const n = paginas.length;
+      const doble = (i: number) => paginas[i]?.hasAttribute('data-doble');
+      if (!escritorio.matches) return paginas.map((_, i) => [i]);
+      const v: number[][] = [[0]];
+      let i = 1;
+      while (i < n) {
+        if (doble(i) || i === n - 1 || doble(i + 1)) { v.push([i]); i++; }
+        else { v.push([i, i + 1]); i += 2; }
+      }
+      return v;
+    };
+
+    const mostrar = (destino: number, direccion = 0) => {
+      actual = Math.max(0, Math.min(vistas.length - 1, destino));
+      const vista = vistas[actual];
+      paginas.forEach((p, i) => p.classList.toggle('vista', vista.includes(i)));
+      const esDoble = paginas[vista[0]].hasAttribute('data-doble');
+      pliego.classList.toggle('sencillo', vista.length === 1 && !esDoble);
+      pliego.classList.toggle('es-doble', esDoble);
+      pliego.classList.toggle('doble-pagina', vista.length === 2 || esDoble);
+      const numeros = vista.map((i) => String(i + 1).padStart(2, '0'));
+      contador.textContent = `${numeros.join('–')} / ${String(paginas.length).padStart(2, '0')}`;
+      anterior.disabled = actual === 0;
+      siguiente.disabled = actual === vistas.length - 1;
+      // pasar página: la nueva entra girando desde el lomo
+      if (direccion && !sinMovimiento) {
+        pliego.animate(
+          [
+            { opacity: 0, transform: `rotateY(${direccion * -14}deg) translateX(${direccion * 3}%)`, transformOrigin: direccion > 0 ? 'left center' : 'right center' },
+            { opacity: 1, transform: 'none', transformOrigin: direccion > 0 ? 'left center' : 'right center' },
+          ],
+          { duration: 550, easing: 'cubic-bezier(.2,.7,.2,1)' },
+        );
+      }
+    };
+    const pasar = (dir: number) => { if (vistas[actual + dir]) mostrar(actual + dir, dir); };
+
+    const preparar = () => {
+      const primera = vistas[actual]?.[0] ?? 0;
+      vistas = agrupar();
+      mostrar(Math.max(0, vistas.findIndex((v) => v.includes(primera))));
+    };
+    preparar();
+    escritorio.addEventListener('change', preparar);
+
+    anterior.addEventListener('click', () => pasar(-1));
+    siguiente.addEventListener('click', () => pasar(1));
+    revista.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') pasar(1);
+      if (e.key === 'ArrowLeft') pasar(-1);
     });
-  };
 
-  document.querySelectorAll<HTMLButtonElement>('[data-abrir-proyecto]').forEach((boton) => {
-    boton.addEventListener('click', () => abrir(boton.dataset.abrirProyecto!));
-  });
-
-  document.querySelectorAll<HTMLDialogElement>('.dialogo-proyecto').forEach((dialogo) => {
-    const menu = dialogo.querySelector<HTMLButtonElement>('[data-menu-proyectos]')!;
-    const lista = dialogo.querySelector<HTMLElement>('.lista-proyectos')!;
+    // menú de proyectos
+    const menu = revista.querySelector<HTMLButtonElement>('[data-menu-revistas]')!;
+    const lista = revista.querySelector<HTMLElement>('.lista-revistas')!;
     const plegar = (abierto: boolean) => { lista.hidden = !abierto; menu.setAttribute('aria-expanded', String(abierto)); };
-    menu.addEventListener('click', (e) => { e.stopPropagation(); plegar(lista.hidden); });
-    dialogo.addEventListener('click', (e) => { if (!lista.hidden && !lista.contains(e.target as Node)) plegar(false); });
-    dialogo.querySelectorAll<HTMLButtonElement>('[data-ir-proyecto]').forEach((b) => {
-      b.addEventListener('click', () => { plegar(false); abrir(b.dataset.irProyecto!); });
+    menu.addEventListener('click', () => plegar(lista.hidden));
+    revista.querySelectorAll<HTMLButtonElement>('[data-ir-revista]').forEach((b) => b.addEventListener('click', () => { plegar(false); abrir(b.dataset.irRevista!); }));
+
+    // pulsar la revista: mitad derecha → siguiente, mitad izquierda → anterior; pulsar fuera → cerrar
+    let toque: { x: number; y: number } | null = null;
+    let deslizado = false;
+    revista.addEventListener('pointerdown', (e) => { toque = { x: e.clientX, y: e.clientY }; deslizado = false; });
+    revista.addEventListener('pointerup', (e) => {
+      if (!toque || e.pointerType === 'mouse') return;
+      const dx = e.clientX - toque.x, dy = e.clientY - toque.y;
+      // deslizar con el dedo en el móvil
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { deslizado = true; pasar(dx < 0 ? 1 : -1); }
+      toque = null;
     });
-    dialogo.querySelector('[data-cerrar-proyecto]')?.addEventListener('click', () => dialogo.close());
-    dialogo.addEventListener('close', () => {
+    revista.addEventListener('click', (e) => {
+      if (deslizado) { deslizado = false; return; }
+      const objetivo = e.target as HTMLElement;
+      if (!lista.hidden && !objetivo.closest('.lista-revistas, [data-menu-revistas]')) { plegar(false); return; }
+      if (objetivo.closest('.barra, .pasar')) return;
+      if (!objetivo.closest('[data-pliego]')) { revista.close(); return; }
+      const caja = pliego.getBoundingClientRect();
+      pasar(e.clientX > caja.left + caja.width / 2 ? 1 : -1);
+    });
+
+    // guías de maquetación
+    const guias = revista.querySelector<HTMLButtonElement>('[data-guias]')!;
+    guias.addEventListener('click', () => {
+      const activas = !revista.classList.contains('con-guias');
+      revista.classList.toggle('con-guias', activas);
+      guias.setAttribute('aria-pressed', String(activas));
+    });
+
+    revista.querySelector('[data-cerrar-revista]')!.addEventListener('click', () => revista.close());
+    revista.addEventListener('close', () => {
       plegar(false);
-      // solo se devuelve el scroll a la página si no se ha abierto otro proyecto
-      if (!document.querySelector('.dialogo-proyecto[open]')) document.documentElement.style.overflow = '';
+      if (!document.querySelector('dialog.revista[open]')) document.documentElement.style.overflow = '';
     });
+    // al abrir, siempre desde la portada
+    revista.addEventListener('abrir-revista', () => mostrar(0));
   });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-abrir-revista]').forEach((b) => b.addEventListener('click', () => abrir(b.dataset.abrirRevista!)));
 </script>

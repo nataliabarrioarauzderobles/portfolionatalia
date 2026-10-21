@@ -11,12 +11,12 @@ import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
-// menú que aparece sobre la foto al terminar la intro (una sección en cada esquina)
+// menú que aparece sobre la foto al terminar la intro
 const secciones = [
-  { pagina: 'pintura', texto: t.menuPintura, sitio: 'arriba-izquierda' },
-  { pagina: 'diseno', texto: t.menuDiseno, sitio: 'arriba-derecha' },
-  { pagina: 'encargos', texto: t.menuEncargos, sitio: 'abajo-izquierda' },
-  { pagina: 'contacto', texto: t.menuContacto, sitio: 'abajo-derecha' },
+  { pagina: 'pintura', texto: t.menuPintura },
+  { pagina: 'diseno', texto: t.menuDiseno },
+  { pagina: 'encargos', texto: t.menuEncargos },
+  { pagina: 'contacto', texto: t.menuContacto },
 ];
 
 const base = imagen('inicio/foto-base.jpg');
@@ -41,10 +41,10 @@ const trazos = [
           data-trazo={t.desde.join(',')}
         />
       ))}
-      <!-- menú sobre la foto: letra fina que gana grosor al pasar el cursor -->
+      <!-- menú sobre la foto: botones con letra fina que gana grosor al pasar el cursor -->
       <nav class="menu-inicio" aria-label={t.menu}>
         {secciones.map((s, i) => (
-          <a href={rutaIdioma(idioma, s.pagina)} class={s.sitio} data-seccion>
+          <a href={rutaIdioma(idioma, s.pagina)} data-seccion>
             <span class="mono">{String(i + 1).padStart(2, '0')}</span>{s.texto}
           </a>
         ))}
@@ -63,6 +63,7 @@ const trazos = [
     gap: clamp(1.4rem, 3vw, 2.2rem);
     padding: 1rem var(--margen) 3rem;
     text-align: center;
+    overflow: clip; /* los trazos entran desde fuera sin crear scroll horizontal */
   }
   .retrato { position: relative; margin: 0; height: min(44vh, 400px); max-width: 80vw; }
   .capa { position: absolute; display: block; }
@@ -70,31 +71,27 @@ const trazos = [
   .base { inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(0.5); }
   .trazo { transform-origin: center; will-change: transform, opacity; }
 
-  /* MENÚ SOBRE LA FOTO: cada sección asoma desde una esquina, medio encima de la foto */
+  /* MENÚ SOBRE LA FOTO: botones centrados en la parte baja del retrato */
+  .menu-inicio {
+    position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%);
+    display: flex; gap: 0.45rem; z-index: 2;
+  }
   .menu-inicio a {
-    position: absolute;
-    display: flex; align-items: baseline; gap: 0.5rem;
-    font-size: clamp(1.3rem, 2.4vw, 2.1rem);
-    font-weight: 200;
-    letter-spacing: -0.01em;
-    line-height: 1;
-    white-space: nowrap;
+    display: inline-flex; align-items: baseline; gap: 0.45rem;
+    padding: 0.6rem 1.05rem;
+    border: 1px solid var(--texto); border-radius: 999px;
+    background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(4px);
+    font-size: 0.86rem; font-weight: 300; line-height: 1; white-space: nowrap;
     color: var(--texto);
-    transition: font-weight 0.45s ease, letter-spacing 0.45s ease;
+    transition: font-weight 0.35s ease, background 0.3s ease, color 0.3s ease, transform 0.3s ease;
   }
-  .menu-inicio a:hover, .menu-inicio a:focus-visible { font-weight: 600; letter-spacing: 0; }
-  .menu-inicio .mono { font-size: 0.6rem; font-weight: 400; color: var(--texto-tenue); }
-  .arriba-izquierda { right: calc(100% - 2.6rem); top: 14%; }
-  .arriba-derecha { left: calc(100% - 2.6rem); top: 26%; }
-  .abajo-izquierda { right: calc(100% - 2.6rem); bottom: 26%; }
-  .abajo-derecha { left: calc(100% - 2.6rem); bottom: 12%; }
-  /* en pantallas estrechas el menú va debajo de la foto, en dos filas */
+  .menu-inicio a:hover, .menu-inicio a:focus-visible { font-weight: 600; background: var(--texto); color: var(--fondo); transform: translateY(-2px); }
+  .menu-inicio .mono { font-size: 0.56rem; font-weight: 400; color: inherit; opacity: 0.5; }
+  /* en el móvil, dos filas de dos botones */
   @media (max-width: 760px) {
-    .menu-inicio { position: absolute; top: calc(100% + 4.2rem); left: 50%; transform: translateX(-50%); width: 86vw; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
-    .menu-inicio a { position: static; justify-content: center; font-size: 1.3rem; }
-    .portada { padding-bottom: 9rem; }
+    .menu-inicio { display: grid; grid-template-columns: 1fr 1fr; width: min(86vw, 300px); bottom: 5%; }
+    .menu-inicio a { justify-content: center; padding: 0.65rem 0.6rem; }
   }
-
   .nombre {
     font-size: clamp(0.62rem, 0.9vw, 0.74rem);
     font-weight: 300;
@@ -162,11 +159,10 @@ const trazos = [
           [{ opacity: 0, letterSpacing: '0.7em', transform: 'translateY(8px)' }, { opacity: 1, letterSpacing: '0.34em', transform: 'none' }],
           { duration: 1400, delay: aterriza + 400, easing: curva, fill: 'forwards' },
         ));
-        // 5. el menú aparece sobre la foto, una sección tras otra, deslizándose desde fuera
+        // 5. el menú aparece sobre la foto, un botón tras otro
         secciones.forEach((el, i) => {
-          const lado = i % 2 === 0 ? -1 : 1;
           const a = el.animate(
-            [{ opacity: 0, transform: `translateX(${lado * 24}px)`, fontWeight: 100 }, { opacity: 1, transform: 'none', fontWeight: 200 }],
+            [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
             { duration: 1100, delay: aterriza + 900 + i * 140, easing: curva, fill: 'backwards' },
           );
           // al terminar, la animación se suelta para que el grosor pueda cambiar con el cursor

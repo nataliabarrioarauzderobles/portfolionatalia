@@ -1,0 +1,249 @@
+---
+// UNA PÁGINA DE REVISTA (ver src/data/revistas.ts)
+// Todas las medidas de dentro van en "cqw" (% del ancho de la página), así la maqueta
+// se ve igual de proporcionada en grande, en pequeño (portadas del índice) y en el móvil.
+// Retícula: 6 columnas, márgenes de 7 % a los lados y 8 % arriba y abajo (se ven con "Guías").
+import { Image } from 'astro:assets';
+import type { Proyecto } from '../data/proyectos';
+import type { Pagina, Revista } from '../data/revistas';
+import type { Idioma } from '../i18n/textos';
+import { contacto } from '../utils/enlaces';
+import { imagen } from '../utils/imagenes';
+
+interface Props { pagina: Pagina; proyecto: Proyecto; revista: Revista; idioma: Idioma; numero: number; total: number; miniatura?: boolean }
+const { pagina, proyecto, revista, idioma, numero, total, miniatura = false } = Astro.props;
+const titulo = proyecto.titulo[idioma];
+const parrafos = proyecto.texto[idioma].split('\n\n');
+// la cabecera de la portada se ajusta a lo largo del título
+const largo = Math.max(...titulo.split(' ').map((p) => p.length));
+const tamCabecera = Math.min(revista.cabecera === 'ancha' ? 15 : 27, (revista.cabecera === 'ancha' ? 92 : revista.cabecera === 'negra' ? 128 : 150) / largo);
+const año = proyecto.año ?? '2025';
+const tx = {
+  es: { año: 'Año', disciplina: 'Disciplina', autora: 'Diseño', numero: 'Nº' },
+  en: { año: 'Year', disciplina: 'Discipline', autora: 'Design', numero: 'No.' },
+}[idioma];
+const tamanos = miniatura ? [400, 700] : [700, 1200, 1800];
+const sizes = miniatura ? '(max-width: 700px) 45vw, 30vw' : '(max-width: 900px) 92vw, 45vw';
+// los textos largos van a dos columnas; los cortos, a una columna más grande
+const largoTexto = pagina.tipo === 'texto' ? pagina.parrafos.reduce((n, i) => n + (parrafos[i]?.length ?? 0), 0) : 0;
+const conFolio = !['portada', 'doble', 'contra'].includes(pagina.tipo) && !(pagina.tipo === 'imagen' && pagina.sangre);
+---
+
+<article
+  class:list={['pagina', `tipo-${pagina.tipo}`, `cabecera-${revista.cabecera}`, { sangre: pagina.tipo === 'imagen' && pagina.sangre }]}
+  data-pagina={numero}
+  data-doble={pagina.tipo === 'doble' ? '' : undefined}
+  style={`--acento:${revista.acento};--papel:${revista.papel}`}
+>
+  {conFolio && (
+    <header class="folio">
+      <span>Natalia Barrio</span>
+      <span>{tx.numero} {revista.numero} — {titulo}</span>
+    </header>
+  )}
+
+  {pagina.tipo === 'portada' && (
+    <>
+      <Image class="foto-fondo" src={imagen(pagina.imagen)} alt={titulo} widths={tamanos} sizes={sizes} loading="lazy" />
+      <div class="portada-arriba">
+        <span>{tx.numero} {revista.numero}</span>
+        <span>{revista.disciplina[idioma]}</span>
+        <span>{año}</span>
+      </div>
+      <h2 class="cabecera-revista" style={`--tam:${tamCabecera}cqw`}>{titulo}</h2>
+      <div class="portada-abajo">
+        {pagina.titular && <p class="titular-portada">{pagina.titular[idioma]}</p>}
+        <span class="firma-portada">Natalia Barrio</span>
+      </div>
+    </>
+  )}
+
+  {pagina.tipo === 'entrada' && (
+    <div class="caja entrada">
+      <span class="numero-grande">{revista.numero}</span>
+      <h2 class="titulo-entrada">{titulo}</h2>
+      <p class="entradilla">{parrafos[0]}</p>
+      <dl class="datos">
+        <div><dt>{tx.año}</dt><dd>{año}</dd></div>
+        <div><dt>{tx.disciplina}</dt><dd>{revista.disciplina[idioma]}</dd></div>
+        <div><dt>{tx.autora}</dt><dd>Natalia Barrio Araúz de Robles</dd></div>
+      </dl>
+    </div>
+  )}
+
+  {pagina.tipo === 'imagen' && (
+    pagina.sangre ? (
+      <Image class="foto-fondo" src={imagen(pagina.imagen)} alt={titulo} widths={tamanos} sizes={sizes} loading="lazy" />
+    ) : (
+      <figure class="caja figura">
+        <Image src={imagen(pagina.imagen)} alt={titulo} widths={tamanos} sizes={sizes} loading="lazy" />
+        {pagina.pie && <figcaption>{pagina.pie[idioma]}</figcaption>}
+      </figure>
+    )
+  )}
+
+  {pagina.tipo === 'doble' && (
+    <>
+      <Image class:list={['foto-fondo', { encajar: pagina.encajar }]} src={imagen(pagina.imagen)} alt={titulo} widths={[1200, 2000, 2800]} sizes="(max-width: 900px) 100vw, 90vw" loading="lazy" />
+      {pagina.pie && <p class="pie-doble">{pagina.pie[idioma]}</p>}
+    </>
+  )}
+
+  {pagina.tipo === 'texto' && (
+    <div class="caja texto">
+      {pagina.titular && <h3 class="titular">{pagina.titular[idioma]}</h3>}
+      <div class:list={['columnas', { 'dos-columnas': largoTexto > 650 }]} lang={idioma}>
+        {pagina.parrafos.map((i) => <p>{parrafos[i]}</p>)}
+      </div>
+      {pagina.imagen && <Image class="foto-texto" src={imagen(pagina.imagen)} alt={titulo} widths={tamanos} sizes={sizes} loading="lazy" />}
+    </div>
+  )}
+
+  {pagina.tipo === 'cita' && (
+    <div class:list={['caja', 'cita', { 'con-imagen': pagina.imagen }]}>
+      <blockquote><span class="comillas" aria-hidden="true">“</span>{pagina.cita[idioma]}</blockquote>
+      {pagina.imagen && <Image class="foto-cita" src={imagen(pagina.imagen)} alt={titulo} widths={tamanos} sizes={sizes} loading="lazy" />}
+    </div>
+  )}
+
+  {pagina.tipo === 'rejilla' && (
+    <div class="caja rejilla">
+      {pagina.titular && <h3 class="titular">{pagina.titular[idioma]}</h3>}
+      <ul class={`n-${pagina.imagenes.length}`}>
+        {pagina.imagenes.map((ruta, i) => (
+          <li>
+            <Image src={imagen(ruta)} alt={titulo} widths={[400, 800]} sizes="(max-width: 900px) 45vw, 20vw" loading="lazy" />
+            <span>{String(i + 1).padStart(2, '0')}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {pagina.tipo === 'contra' && (
+    <>
+      {pagina.imagen && <Image class="foto-fondo apagada" src={imagen(pagina.imagen)} alt="" widths={tamanos} sizes={sizes} loading="lazy" />}
+      <div class="caja contra">
+        <img class="firma" src={imagen('marca/firma.png').src} alt="Tali" />
+        <p>Natalia Barrio Araúz de Robles</p>
+        <p>{contacto.email}</p>
+        <p>@{contacto.instagram}</p>
+      </div>
+    </>
+  )}
+
+  {conFolio && <footer class="numero-pagina"><span>{String(numero).padStart(2, '0')}</span><span>/ {String(total).padStart(2, '0')}</span></footer>}
+  <!-- guías de maquetación (6 columnas y márgenes); se ven al activar "Guías" -->
+  <span class="guias" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+</article>
+
+<style>
+  .pagina {
+    --tinta: #161514;
+    --m-lado: 7cqw;
+    --m-alto: 8cqw;
+    position: relative;
+    container-type: inline-size;
+    overflow: hidden;
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: var(--fuente);
+    font-size: 2.4cqw;
+    line-height: 1.5;
+  }
+  .pagina :global(img) { display: block; }
+
+  /* cabeceras: cada revista con su letra */
+  .cabecera-condensada .cabecera-revista, .cabecera-condensada .titulo-entrada, .cabecera-condensada .titular { font-family: 'Archivo', sans-serif; font-stretch: 62%; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; line-height: 0.84; }
+  .cabecera-serif .cabecera-revista, .cabecera-serif .titulo-entrada, .cabecera-serif .titular { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; line-height: 0.88; }
+  .cabecera-ancha .cabecera-revista, .cabecera-ancha .titulo-entrada, .cabecera-ancha .titular { font-family: 'Archivo', sans-serif; font-stretch: 125%; font-weight: 700; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.9; }
+  .cabecera-negra .cabecera-revista, .cabecera-negra .titulo-entrada, .cabecera-negra .titular { font-family: 'Archivo', sans-serif; font-weight: 900; text-transform: lowercase; letter-spacing: -0.06em; line-height: 0.85; }
+
+  /* folio: la línea de arriba de cada página */
+  .folio, .numero-pagina {
+    position: absolute; left: var(--m-lado); right: var(--m-lado); z-index: 2;
+    display: flex; justify-content: space-between;
+    font-family: var(--fuente-mono); font-size: 1.55cqw; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .folio { top: 3.6cqw; padding-bottom: 1.2cqw; border-bottom: 0.15cqw solid currentColor; }
+  .numero-pagina { bottom: 3.4cqw; justify-content: flex-start; gap: 1cqw; }
+  .numero-pagina span:first-child { color: var(--acento); }
+  .numero-pagina span:last-child { opacity: 0.4; }
+
+  .caja { position: absolute; inset: var(--m-alto) var(--m-lado); padding-top: 4cqw; display: flex; flex-direction: column; }
+
+  .foto-fondo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .foto-fondo.encajar { object-fit: contain; padding: 6cqw 4cqw 9cqw; }
+  .foto-fondo.apagada { opacity: 0.22; filter: grayscale(1); }
+
+  /* PORTADA */
+  .tipo-portada { color: #fff; }
+  .tipo-portada::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.28), transparent 32%, transparent 68%, rgba(0,0,0,0.3)); pointer-events: none; }
+  .portada-arriba, .portada-abajo { position: absolute; left: var(--m-lado); right: var(--m-lado); z-index: 2; display: flex; justify-content: space-between; align-items: flex-end; gap: 3cqw; }
+  .portada-arriba { top: 4cqw; font-family: var(--fuente-mono); font-size: 1.7cqw; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cabecera-revista {
+    position: absolute; z-index: 2; top: 8cqw; left: var(--m-lado); right: var(--m-lado);
+    margin: 0; font-size: var(--tam); color: #fff;
+    text-wrap: balance;
+  }
+  /* en la portada de serie la cabecera va en el color de la revista */
+  .cabecera-serif .cabecera-revista { color: #fff; }
+  .portada-abajo { bottom: 5cqw; }
+  .titular-portada { margin: 0; max-width: 60%; font-family: 'Instrument Serif', serif; font-style: italic; font-size: 5.6cqw; line-height: 1; }
+  .firma-portada { font-family: var(--fuente-mono); font-size: 1.6cqw; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+
+  /* ENTRADA */
+  .entrada { justify-content: flex-start; }
+  .numero-grande { font-family: 'Archivo', sans-serif; font-stretch: 62%; font-weight: 800; font-size: 22cqw; line-height: 0.8; color: var(--acento); margin-top: 4cqw; }
+  .titulo-entrada { margin: 4cqw 0 0; font-size: 10cqw; color: var(--tinta); }
+  .entradilla { margin: 6cqw 0 0; max-width: 92%; font-family: 'Instrument Serif', serif; font-size: 4.2cqw; line-height: 1.18; }
+  .datos { margin: auto 0 4cqw; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2cqw; border-top: 0.15cqw solid currentColor; padding-top: 1.8cqw; }
+  .datos dt { font-family: var(--fuente-mono); font-size: 1.4cqw; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.55; margin-bottom: 0.6cqw; }
+  .datos dd { margin: 0; font-size: 1.9cqw; line-height: 1.3; }
+
+  /* IMAGEN CON MARGEN */
+  .figura { margin: 0; justify-content: center; gap: 2cqw; padding-bottom: 4cqw; }
+  .figura :global(img) { width: 100%; max-height: 95cqw; height: auto; object-fit: contain; }
+  .figura figcaption, .pie-doble { font-family: var(--fuente-mono); font-size: 1.5cqw; letter-spacing: 0.05em; text-transform: uppercase; }
+  .pie-doble { position: absolute; z-index: 2; left: 3.5cqw; bottom: 2.6cqw; margin: 0; font-size: 0.8cqw; color: var(--tinta); background: var(--papel); padding: 0.5cqw 0.9cqw; }
+
+  /* TEXTO A DOS COLUMNAS con letra capital */
+  .titular { margin: 2cqw 0 4cqw; font-size: 7.2cqw; color: var(--acento); }
+  .columnas { font-size: 2.9cqw; line-height: 1.5; hyphens: auto; max-width: 88%; }
+  .columnas.dos-columnas { columns: 2; column-gap: 4cqw; font-size: 2.2cqw; line-height: 1.55; max-width: none; text-align: justify; }
+  .columnas p { margin: 0 0 1.4cqw; }
+  .columnas p:first-child::first-letter {
+    float: left; margin: 0.5cqw 1.4cqw 0 0;
+    font-family: 'Archivo', sans-serif; font-stretch: 62%; font-weight: 800; font-size: 10.4cqw; line-height: 0.78; color: var(--acento);
+  }
+  /* la foto ocupa lo que queda de página bajo el texto */
+  .foto-texto { flex: 1 1 0; min-height: 26cqw; margin: 4cqw 0 4cqw; width: 100%; height: auto; object-fit: cover; }
+
+  /* CITA */
+  .cita { justify-content: center; }
+  .cita blockquote { margin: 0; font-family: 'Instrument Serif', serif; font-style: italic; font-size: 9.4cqw; line-height: 1; letter-spacing: -0.02em; text-wrap: balance; }
+  .comillas { display: block; font-size: 22cqw; line-height: 0.6; color: var(--acento); font-style: normal; }
+  .cita.con-imagen { justify-content: space-between; }
+  .cita.con-imagen blockquote { font-size: 7.6cqw; margin-top: 6cqw; }
+  .foto-cita { width: 58%; align-self: flex-end; height: auto; margin-bottom: 4cqw; }
+
+  /* REJILLA de imágenes: las filas se reparten el alto que queda, así nunca se salen de la página */
+  .rejilla { padding-bottom: 4cqw; }
+  .rejilla ul { flex: 1 1 0; min-height: 0; list-style: none; margin: 0; padding: 0; display: grid; gap: 3cqw; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(0, 1fr); }
+  .rejilla li { display: flex; flex-direction: column; min-height: 0; }
+  .rejilla li :global(img) { flex: 1 1 0; min-height: 0; width: 100%; height: 100%; object-fit: cover; }
+  .rejilla li span { display: block; margin-top: 0.8cqw; font-family: var(--fuente-mono); font-size: 1.4cqw; color: var(--acento); }
+  .rejilla .n-2 { grid-template-columns: 1fr; }
+  .rejilla .n-3 li:first-child { grid-column: 1 / -1; }
+  .rejilla .n-6 { grid-template-columns: repeat(3, 1fr); }
+  /* CONTRAPORTADA */
+  .tipo-contra { background: var(--acento); color: #fff; }
+  .contra { justify-content: flex-end; align-items: flex-start; font-family: var(--fuente-mono); font-size: 1.6cqw; letter-spacing: 0.05em; text-transform: uppercase; }
+  .contra .firma { width: 34%; height: auto; margin-bottom: 4cqw; filter: invert(1); }
+  .contra p { margin: 0 0 0.6cqw; }
+
+  /* GUÍAS */
+  .guias { position: absolute; inset: var(--m-alto) var(--m-lado); z-index: 5; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2.4cqw; pointer-events: none; opacity: 0; transition: opacity 0.3s; outline: 0.12cqw solid rgba(0, 170, 255, 0.7); }
+  .guias i { background: rgba(0, 170, 255, 0.1); border-left: 0.1cqw solid rgba(0, 170, 255, 0.5); border-right: 0.1cqw solid rgba(0, 170, 255, 0.5); }
+  :global(.con-guias) .guias { opacity: 1; }
+</style>
