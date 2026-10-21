@@ -13,8 +13,8 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { etiqueta: 'Piezas decorativas', titulo: 'Ojos y labios para habitar tu espacio', cta: 'Personaliza tu pieza', piezas: 'Piezas diseñadas', casa: 'En casa — Caras de Mobiliario, Madrid, 2024' },
-  en: { etiqueta: 'Decorative pieces', titulo: 'Eyes and lips to live with', cta: 'Design your piece', piezas: 'Finished pieces', casa: 'At home — Caras de Mobiliario, Madrid, 2024' },
+  es: { etiqueta: 'Piezas decorativas', titulo: 'Ojos y labios para habitar tu espacio', cta: 'Personaliza tu pieza', piezas: 'Piezas diseñadas', volver: 'Volver a Diseño', casa: 'En casa — Caras de Mobiliario, Madrid, 2024' },
+  en: { etiqueta: 'Decorative pieces', titulo: 'Eyes and lips to live with', cta: 'Design your piece', piezas: 'Finished pieces', volver: 'Back to Design', casa: 'At home — Caras de Mobiliario, Madrid, 2024' },
 }[idioma];
 ---
 
@@ -55,7 +55,11 @@ const tx = {
 
 <!-- CONFIGURADOR A PANTALLA COMPLETA -->
 <dialog class="dialogo-personaliza" id="dialogo-personaliza" aria-label={tx.cta}>
-  <button type="button" class="cerrar mono" data-cerrar-personaliza>{t.cerrar} ×</button>
+  <!-- barra fija para salir en cualquier momento (también pulsando fuera del panel o con Esc) -->
+  <div class="barra-salir">
+    <button type="button" class="volver mono" data-cerrar-personaliza>← {tx.volver}</button>
+    <button type="button" class="cerrar" data-cerrar-personaliza aria-label={t.cerrar}>×</button>
+  </div>
   <div class="contenedor">
     <Personaliza idioma={idioma} />
   </div>
@@ -109,18 +113,27 @@ const tx = {
   .en-casa img { width: 100%; height: auto; }
   .en-casa figcaption { margin-top: 0.8rem; color: var(--texto-suave); }
 
-  /* Diálogo del configurador */
+  /* Diálogo del configurador: un panel grande sobre la página difuminada; pulsando fuera se cierra */
   .dialogo-personaliza {
-    width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; margin: 0; padding: clamp(1rem, 3vw, 2.5rem) 0;
-    border: 0; background: var(--fondo); overflow-y: auto;
+    width: min(1380px, calc(100vw - 4rem)); max-width: none; height: calc(100dvh - 4rem); max-height: none;
+    margin: auto; padding: 0 0 2.5rem; border: 0; border-radius: 4px;
+    background: var(--fondo); overflow-y: auto;
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.35);
   }
   .dialogo-personaliza[open] { animation: entrarDialogo 0.45s ease; }
-  .dialogo-personaliza::backdrop { background: #fff; }
-  .dialogo-personaliza .cerrar {
-    position: sticky; top: 0; z-index: 5; display: block; margin: 0 var(--margen) 0 auto;
-    padding: 0.4rem 0.8rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--fondo); cursor: pointer; color: var(--texto);
+  .dialogo-personaliza::backdrop { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .barra-salir {
+    position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem var(--margen); margin-bottom: 0.5rem;
+    background: color-mix(in srgb, var(--fondo) 94%, transparent); backdrop-filter: blur(6px);
   }
-  @keyframes entrarDialogo { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  .volver { padding: 0.45rem 0.9rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--fondo); cursor: pointer; color: var(--texto); transition: border-color 0.2s; }
+  .volver:hover { border-color: var(--texto); }
+  .barra-salir .cerrar { width: 2.2rem; height: 2.2rem; border: 0; background: none; font-size: 1.6rem; font-weight: 200; line-height: 1; cursor: pointer; color: var(--texto); }
+  /* en el móvil ocupa toda la pantalla */
+  @media (max-width: 700px) {
+    .dialogo-personaliza { width: 100vw; height: 100dvh; border-radius: 0; }
+  }  @keyframes entrarDialogo { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .flota, .terminadas li.visible img { animation: none; } }
 </style>
 
@@ -129,7 +142,13 @@ const tx = {
   if (dialogo) {
     const abrir = () => { dialogo.showModal(); document.documentElement.style.overflow = 'hidden'; };
     document.querySelectorAll('[data-abrir-personaliza]').forEach((b) => b.addEventListener('click', abrir));
-    dialogo.querySelector('[data-cerrar-personaliza]')?.addEventListener('click', () => dialogo.close());
+    dialogo.querySelectorAll('[data-cerrar-personaliza]').forEach((b) => b.addEventListener('click', () => dialogo.close()));
+    // pulsar fuera del panel (sobre la página difuminada) también cierra
+    // (solo si el clic empezó y acabó fuera, para no cerrarlo al soltar un arrastre)
+    const fuera = (e: MouseEvent) => { const r = dialogo.getBoundingClientRect(); return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom; };
+    let empezoFuera = false;
+    dialogo.addEventListener('pointerdown', (e) => { empezoFuera = fuera(e); });
+    dialogo.addEventListener('click', (e) => { if (empezoFuera && fuera(e)) dialogo.close(); });
     dialogo.addEventListener('close', () => { document.documentElement.style.overflow = ''; });
   }
 </script>

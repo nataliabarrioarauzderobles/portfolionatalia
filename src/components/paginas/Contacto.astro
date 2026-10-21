@@ -25,7 +25,7 @@ const sobreMi = {
     'My work starts from abstraction to come closer to the human, creating compositions in which the figure appears, transforms and finally comes undone. Through painting I seek a dialogue between the recognisable and the ambiguous, between what takes shape and what is in the process of disappearing.',
   ],
 }[idioma];
-const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
+const ayuda = { es: 'Arrástrame', en: 'Drag me' }[idioma];
 ---
 
 <Base idioma={idioma} pagina="contacto" titulo={t.contactoTitulo}>
@@ -53,15 +53,19 @@ const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
         <a class="boton boton-principal" href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">{t.escribemeWhatsApp}</a>
         <a class="boton" href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV}</a>
       </div>
-      <p class="mono ayuda" aria-hidden="true">↔ {ayuda}</p>
     </div>
 
     <!-- las cartas -->
     {cartas.map((img, i) => (
-      <figure class="carta" data-carta style={`--i:${i}`}>
-        <Image src={img} alt="" widths={[260, 440]} sizes="(max-width: 700px) 120px, 200px" loading={i < 8 ? 'eager' : 'lazy'} draggable="false" />
+      <figure class="carta" data-carta style={`--dur:${(5.5 + ((i * 37) % 30) / 10).toFixed(1)}s;--fase:-${((i * 53) % 40) / 10}s`}>
+        <!-- la foto 'flota' sola hasta que la coges -->
+        <span class="flota">
+          <Image src={img} alt="" widths={[260, 440]} sizes="(max-width: 700px) 120px, 200px" loading={i < 8 ? 'eager' : 'lazy'} draggable="false" />
+        </span>
       </figure>
     ))}
+    <!-- pista: una etiqueta que acompaña a una de las fotos hasta que mueves alguna -->
+    <span class="pista mono" data-pista hidden><span class="mano" aria-hidden="true">✋</span>{ayuda}</span>
   </section>
 
   <!-- cierre de la página: el personaje se dibuja como una firma -->
@@ -80,6 +84,7 @@ const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
     padding: clamp(3rem, 8vh, 6rem) var(--margen);
     overflow: clip;
     touch-action: pan-y;
+    isolation: isolate; /* las fotos se apilan dentro de la mesa, siempre por debajo de la cabecera y el menú */
   }
   @media (max-width: 700px) {
     /* en el móvil las cartas caen arriba y abajo del texto */
@@ -103,16 +108,44 @@ const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
   .carta {
     --ancho: clamp(92px, 12vw, 190px);
     position: absolute; left: 0; top: 0; z-index: 2;
-    width: var(--ancho); margin: 0; padding: calc(var(--ancho) * 0.045);
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 8px 22px -8px rgba(0,0,0,0.28);
+    width: var(--ancho); margin: 0;
     cursor: grab; user-select: none; -webkit-user-select: none;
     touch-action: none;
     will-change: transform;
-    transition: box-shadow 0.25s ease;
   }
+  .flota {
+    display: block; padding: calc(var(--ancho) * 0.045);
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 8px 22px -8px rgba(0,0,0,0.28);
+    transition: box-shadow 0.25s ease, scale 0.3s ease;
+  }
+  /* mientras nadie la toca, cada foto se mece a su ritmo */
+  .carta.viva .flota { animation: mecerse var(--dur, 6s) ease-in-out var(--fase, 0s) infinite; }
+  @keyframes mecerse {
+    0%, 100% { translate: 0 0; rotate: 0deg; }
+    25% { translate: 5px -9px; rotate: 2.2deg; }
+    50% { translate: -3px -4px; rotate: -1.4deg; }
+    75% { translate: -6px 6px; rotate: 1deg; }
+  }
+  /* al pasar el cursor crece un poco: se intuye que se puede coger */
+  .carta:hover .flota { scale: 1.05; box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 16px 30px -10px rgba(0,0,0,0.32); }
+  @media (prefers-reduced-motion: reduce) { .carta.viva .flota { animation: none; } }
   .carta :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; pointer-events: none; }
-  .carta.cogida { cursor: grabbing; box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 22px 40px -12px rgba(0,0,0,0.38); }
+  .carta.cogida { cursor: grabbing; }
+  .carta.cogida .flota { box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 22px 40px -12px rgba(0,0,0,0.38); }
+
+  /* la pista que acompaña a una foto */
+  .pista {
+    position: absolute; left: 0; top: 0; z-index: 400; pointer-events: none;
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.45rem 0.8rem; border-radius: 999px;
+    background: var(--texto); color: var(--fondo); white-space: nowrap;
+    box-shadow: 0 8px 20px -10px rgba(0,0,0,0.4);
+    transition: opacity 0.4s ease;
+  }
+  .pista .mano { display: inline-block; animation: saludar 1.4s ease-in-out infinite; transform-origin: 70% 80%; }
+  @keyframes saludar { 0%, 100% { transform: translateX(0) rotate(0); } 50% { transform: translateX(5px) rotate(-12deg); } }
+  .pista.fuera { opacity: 0; }
   /* sin JavaScript las cartas no se ven (solo tienen sentido para jugar con ellas) */
   :global(html:not(.js)) .carta { display: none; }
   :global(.js) .carta:not(.repartida) { visibility: hidden; }
@@ -172,7 +205,7 @@ const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
         aplicar(c, e);
         if (sinMovimiento) return;
         const desdeX = W / 2 - c.offsetWidth / 2, desdeY = H + 40;
-        c.animate(
+        const caida = c.animate(
           [
             { transform: `translate(${desdeX}px, ${desdeY}px) rotate(${e.giro * 3}deg) scale(1.15)`, opacity: 0 },
             { opacity: 1, offset: 0.2 },
@@ -180,7 +213,51 @@ const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
           ],
           { duration: 900, delay: 250 + i * 110, easing: 'cubic-bezier(.2,.9,.25,1.05)', fill: 'backwards' },
         );
+        // al caer, empieza a mecerse
+        caida.onfinish = () => c.classList.add('viva');
+        setTimeout(() => c.classList.add('viva'), 250 + i * 110 + 950);
       });
+      if (!sinMovimiento) setTimeout(mostrarPista, 250 + cartas.length * 110 + 900);
+    };
+
+    // PISTA: una etiqueta junto a la foto más cercana al texto, que de vez en cuando
+    // se desplaza un poco sola (como si alguien la empujara), hasta que el visitante mueve alguna
+    const pista = mesa.querySelector<HTMLElement>('[data-pista]')!;
+    let guia: HTMLElement | null = null;
+    let empujon = 0;
+    let tocada = false;
+    const colocarPista = () => {
+      if (!guia || tocada) return;
+      const e = estados.get(guia)!;
+      pista.style.transform = `translate(${e.x + guia.offsetWidth * 0.35}px, ${e.y - 18}px)`;
+    };
+    function mostrarPista() {
+      if (tocada) return;
+      const t = centro!.getBoundingClientRect(), m = mesa!.getBoundingClientRect();
+      const cx = t.left - m.left + t.width / 2, cy = t.top - m.top + t.height / 2;
+      guia = cartas.reduce((a, b) => { const ea = estados.get(a)!, eb = estados.get(b)!; return Math.hypot(eb.x - cx, eb.y - cy) < Math.hypot(ea.x - cx, ea.y - cy) ? b : a; });
+      guia.style.zIndex = String(++capa);
+      pista.hidden = false;
+      colocarPista();
+      const empujar = () => {
+        if (tocada || !guia) return;
+        const e = estados.get(guia)!;
+        const base = `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg)`;
+        const lado = e.x < mesa!.clientWidth / 2 ? -1 : 1;
+        guia.animate(
+          [{ transform: base }, { transform: `translate(${e.x + lado * 34}px, ${e.y - 10}px) rotate(${e.giro + lado * 6}deg) scale(1.04)`, offset: 0.4 }, { transform: base }],
+          { duration: 1100, easing: 'ease-in-out' },
+        );
+      };
+      empujar();
+      empujon = window.setInterval(empujar, 3600);
+    }
+    const quitarPista = () => {
+      if (tocada) return;
+      tocada = true;
+      clearInterval(empujon);
+      pista.classList.add('fuera');
+      setTimeout(() => (pista.hidden = true), 400);
     };
 
     // Coger y mover (ratón o dedo)
@@ -190,6 +267,8 @@ const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
         const e = estados.get(c);
         if (!e) return;
         c.getAnimations().forEach((a) => a.finish());
+        quitarPista();
+        c.classList.remove('viva');
         c.setPointerCapture(ev.pointerId);
         c.style.zIndex = String(++capa);
         c.classList.add('cogida');
@@ -214,6 +293,8 @@ const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
         const e = estados.get(c)!;
         c.animate([{ transform: c.style.transform }, { transform: `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(1)` }], { duration: 220, easing: 'ease-out' });
         aplicar(c, e);
+        // al soltarla vuelve a mecerse
+        if (!sinMovimiento) c.classList.add('viva');
       };
       c.addEventListener('pointerup', soltar);
       c.addEventListener('pointercancel', soltar);
@@ -226,7 +307,7 @@ const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
       if (Math.abs(window.innerWidth - anchoPrevio) < 40) return; // la barra del móvil cambia el alto sin importar
       anchoPrevio = window.innerWidth;
       clearTimeout(espera);
-      espera = window.setTimeout(() => { repartir(); cartas.forEach((c) => aplicar(c, estados.get(c)!)); }, 200);
+      espera = window.setTimeout(() => { repartir(); cartas.forEach((c) => aplicar(c, estados.get(c)!)); colocarPista(); }, 200);
     });
 
     // se lanzan cuando la mesa se ve (y con las primeras fotos ya cargadas)

@@ -14,8 +14,8 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { etiqueta: 'Proyectos', ver: 'Abrir revista', anterior: 'Página anterior', siguiente: 'Página siguiente', guias: 'Guías', ayuda: 'Pulsa fuera de la revista para cerrarla' },
-  en: { etiqueta: 'Projects', ver: 'Open magazine', anterior: 'Previous page', siguiente: 'Next page', guias: 'Guides', ayuda: 'Tap outside the magazine to close it' },
+  es: { etiqueta: 'Proyectos', ver: 'Abrir revista', anterior: 'Página anterior', siguiente: 'Página siguiente', guias: 'Guías', ayuda: 'Pulsa fuera de la revista para cerrarla', deslizar: 'Desliza para pasar página' },
+  en: { etiqueta: 'Projects', ver: 'Open magazine', anterior: 'Previous page', siguiente: 'Next page', guias: 'Guides', ayuda: 'Tap outside the magazine to close it', deslizar: 'Swipe to turn the page' },
 }[idioma];
 const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p, revista: revistas[p.id] }));
 ---
@@ -78,7 +78,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
       <span data-contador></span>
       <button type="button" data-siguiente aria-label={tx.siguiente}>→</button>
     </div>
-    <p class="ayuda mono">{tx.ayuda}</p>
+    <p class="ayuda mono"><span class="solo-movil">{tx.deslizar} → · </span>{tx.ayuda}</p>
   </dialog>
 ))}
 
@@ -141,11 +141,32 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
   .pliego :global(.pagina.vista) { display: block; }
   .pliego :global(.tipo-doble .guias) { display: none; }
 
-  /* móvil: una página cada vez */
+  /* MÓVIL: la revista como un libro que se hojea deslizando.
+     Las páginas van en fila; la del centro está plana y las de los lados se doblan hacia el lomo. */
   @media (max-width: 899px) {
-    .pliego { --alto: min(calc(100dvh - 10rem), calc((100vw - 2rem) / 0.75)); aspect-ratio: 3 / 4; }
-    .pliego.es-doble { height: auto; width: calc(100vw - 2rem); aspect-ratio: 3 / 2; }
-    .pliego.es-doble::after { display: none; }
+    .escenario { padding: 0.5rem 0; }
+    .pliego.libro {
+      --pagina: min(78vw, calc((100dvh - 12rem) * 0.75));
+      display: flex; align-items: center; width: 100vw; height: auto; aspect-ratio: auto;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none;
+      padding: 1rem calc((100vw - var(--pagina)) / 2) 1.8rem;
+      box-shadow: none; perspective: 1100px;
+    }
+    .pliego.libro::-webkit-scrollbar { display: none; }
+    .pliego.libro::after { display: none; }
+    .libro :global(.pagina) {
+      display: block; flex: 0 0 var(--pagina); height: auto; aspect-ratio: 3 / 4; cursor: default;
+      scroll-snap-align: center; scroll-snap-stop: always;
+      transform-style: preserve-3d; will-change: transform;
+      /* cantos de papel apilados a la derecha y sombra, como un libro */
+      box-shadow: 1px 0 0 #dcdad5, 2px 0 0 #fff, 3px 0 0 #dcdad5, 4px 0 0 #fff, 5px 0 0 #d5d3ce, 0 16px 30px -16px rgba(0,0,0,0.4);
+    }
+    /* el lomo: una sombra suave en el borde izquierdo de cada página */
+    .libro :global(.pagina)::before {
+      content: ''; position: absolute; inset: 0 auto 0 0; width: 10%; z-index: 3; pointer-events: none;
+      background: linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.04) 60%, transparent);
+    }
+    .libro :global(.pagina[data-doble]) { flex-basis: calc(var(--pagina) * 1.22); aspect-ratio: 3 / 2; }
   }
 
   .pasar { display: flex; justify-content: center; align-items: center; gap: 1.4rem; padding: 0.4rem 0 0.2rem; }
@@ -153,6 +174,8 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
   .pasar button:hover:not(:disabled) { border-color: var(--texto); }
   .pasar button:disabled { opacity: 0.3; cursor: default; }
   .pasar span { min-width: 5.5rem; text-align: center; color: var(--texto-suave); }
+  .solo-movil { display: none; }
+  @media (max-width: 899px) { .solo-movil { display: inline; } }
   .ayuda { margin: 0; padding: 0.3rem 0 0.9rem; text-align: center; color: var(--texto-tenue); }
 </style>
 
@@ -177,6 +200,8 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
     const siguiente = revista.querySelector<HTMLButtonElement>('[data-siguiente]')!;
     let vistas: number[][] = [];
     let actual = 0;
+    // en el móvil la revista es un libro que se hojea deslizando (scroll horizontal nativo)
+    const esLibro = () => !escritorio.matches;
 
     // Agrupa las páginas en lo que se ve cada vez: en ordenador, la portada sola y después de dos en dos
     // (la doble página va sola porque ya ocupa las dos). En el móvil, una a una.
@@ -193,18 +218,56 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
       return v;
     };
 
+    const actualizarContador = () => {
+      const numeros = vistas[actual].map((i) => String(i + 1).padStart(2, '0'));
+      contador.textContent = `${numeros.join('–')} / ${String(paginas.length).padStart(2, '0')}`;
+      anterior.disabled = actual === 0;
+      siguiente.disabled = actual === vistas.length - 1;
+    };
+
+    // LIBRO (móvil): la página del centro plana; las de los lados se doblan hacia el lomo
+    const centroPagina = (p: HTMLElement) => p.offsetLeft + p.offsetWidth / 2;
+    const doblar = () => {
+      const centro = pliego.scrollLeft + pliego.clientWidth / 2;
+      let cerca = 0, minimo = Infinity;
+      paginas.forEach((p, i) => {
+        const d = (centroPagina(p) - centro) / p.offsetWidth;
+        if (Math.abs(d) < minimo) { minimo = Math.abs(d); cerca = i; }
+        if (sinMovimiento) return;
+        const k = Math.max(-1, Math.min(1, d));
+        p.style.transformOrigin = k < 0 ? 'right center' : 'left center';
+        p.style.transform = `rotateY(${k * -32}deg) scale(${1 - Math.abs(k) * 0.06})`;
+        p.style.filter = `brightness(${1 - Math.abs(k) * 0.12})`;
+      });
+      if (cerca !== actual) { actual = cerca; actualizarContador(); }
+    };
+    let pendiente = false;
+    pliego.addEventListener('scroll', () => {
+      if (!esLibro() || pendiente) return;
+      pendiente = true;
+      requestAnimationFrame(() => { pendiente = false; doblar(); });
+    }, { passive: true });
+    const irA = (i: number, suave = true) => {
+      const p = paginas[i];
+      pliego.scrollTo({ left: centroPagina(p) - pliego.clientWidth / 2, behavior: suave && !sinMovimiento ? 'smooth' : 'auto' });
+    };
+
     const mostrar = (destino: number, direccion = 0) => {
       actual = Math.max(0, Math.min(vistas.length - 1, destino));
       const vista = vistas[actual];
+      if (esLibro()) {
+        paginas.forEach((p) => p.classList.add('vista'));
+        actualizarContador();
+        irA(vista[0], direccion !== 0);
+        return;
+      }
+      paginas.forEach((p) => { p.style.transform = ''; p.style.filter = ''; p.style.transformOrigin = ''; });
       paginas.forEach((p, i) => p.classList.toggle('vista', vista.includes(i)));
       const esDoble = paginas[vista[0]].hasAttribute('data-doble');
       pliego.classList.toggle('sencillo', vista.length === 1 && !esDoble);
       pliego.classList.toggle('es-doble', esDoble);
       pliego.classList.toggle('doble-pagina', vista.length === 2 || esDoble);
-      const numeros = vista.map((i) => String(i + 1).padStart(2, '0'));
-      contador.textContent = `${numeros.join('–')} / ${String(paginas.length).padStart(2, '0')}`;
-      anterior.disabled = actual === 0;
-      siguiente.disabled = actual === vistas.length - 1;
+      actualizarContador();
       // pasar página: la nueva entra girando desde el lomo
       if (direccion && !sinMovimiento) {
         pliego.animate(
@@ -220,6 +283,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
 
     const preparar = () => {
       const primera = vistas[actual]?.[0] ?? 0;
+      pliego.classList.toggle('libro', esLibro());
       vistas = agrupar();
       mostrar(Math.max(0, vistas.findIndex((v) => v.includes(primera))));
     };
@@ -245,7 +309,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
     let deslizado = false;
     revista.addEventListener('pointerdown', (e) => { toque = { x: e.clientX, y: e.clientY }; deslizado = false; });
     revista.addEventListener('pointerup', (e) => {
-      if (!toque || e.pointerType === 'mouse') return;
+      if (!toque || e.pointerType === 'mouse' || esLibro()) return;
       const dx = e.clientX - toque.x, dy = e.clientY - toque.y;
       // deslizar con el dedo en el móvil
       if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { deslizado = true; pasar(dx < 0 ? 1 : -1); }
@@ -257,6 +321,8 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
       if (!lista.hidden && !objetivo.closest('.lista-revistas, [data-menu-revistas]')) { plegar(false); return; }
       if (objetivo.closest('.barra, .pasar')) return;
       if (!objetivo.closest('[data-pliego]')) { revista.close(); return; }
+      // en el libro, tocar una página no hace nada (se pasa deslizando); tocar el hueco de los lados cierra
+      if (esLibro()) { if (!objetivo.closest('.pagina')) revista.close(); return; }
       const caja = pliego.getBoundingClientRect();
       pasar(e.clientX > caja.left + caja.width / 2 ? 1 : -1);
     });
@@ -275,7 +341,18 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
       if (!document.querySelector('dialog.revista[open]')) document.documentElement.style.overflow = '';
     });
     // al abrir, siempre desde la portada
-    revista.addEventListener('abrir-revista', () => mostrar(0));
+    revista.addEventListener('abrir-revista', () => {
+      mostrar(0);
+      if (!esLibro()) return;
+      // al abrir el libro, un pequeño amago de pasar página para que se vea que se desliza
+      requestAnimationFrame(() => {
+        irA(0, false);
+        doblar();
+        if (sinMovimiento) return;
+        setTimeout(() => pliego.scrollTo({ left: paginas[0].offsetWidth * 0.28, behavior: 'smooth' }), 500);
+        setTimeout(() => irA(0), 1100);
+      });
+    });
   });
 
   document.querySelectorAll<HTMLButtonElement>('[data-abrir-revista]').forEach((b) => b.addEventListener('click', () => abrir(b.dataset.abrirRevista!)));

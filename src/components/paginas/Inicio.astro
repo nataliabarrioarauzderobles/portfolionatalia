@@ -66,7 +66,7 @@ const trazos = [
 
   /* Estado inicial cuando hay JavaScript: solo el blanco. Sin JavaScript se ve el resultado final directamente. */
   :global(.js) .base, :global(.js) .trazo, :global(.js) .nombre { opacity: 0; }
-  /* la cabecera aparece al final de la intro */
+  /* la cabecera aparece al empezar la intro, junto con la imagen */
   :global(body.intro .cabecera) { opacity: 0; }
   :global(body .cabecera) { transition: opacity 1s ease; }
 </style>
@@ -98,6 +98,8 @@ const trazos = [
     } else {
       document.body.classList.add('intro');
       Promise.all(cargadas).then(() => {
+        // la cabecera (firma y secciones) aparece a la vez que la imagen, sin esperar al final
+        setTimeout(() => document.body.classList.remove('intro'), 150);
         // 1. la foto aparece muy tenue
         animaciones.push(base.animate([{ opacity: 0, transform: 'scale(1.03)' }, { opacity: tenue, transform: 'scale(1)' }], { duration: 1200, easing: 'ease-out', fill: 'forwards' }));
         // 2. cada rasgo llega grande desde fuera y se hace pequeño hasta su sitio
@@ -119,7 +121,7 @@ const trazos = [
           [{ opacity: 0, letterSpacing: '0.7em', transform: 'translateY(8px)' }, { opacity: 1, letterSpacing: '0.34em', transform: 'none' }],
           { duration: 1400, delay: aterriza + 400, easing: curva, fill: 'forwards' },
         ));
-        setTimeout(() => document.body.classList.remove('intro'), aterriza + 900);
+
       });
       // un clic durante la intro la salta
       portada.addEventListener('click', mostrarTodo, { once: true });

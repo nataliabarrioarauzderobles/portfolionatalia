@@ -1,23 +1,23 @@
 ---
 // CABECERA
-//  · En la home: las secciones a la vista arriba, en letra fina (crecen y se oscurecen al pasar el cursor).
-//  · En las demás páginas: la sección en la que estás a la izquierda, tu firma en el centro
-//    y a la derecha el idioma y el menú hamburguesa.
-//  · El menú se abre sobre la página (que se ve difuminada detrás), centrado y "en modo diccionario":
-//    cada sección en mayúsculas, con la primera letra en negrita, y una breve definición debajo.
+//  · En la home: tu firma en el centro y, justo debajo, las secciones en letra fina
+//    (crecen un poco y se oscurecen al pasar el cursor). Aparecen a la vez que la imagen.
+//  · En las demás páginas: la sección en la que estás a la izquierda, la firma en el centro
+//    y a la derecha el idioma y el menú hamburguesa. Al pulsarlo, las secciones aparecen
+//    debajo, a la derecha, como botones.
 import { Image } from 'astro:assets';
 import { textos, type Idioma } from '../i18n/textos';
-import { contacto, enlaceWhatsApp, rutaIdioma } from '../utils/enlaces';
+import { rutaIdioma } from '../utils/enlaces';
 import { imagen } from '../utils/imagenes';
 
 interface Props { idioma: Idioma; pagina: string }
 const { idioma, pagina } = Astro.props;
 const t = textos[idioma];
 const enlaces = [
-  { pagina: 'pintura', texto: t.menuPintura, nota: t.notaPintura },
-  { pagina: 'diseno', texto: t.menuDiseno, nota: t.notaDiseno },
-  { pagina: 'encargos', texto: t.menuEncargos, nota: t.notaEncargos },
-  { pagina: 'contacto', texto: t.menuContacto, nota: t.notaContacto },
+  { pagina: 'pintura', texto: t.menuPintura },
+  { pagina: 'diseno', texto: t.menuDiseno },
+  { pagina: 'encargos', texto: t.menuEncargos },
+  { pagina: 'contacto', texto: t.menuContacto },
 ];
 const enHome = pagina === '';
 const actual = enlaces.find((e) => e.pagina === pagina);
@@ -25,16 +25,17 @@ const actual = enlaces.find((e) => e.pagina === pagina);
 
 <header class:list={['cabecera', { 'en-home': enHome }]}>
   <div class="contenedor fila">
-    {enHome ? (
-      <nav class="secciones" aria-label={t.menu}>
-        {enlaces.map((e) => <a href={rutaIdioma(idioma, e.pagina)}>{e.texto}</a>)}
-      </nav>
-    ) : (
-      <span class="donde mono">{actual?.texto}</span>
-    )}
-    <a href={rutaIdioma(idioma)} class="firma" aria-label={t.inicio}>
-      <Image src={imagen('marca/firma.png')} alt="Tali" width={240} />
-    </a>
+    <span class="donde mono">{actual?.texto}</span>
+    <div class="centro">
+      <a href={rutaIdioma(idioma)} class="firma" aria-label={t.inicio}>
+        <Image src={imagen('marca/firma.png')} alt="Tali" width={240} />
+      </a>
+      {enHome && (
+        <nav class="secciones" aria-label={t.menu}>
+          {enlaces.map((e) => <a href={rutaIdioma(idioma, e.pagina)}>{e.texto}</a>)}
+        </nav>
+      )}
+    </div>
     <div class="derecha">
       <div class="idiomas">
         <a href={rutaIdioma('es', pagina)} aria-current={idioma === 'es' ? 'true' : undefined} lang="es">ES</a>
@@ -42,43 +43,22 @@ const actual = enlaces.find((e) => e.pagina === pagina);
         <a href={rutaIdioma('en', pagina)} aria-current={idioma === 'en' ? 'true' : undefined} lang="en">EN</a>
       </div>
       {!enHome && (
-        <button type="button" class="abrir-menu" data-abrir-menu aria-expanded="false" aria-controls="menu-principal" aria-label={t.menu}>
-          <span class="lineas" aria-hidden="true"><i></i><i></i><i></i></span>
-        </button>
+        <div class="menu">
+          <button type="button" class="abrir-menu" data-abrir-menu aria-expanded="false" aria-controls="menu-secciones" aria-label={t.menu}>
+            <span class="lineas" aria-hidden="true"><i></i><i></i><i></i></span>
+          </button>
+          <!-- las secciones, como botones, debajo del menú -->
+          <nav class="botones-menu" id="menu-secciones" aria-label={t.menu} hidden>
+            <a href={rutaIdioma(idioma)} style="--i:0">{t.inicio}</a>
+            {enlaces.map((e, i) => (
+              <a href={rutaIdioma(idioma, e.pagina)} aria-current={pagina === e.pagina ? 'page' : undefined} style={`--i:${i + 1}`}>{e.texto}</a>
+            ))}
+          </nav>
+        </div>
       )}
     </div>
   </div>
 </header>
-
-{!enHome && (
-  <dialog class="menu-principal" id="menu-principal" aria-label={t.menu}>
-    <button type="button" class="cerrar-menu" data-cerrar-menu aria-label={t.cerrar}>
-      <span aria-hidden="true"><i></i><i></i></span>
-    </button>
-    <nav aria-label={t.menu}>
-      <ol>
-        <li style="--i:0">
-          <a href={rutaIdioma(idioma)}>
-            <span class="palabra"><b>{t.inicio.charAt(0)}</b>{t.inicio.slice(1)}</span>
-          </a>
-        </li>
-        {enlaces.map((e, i) => (
-          <li style={`--i:${i + 1}`}>
-            <a href={rutaIdioma(idioma, e.pagina)} aria-current={pagina === e.pagina ? 'page' : undefined}>
-              <span class="palabra"><b>{e.texto.charAt(0)}</b>{e.texto.slice(1)}</span>
-              <span class="definicion">{e.nota}</span>
-            </a>
-          </li>
-        ))}
-      </ol>
-    </nav>
-    <p class="contacto-menu mono">
-      <a href={`mailto:${contacto.email}`}>{contacto.email}</a>
-      <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener">Instagram</a>
-      <a href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">WhatsApp</a>
-    </p>
-  </dialog>
-)}
 
 <style>
   .cabecera {
@@ -96,93 +76,79 @@ const actual = enlaces.find((e) => e.pagina === pagina);
     padding-top: 1.1rem;
     padding-bottom: 1.1rem;
   }
+  .centro { display: grid; justify-items: center; gap: 0.7rem; }
   .firma img { height: 40px; width: auto; }
   a { color: var(--texto-suave); transition: color 0.2s; }
   a:hover, a[aria-current] { color: var(--texto); }
+  .donde { color: var(--texto-suave); }
 
-  /* HOME: las secciones a la vista, en letra fina; al pasar crecen un poco y se oscurecen */
-  .secciones { display: flex; gap: clamp(1rem, 2.4vw, 2rem); }
+  /* HOME: firma y, debajo, las secciones en letra fina */
+  .en-home .fila { align-items: start; padding-top: 1.4rem; }
+  .en-home .derecha { padding-top: 0.8rem; }
+  .secciones { display: flex; gap: clamp(1.1rem, 2.4vw, 2rem); }
   .secciones a {
     display: inline-block;
     font-size: 0.82rem; font-weight: 300; letter-spacing: 0.02em;
     color: var(--texto-suave);
-    transform-origin: left center;
     transition: transform 0.3s ease, color 0.3s ease;
   }
   .secciones a:hover, .secciones a:focus-visible { transform: scale(1.12); color: var(--texto); }
 
-  .donde { color: var(--texto-suave); }
-
   .derecha { display: flex; justify-content: flex-end; align-items: center; gap: 1.4rem; }
   .idiomas { display: flex; gap: 0.35rem; font-family: var(--fuente-mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--texto-tenue); }
 
-  /* botón hamburguesa (a la derecha) */
+  /* MENÚ: hamburguesa y, al pulsar, botones a la derecha */
+  .menu { position: relative; }
   .abrir-menu { display: grid; place-items: center; width: 36px; height: 36px; margin-right: -8px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--texto); }
-  .lineas { display: grid; gap: 5px; width: 22px; }
-  .lineas i { display: block; height: 1px; background: currentColor; transition: transform 0.35s ease, width 0.35s ease; }
-  .lineas i:nth-child(2) { width: 70%; justify-self: end; }
-  .abrir-menu:hover .lineas i:nth-child(2) { width: 100%; }
+  .lineas { position: relative; display: block; width: 22px; height: 12px; }
+  .lineas i { position: absolute; left: 0; width: 100%; height: 1px; background: currentColor; transition: transform 0.3s ease, opacity 0.3s ease, top 0.3s ease; }
+  .lineas i:nth-child(1) { top: 0; }
+  .lineas i:nth-child(2) { top: 50%; }
+  .lineas i:nth-child(3) { top: 100%; }
+  /* abierto: las líneas forman una × */
+  .abrir-menu[aria-expanded='true'] .lineas i:nth-child(1) { top: 50%; transform: rotate(45deg); }
+  .abrir-menu[aria-expanded='true'] .lineas i:nth-child(2) { opacity: 0; }
+  .abrir-menu[aria-expanded='true'] .lineas i:nth-child(3) { top: 50%; transform: rotate(-45deg); }
 
-  /* MENÚ: sobre la página difuminada */
-  .menu-principal {
-    width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; border: 0;
-    background: transparent; color: var(--texto);
+  .botones-menu { position: absolute; top: calc(100% + 0.8rem); right: -0.5rem; display: grid; justify-items: end; gap: 0.45rem; }
+  .botones-menu a {
+    padding: 0.55rem 1.1rem;
+    border: 1px solid var(--linea); border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(6px);
+    font-size: 0.86rem; font-weight: 300; white-space: nowrap; color: var(--texto);
+    box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.25);
+    animation: botonEntra 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation-delay: calc(var(--i) * 45ms);
+    transition: background 0.25s, color 0.25s, border-color 0.25s;
   }
-  .menu-principal[open] { display: grid; place-items: center; grid-template-rows: 1fr auto; animation: aparecerMenu 0.4s ease; }
-  .menu-principal::backdrop { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); animation: aparecerMenu 0.4s ease; }
-  @keyframes aparecerMenu { from { opacity: 0; } to { opacity: 1; } }
-
-  .cerrar-menu { position: absolute; top: 1.1rem; right: var(--margen); width: 36px; height: 36px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--texto); }
-  .cerrar-menu:focus { outline: none; }
-  .cerrar-menu:focus-visible { outline: 1px solid var(--texto-tenue); outline-offset: 2px; }
-  .cerrar-menu span { position: relative; display: block; width: 22px; height: 22px; margin: auto; }
-  .cerrar-menu i { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: currentColor; transform: rotate(45deg); }
-  .cerrar-menu i + i { transform: rotate(-45deg); }
-
-  nav ol { list-style: none; margin: 0; padding: 0; text-align: center; display: grid; gap: clamp(1rem, 2.6vh, 1.8rem); }
-  .menu-principal[open] li { animation: entradaMenu 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: calc(80ms + var(--i) * 60ms); }
-  @keyframes entradaMenu { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-  nav a { display: grid; justify-items: center; gap: 0.3rem; color: var(--texto); }
-  /* "modo diccionario": mayúsculas, primera letra en negrita y el resto fino */
-  .palabra {
-    font-family: var(--fuente); font-size: clamp(1.35rem, 2.6vw, 1.9rem); font-weight: 200;
-    letter-spacing: 0.16em; text-transform: uppercase; line-height: 1.1;
-    transition: letter-spacing 0.4s ease, color 0.3s;
-  }
-  .palabra b { font-weight: 700; }
-  .definicion { font-size: 0.74rem; font-weight: 300; color: var(--texto-suave); letter-spacing: 0.01em; }
-  nav a:hover .palabra, nav a:focus-visible .palabra { letter-spacing: 0.24em; }
-  nav a[aria-current='page'] .palabra { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.35em; }
-
-  .contacto-menu { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.8rem; margin: 0; padding: 0 var(--margen) 2rem; }
+  .botones-menu a:hover, .botones-menu a:focus-visible { background: var(--texto); border-color: var(--texto); color: var(--fondo); }
+  .botones-menu a[aria-current='page'] { border-color: var(--texto); }
+  @keyframes botonEntra { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
 
   @media (max-width: 640px) {
     .fila { padding-top: 0.8rem; padding-bottom: 0.8rem; }
     .firma img { height: 32px; }
-    /* en el móvil, en la home la firma va arriba y las secciones debajo, centradas */
-    .en-home .fila { grid-template-columns: 1fr auto; row-gap: 0.7rem; }
-    .en-home .firma { grid-column: 1 / -1; grid-row: 1; justify-self: center; }
-    .en-home .secciones { grid-row: 2; gap: 0.9rem; flex-wrap: wrap; }
-    .en-home .derecha { grid-row: 2; }
+    .en-home .fila { grid-template-columns: 1fr; }
+    .en-home .donde { display: none; }
+    .en-home .derecha { position: absolute; top: 0.9rem; right: var(--margen); padding: 0; }
+    .secciones { gap: 1rem; flex-wrap: wrap; justify-content: center; }
     .derecha { gap: 0.9rem; }
   }
 </style>
 
 <script>
-  const menu = document.getElementById('menu-principal') as HTMLDialogElement | null;
   const boton = document.querySelector<HTMLButtonElement>('[data-abrir-menu]');
-  if (menu && boton) {
-    boton.addEventListener('click', () => {
-      menu.showModal();
-      boton.setAttribute('aria-expanded', 'true');
-      document.documentElement.style.overflow = 'hidden';
-    });
-    menu.querySelector('[data-cerrar-menu]')!.addEventListener('click', () => menu.close());
-    // pulsar fuera de las palabras también cierra
-    menu.addEventListener('click', (e) => { if (e.target === menu) menu.close(); });
-    menu.addEventListener('close', () => {
-      boton.setAttribute('aria-expanded', 'false');
-      document.documentElement.style.overflow = '';
-    });
+  const menu = document.getElementById('menu-secciones');
+  if (boton && menu) {
+    const abrir = (si: boolean) => { menu.hidden = !si; boton.setAttribute('aria-expanded', String(si)); };
+    boton.addEventListener('click', (e) => { e.stopPropagation(); abrir(menu.hidden); });
+    // se cierra al pulsar fuera, con Esc o al bajar por la página
+    document.addEventListener('click', (e) => { if (!menu.hidden && !menu.contains(e.target as Node)) abrir(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') abrir(false); });
+    let desde = 0;
+    window.addEventListener('scroll', () => {
+      if (menu.hidden) { desde = window.scrollY; return; }
+      if (Math.abs(window.scrollY - desde) > 120) abrir(false);
+    }, { passive: true });
   }
 </script>
