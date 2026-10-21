@@ -42,6 +42,18 @@ img { display: block; max-width: 100%; height: auto; }
 /* lo que lleva el atributo "hidden" no se ve nunca, aunque tenga otro display */
 [hidden] { display: none !important; }
 
+/* APARECER al hacer scroll (el script está en layouts/Base.astro).
+   --retraso permite que varios elementos aparezcan uno detrás de otro. */
+.js [data-aparece] {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.9s ease var(--retraso, 0ms), transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) var(--retraso, 0ms);
+}
+.js [data-aparece].visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .js [data-aparece] { transform: none; transition: opacity 0.4s ease; }
+}
+
 a { color: inherit; text-decoration: none; }
 
 h1, h2, h3 {

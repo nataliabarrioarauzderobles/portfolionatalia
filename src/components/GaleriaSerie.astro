@@ -25,12 +25,23 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
 <section class="serie" id={serie.id} data-carrusel>
   <div class="pegajoso">
     <div class="contenedor cabecera-serie">
-      <h2 class="titulo-seccion">{t.series[serie.id]}</h2>
-      <span class="mono contador-serie">{String(obras.length).padStart(2, '0')} {idioma === 'es' ? 'obras' : 'works'}</span>
+      <div class="nombre-serie">
+        <h2 class="titulo-seccion">{t.series[serie.id]}</h2>
+        <!-- texto de la serie: plegado, se abre como una nota que no mueve las obras -->
+        {serie.texto && (
+          <details class="nota">
+            <summary class="mono">{t.sobreSerie} <span aria-hidden="true">+</span></summary>
+            <p>{serie.texto[idioma]}</p>
+          </details>
+        )}
+      </div>
+      <span class="mono contador-serie" data-contador data-total={obras.length} data-disponibles={obras.filter((o) => !o.vendida).length}>
+        {String(obras.length).padStart(2, '0')} {t.obras}
+      </span>
     </div>
     <ul class="tira" data-tira>
       {obras.map((obra, i) => (
-        <li>
+        <li data-vendida={obra.vendida ? '' : undefined} data-aparece style={`--retraso:${Math.min(i, 6) * 90}ms`}>
           <p class="pie-obra mono">
             <span class="numero">{String(i + 1).padStart(2, '0')}</span>
             <span class="titulo-obra">
@@ -74,6 +85,7 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
         <dl>
           {obra.medidas && (<><dt>{t.medidas}</dt><dd>{obra.medidas} cm</dd></>)}
           {serie.tecnica && (<><dt>{t.tecnica}</dt><dd>{t.tecnicas[serie.tecnica]}</dd></>)}
+          {serie.año && (<><dt>{t.año}</dt><dd>{serie.año}</dd></>)}
           <dt>{t.precio}</dt>
           <dd>{obra.vendida ? t.vendida : t.consultarPrecio}</dd>
         </dl>
@@ -81,6 +93,13 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
           <a class="boton boton-whatsapp" href={enlaceWhatsApp(t.mensajeObra(obra.titulo, obra.medidas))} target="_blank" rel="noopener">
             {t.botonConsultar}
           </a>
+        )}
+        <!-- texto de la obra: plegado bajo la ficha, para no competir con la imagen -->
+        {obra.texto && (
+          <details class="sobre-obra">
+            <summary class="mono">{t.sobreObra} <span aria-hidden="true">+</span></summary>
+            <p>{obra.texto[idioma]}</p>
+          </details>
         )}
       </div>
     </div>
@@ -101,6 +120,35 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
   }
   .cabecera-serie .titulo-seccion { font-size: 0.95rem; color: var(--texto-suave); margin: 0; }
   .contador-serie { color: var(--texto-tenue); }
+  .nombre-serie { position: relative; display: flex; align-items: baseline; gap: 1.4rem; }
+
+  /* NOTAS PLEGADAS: "Sobre la serie +" y "Sobre la obra +" */
+  details summary { list-style: none; cursor: pointer; color: var(--texto-tenue); transition: color 0.2s; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary:hover, details[open] summary { color: var(--texto); }
+  details[open] summary span { display: inline-block; transform: rotate(45deg); }
+  /* la nota de la serie flota por encima de las obras, sin desplazarlas */
+  .nota p {
+    position: absolute;
+    z-index: 3;
+    top: calc(100% + 0.6rem);
+    left: 0;
+    width: min(420px, 80vw);
+    margin: 0;
+    padding: 1rem 1.2rem;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--linea);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--texto-suave);
+    animation: abrirNota 0.35s ease;
+  }
+  .sobre-obra { margin-top: 1.8rem; padding-top: 1rem; border-top: 1px solid var(--linea); }
+  .sobre-obra p { margin: 0.9rem 0 0; font-size: 0.82rem; line-height: 1.75; color: var(--texto-suave); max-width: 38ch; animation: abrirNota 0.35s ease; }
+  @keyframes abrirNota { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  /* FILTRO "Disponibles": se ocultan las vendidas */
+  :global(html[data-filtro='disponibles']) .tira li[data-vendida] { display: none; }
 
   /* LA TIRA: todas las obras a la misma altura, una al lado de otra */
   .tira {
@@ -288,6 +336,8 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
     requestAnimationFrame(() => { mover(); pendiente = false; });
   }, { passive: true });
   window.addEventListener('resize', preparar);
+  // al cambiar entre "Todas" y "Disponibles" la tira cambia de largo
+  window.addEventListener('filtro-obras', preparar);
   ancho.addEventListener('change', preparar);
   sinMovimiento.addEventListener('change', preparar);
   window.addEventListener('load', preparar);

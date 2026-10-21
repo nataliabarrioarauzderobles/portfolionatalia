@@ -31,6 +31,8 @@ const tituloCompleto = titulo ? `${titulo} — Natalia Barrio Araúz de Robles` 
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono:wght@400&family=Schibsted+Grotesk:wght@400;500&display=swap"
     />
+    <!-- marca que hay JavaScript: solo entonces se ocultan los elementos que "aparecen" al hacer scroll -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body>
     <Cabecera idioma={idioma} pagina={pagina} />
@@ -40,3 +42,19 @@ const tituloCompleto = titulo ? `${titulo} — Natalia Barrio Araúz de Robles` 
     <Pie idioma={idioma} />
   </body>
 </html>
+
+<script>
+  // APARECER: los elementos con data-aparece se muestran suavemente al entrar en pantalla
+  const elementos = document.querySelectorAll<HTMLElement>('[data-aparece]');
+  if (!('IntersectionObserver' in window)) {
+    elementos.forEach((el) => el.classList.add('visible'));
+  } else {
+    const observador = new IntersectionObserver(
+      (entradas) => entradas.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observador.unobserve(e.target); }
+      }),
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+    );
+    elementos.forEach((el) => observador.observe(el));
+  }
+</script>

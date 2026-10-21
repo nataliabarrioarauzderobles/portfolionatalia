@@ -5,8 +5,7 @@
 //  · Pintar: color liso o degradado; al pasar por encima se ve la zona coloreada y con un clic se pinta.
 //  · Detalles: lunares, anillos, estrellas, ondas y zigzag que se colocan con un clic.
 //  · Dibujar: trazos a mano alzada (también para crear "Tu silueta" desde cero).
-import { Image } from 'astro:assets';
-import { coloresPieza, modelosPieza } from '../data/proyectos';
+import { coloresPieza } from '../data/proyectos';
 import type { Idioma } from '../i18n/textos';
 import { contacto, enlaceWhatsApp } from '../utils/enlaces';
 import { imagen } from '../utils/imagenes';
@@ -136,22 +135,22 @@ const iconosDetalle: Record<string, string> = {
           <span class="mono subetiqueta" data-etiqueta-c1>{tx.color1}</span>
           <div class="colores" data-paleta="1">
             {colores.map((c, i) => (
-              <button type="button" class="color" data-color={c.hex} data-nombre={c.nombre} style={`--c:${c.hex}`} title={c.nombre} aria-pressed={i === 0 ? 'true' : 'false'}>
-                <span class="solo-lector">{c.nombre}</span>
+              <button type="button" class="color" data-color={c.hex} data-nombre={c.nombre} style={`--c:${c.hex}`} aria-pressed={i === 0 ? 'true' : 'false'}>
+                <span class="muestra"></span><span class="nombre-color">{c.nombre}</span>
               </button>
             ))}
-            <label class="color otro" title={tx.otro}><input type="color" value="#e58cb0" data-otro /><span class="solo-lector">{tx.otro}</span></label>
+            <label class="color otro"><input type="color" value="#e58cb0" data-otro /><span class="muestra"></span><span class="nombre-color">{tx.otro}</span></label>
           </div>
         </div>
         <div class="fila-color" data-degradado hidden>
           <span class="mono subetiqueta">{tx.color2}</span>
           <div class="colores" data-paleta="2">
             {colores.map((c, i) => (
-              <button type="button" class="color" data-color={c.hex} data-nombre={c.nombre} style={`--c:${c.hex}`} title={c.nombre} aria-pressed={i === 2 ? 'true' : 'false'}>
-                <span class="solo-lector">{c.nombre}</span>
+              <button type="button" class="color" data-color={c.hex} data-nombre={c.nombre} style={`--c:${c.hex}`} aria-pressed={i === 7 ? 'true' : 'false'}>
+                <span class="muestra"></span><span class="nombre-color">{c.nombre}</span>
               </button>
             ))}
-            <label class="color otro" title={tx.otro}><input type="color" value="#2fb3b0" data-otro /><span class="solo-lector">{tx.otro}</span></label>
+            <label class="color otro"><input type="color" value="#2fb3b0" data-otro /><span class="muestra"></span><span class="nombre-color">{tx.otro}</span></label>
           </div>
         </div>
         <div class="segmentos direcciones" data-degradado hidden role="group">
@@ -199,22 +198,10 @@ const iconosDetalle: Record<string, string> = {
     </div>
   </div>
 
-  <!-- PIEZAS REALES -->
-  <div class="terminadas">
-    <p class="mono numero">{tx.piezas}</p>
-    <ul>
-      {modelosPieza.filter((m) => m.id !== 'silla-ojo').map((m) => (
-        <li>
-          <Image src={imagen(m.imagen)} alt={m.nombre[idioma]} widths={[300, 500]} sizes="(max-width: 700px) 45vw, 18vw" loading="lazy" />
-          <span class="mono">{m.nombre[idioma]}</span>
-        </li>
-      ))}
-    </ul>
-  </div>
 </section>
 
 <style>
-  .personaliza { margin-top: clamp(2.5rem, 6vw, 4.5rem); scroll-margin-top: 5rem; }
+  .personaliza { scroll-margin-top: 5rem; }
   .intro { max-width: 560px; margin-bottom: 2.2rem; }
   .intro .etiqueta { display: block; margin-bottom: 0.8rem; }
   .intro p { margin: 0; color: var(--texto-suave); }
@@ -227,7 +214,7 @@ const iconosDetalle: Record<string, string> = {
   }
   @media (max-width: 900px) { .estudio { grid-template-columns: 1fr; } }
 
-  .lienzo-zona { position: sticky; top: 5.5rem; }
+  .lienzo-zona { position: sticky; top: 3.5rem; }
   @media (max-width: 900px) { .lienzo-zona { position: relative; top: 0; } }
   canvas {
     display: block; width: 100%; height: auto; aspect-ratio: 4 / 3;
@@ -269,17 +256,27 @@ const iconosDetalle: Record<string, string> = {
   }
   .segmentos button[aria-pressed='true'] { background: var(--texto); border-color: var(--texto); color: var(--fondo); }
 
-  .fila-color { display: flex; align-items: center; gap: 0.8rem; }
-  .colores { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .fila-color { display: grid; gap: 0.6rem; }
+
+  /* CARTA DE COLOR: cada tono es una "muestra de pintura" rectangular con su nombre debajo */
+  .colores { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 0.9rem 0.5rem; }
   .color {
-    position: relative; width: 1.9rem; height: 1.9rem; border-radius: 50%; padding: 0; cursor: pointer;
-    background: var(--c); border: 1px solid rgba(0, 0, 0, 0.14); transition: transform 0.15s;
+    position: relative; display: grid; gap: 0.4rem; padding: 0; cursor: pointer;
+    background: none; border: 0; text-align: left; color: var(--texto-suave);
   }
-  .color:hover { transform: scale(1.1); }
-  .color[aria-pressed='true'] { outline: 1px solid var(--texto); outline-offset: 3px; }
-  /* "otro color": un círculo con el arcoíris que abre el selector del sistema */
-  .otro { background: conic-gradient(#c8352e, #e9c33b, #3f8f5a, #2fb3b0, #2e5fa8, #7a4fa0, #e58cb0, #c8352e); overflow: hidden; }
-  .otro input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .muestra {
+    display: block; height: 44px; background: var(--c);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .nombre-color { font-family: var(--fuente-mono); font-size: 0.52rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.3; }
+  .color:hover .muestra { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12); }
+  .color[aria-pressed='true'] { color: var(--texto); }
+  .color[aria-pressed='true'] .muestra { transform: translateY(-4px); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
+  .color[aria-pressed='true'] .nombre-color { text-decoration: underline; text-underline-offset: 3px; }
+  /* "otro color": muestra con el arcoíris que abre el selector del sistema */
+  .otro .muestra { background: linear-gradient(90deg, #c8352e, #e9c33b, #3f8f5a, #2fb3b0, #2e5fa8, #7a4fa0, #e58cb0); }
+  .otro input { position: absolute; inset: 0; width: 100%; height: 44px; opacity: 0; cursor: pointer; }
   .muestra-actual { height: 0.6rem; border-radius: 999px; border: 1px solid rgba(0, 0, 0, 0.08); }
 
   .detalles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; }
@@ -302,12 +299,6 @@ const iconosDetalle: Record<string, string> = {
   textarea:focus { outline: none; border-color: var(--texto); }
   .acciones { display: flex; flex-wrap: wrap; gap: 0.7rem; }
 
-  .terminadas { margin-top: clamp(3rem, 7vw, 5rem); }
-  .terminadas .numero { margin-bottom: 1rem; }
-  .terminadas ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
-  @media (max-width: 900px) { .terminadas ul { grid-template-columns: repeat(2, 1fr); } }
-  .terminadas li { display: grid; gap: 0.5rem; }
-  .terminadas img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--fondo-suave); }
 </style>
 
 <script>
@@ -347,7 +338,7 @@ const iconosDetalle: Record<string, string> = {
     let historial: Accion[] = [];
     let modo: 'pintar' | 'dibujar' | 'detalles' = 'pintar';
     let tipoRelleno: 'liso' | 'degradado' = 'liso';
-    let c1 = paleta[0].hex, c2 = paleta[2].hex, direccion: 'h' | 'v' | 'r' = 'h';
+    let c1 = paleta[0].hex, c2 = paleta[7].hex, direccion: 'h' | 'v' | 'r' = 'h';
     let tipoDetalle = 'lunar';
     let radioDetalle = 34;
     let puntero: [number, number] | null = null; // para la vista previa al pasar por encima

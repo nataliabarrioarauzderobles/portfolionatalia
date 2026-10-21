@@ -1,0 +1,135 @@
+---
+// VITRINA DE LAS PIEZAS DECORATIVAS (ojos y labios), lo primero de la página de Diseño:
+//  1. Un ojo de ejemplo que flota: al pulsarlo se abre el configurador a pantalla completa.
+//  2. Las piezas ya diseñadas, que aparecen una tras otra.
+//  3. Cómo quedan en casa.
+import { Image } from 'astro:assets';
+import Personaliza from './Personaliza.astro';
+import { modelosPieza, textoPiezas } from '../data/proyectos';
+import { textos, type Idioma } from '../i18n/textos';
+import { imagen } from '../utils/imagenes';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+const t = textos[idioma];
+const tx = {
+  es: { etiqueta: 'Piezas decorativas', titulo: 'Ojos y labios para habitar tu espacio', cta: 'Personaliza tu pieza', piezas: 'Piezas diseñadas', casa: 'En casa — Caras de Mobiliario, Madrid, 2024' },
+  en: { etiqueta: 'Decorative pieces', titulo: 'Eyes and lips to live with', cta: 'Design your piece', piezas: 'Finished pieces', casa: 'At home — Caras de Mobiliario, Madrid, 2024' },
+}[idioma];
+---
+
+<section class="vitrina contenedor" id="piezas">
+  <div class="presenta">
+    <button type="button" class="ejemplo" data-abrir-personaliza aria-label={tx.cta}>
+      <span class="flota">
+        <Image src={imagen('diseno/ojo-y-labios/ojo-pestanas-azules.jpg')} alt="" widths={[500, 900]} sizes="(max-width: 860px) 80vw, 45vw" loading="eager" />
+      </span>
+      <span class="cta mono">{tx.cta} →</span>
+    </button>
+
+    <div class="texto" data-aparece>
+      <span class="mono etiqueta">{tx.etiqueta}</span>
+      <h2>{tx.titulo}</h2>
+      {textoPiezas[idioma].map((p) => <p>{p}</p>)}
+      <button type="button" class="boton boton-principal" data-abrir-personaliza>{tx.cta} →</button>
+    </div>
+  </div>
+
+  <div class="terminadas">
+    <p class="mono etiqueta">{tx.piezas}</p>
+    <ul>
+      {modelosPieza.map((m, i) => (
+        <li data-aparece style={`--retraso:${i * 120}ms; --fase:${i * -1.3}s`}>
+          <Image src={imagen(m.imagen)} alt={m.nombre[idioma]} widths={[300, 600]} sizes="(max-width: 860px) 45vw, 18vw" loading="lazy" />
+          <span class="mono">{m.nombre[idioma]}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <figure class="en-casa" data-aparece>
+    <Image src={imagen('diseno/ojo-y-labios/piezas-estanteria.jpg')} alt={tx.casa} widths={[800, 1400, 2000]} sizes="(max-width: 860px) 100vw, 80vw" loading="lazy" />
+    <figcaption class="mono">{tx.casa}</figcaption>
+  </figure>
+</section>
+
+<!-- CONFIGURADOR A PANTALLA COMPLETA -->
+<dialog class="dialogo-personaliza" id="dialogo-personaliza" aria-label={tx.cta}>
+  <button type="button" class="cerrar mono" data-cerrar-personaliza>{t.cerrar} ×</button>
+  <div class="contenedor">
+    <Personaliza idioma={idioma} />
+  </div>
+</dialog>
+
+<style>
+  .vitrina { margin-top: clamp(2rem, 5vw, 4rem); }
+
+  .presenta {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 6rem);
+    align-items: center;
+    min-height: min(78vh, 760px);
+  }
+  @media (max-width: 860px) { .presenta { grid-template-columns: 1fr; min-height: 0; } }
+
+  /* El ojo de ejemplo: flota suavemente y al pasar por encima invita a personalizarlo */
+  .ejemplo { position: relative; display: grid; justify-items: center; gap: 1.2rem; padding: 0; border: 0; background: none; cursor: pointer; }
+  .flota { display: block; animation: flotar 6s ease-in-out infinite; }
+  .flota img { width: min(100%, 560px); height: auto; mix-blend-mode: multiply; transition: transform 0.6s ease; }
+  .ejemplo:hover .flota img { transform: scale(1.04) rotate(-2deg); }
+  .cta { color: var(--texto-suave); border-bottom: 1px solid var(--linea); padding-bottom: 0.3rem; transition: color 0.3s, border-color 0.3s; }
+  .ejemplo:hover .cta { color: var(--texto); border-color: var(--texto); }
+  @keyframes flotar {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-14px) rotate(1.5deg); }
+  }
+
+  .texto { max-width: 460px; }
+  .texto .etiqueta { display: block; margin-bottom: 1rem; }
+  .texto h2 { font-family: var(--fuente-titulos); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; letter-spacing: -0.015em; margin-bottom: 1.4rem; }
+  .texto p { margin: 0 0 1rem; color: var(--texto-suave); font-size: 0.9rem; line-height: 1.75; }
+  .texto .boton { margin-top: 1rem; }
+
+  /* Piezas diseñadas: aparecen una tras otra y se mecen suavemente */
+  .terminadas { margin-top: clamp(4rem, 9vw, 7rem); }
+  .terminadas .etiqueta { margin-bottom: 1.4rem; }
+  .terminadas ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(1rem, 2.5vw, 2rem); align-items: end; }
+  @media (max-width: 860px) { .terminadas ul { grid-template-columns: repeat(2, 1fr); } }
+  .terminadas li { display: grid; gap: 0.6rem; }
+  .terminadas li.visible img { animation: mecer 7s ease-in-out infinite; animation-delay: var(--fase, 0s); }
+  .terminadas img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; mix-blend-mode: multiply; }
+  .terminadas .mono { color: var(--texto-suave); }
+  @keyframes mecer {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(-1.5deg); }
+  }
+
+  .en-casa { margin: clamp(4rem, 9vw, 7rem) auto 0; max-width: 1100px; }
+  .en-casa img { width: 100%; height: auto; }
+  .en-casa figcaption { margin-top: 0.8rem; color: var(--texto-suave); }
+
+  /* Diálogo del configurador */
+  .dialogo-personaliza {
+    width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; margin: 0; padding: clamp(1rem, 3vw, 2.5rem) 0;
+    border: 0; background: var(--fondo); overflow-y: auto;
+  }
+  .dialogo-personaliza[open] { animation: entrarDialogo 0.45s ease; }
+  .dialogo-personaliza::backdrop { background: #fff; }
+  .dialogo-personaliza .cerrar {
+    position: sticky; top: 0; z-index: 5; display: block; margin: 0 var(--margen) 0 auto;
+    padding: 0.4rem 0.8rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--fondo); cursor: pointer; color: var(--texto);
+  }
+  @keyframes entrarDialogo { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .flota, .terminadas li.visible img { animation: none; } }
+</style>
+
+<script>
+  const dialogo = document.getElementById('dialogo-personaliza') as HTMLDialogElement | null;
+  if (dialogo) {
+    const abrir = () => { dialogo.showModal(); document.documentElement.style.overflow = 'hidden'; };
+    document.querySelectorAll('[data-abrir-personaliza]').forEach((b) => b.addEventListener('click', abrir));
+    dialogo.querySelector('[data-cerrar-personaliza]')?.addEventListener('click', () => dialogo.close());
+    dialogo.addEventListener('close', () => { document.documentElement.style.overflow = ''; });
+  }
+</script>

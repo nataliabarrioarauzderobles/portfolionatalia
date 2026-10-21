@@ -1,5 +1,6 @@
 ---
-// PINTURA: el scroll de cuadros, serie a serie (Formas → Open → Interfaces → Obras sueltas).
+// PINTURA: el scroll de cuadros, serie a serie (DE-formando → Open → Interfaces → Obras sueltas),
+// con dos subsecciones: "Todas" las obras o solo las "Disponibles".
 import Base from '../../layouts/Base.astro';
 import GaleriaSerie from '../GaleriaSerie.astro';
 import { series } from '../../data/obras';
@@ -15,6 +16,39 @@ const t = textos[idioma];
     <nav class="indice" aria-label={t.pinturaTitulo}>
       {series.map((s) => <a href={`#${s.id}`}>{t.series[s.id]}</a>)}
     </nav>
+    <div class="filtro mono" role="group" aria-label={t.pinturaTitulo}>
+      <button type="button" data-filtro="todas" aria-pressed="true">{t.todas}</button>
+      <button type="button" data-filtro="disponibles" aria-pressed="false">{t.disponibles}</button>
+    </div>
   </div>
   {series.map((s) => <GaleriaSerie serie={s} idioma={idioma} />)}
 </Base>
+
+<style>
+  .filtro { margin-left: auto; display: flex; gap: 1.2rem; }
+  .filtro button {
+    padding: 0 0 0.2rem; border: 0; border-bottom: 1px solid transparent; background: none;
+    font: inherit; color: var(--texto-tenue); cursor: pointer; transition: color 0.2s, border-color 0.2s;
+  }
+  .filtro button:hover { color: var(--texto); }
+  .filtro button[aria-pressed='true'] { color: var(--texto); border-color: var(--texto); }
+</style>
+
+<script>
+  const html = document.documentElement;
+  const palabra = (document.querySelector('[data-contador]')?.textContent ?? '').trim().split(' ').slice(1).join(' ');
+  document.querySelectorAll<HTMLButtonElement>('[data-filtro]').forEach((boton) =>
+    boton.addEventListener('click', () => {
+      const filtro = boton.dataset.filtro!;
+      html.dataset.filtro = filtro;
+      document.querySelectorAll('[data-filtro]').forEach((b) => b.setAttribute('aria-pressed', String(b === boton)));
+      // actualiza el número de obras de cada serie
+      document.querySelectorAll<HTMLElement>('[data-contador]').forEach((c) => {
+        const n = Number(filtro === 'disponibles' ? c.dataset.disponibles : c.dataset.total);
+        c.textContent = `${String(n).padStart(2, '0')} ${palabra}`;
+        c.closest('section')?.toggleAttribute('hidden', n === 0);
+      });
+      window.dispatchEvent(new Event('filtro-obras'));
+    }),
+  );
+</script>

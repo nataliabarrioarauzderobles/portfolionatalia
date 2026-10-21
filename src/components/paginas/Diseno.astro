@@ -1,28 +1,28 @@
 ---
-// DISEÑO: primero "Diseña tu pieza" (colorear ojos y labios) y después los proyectos en orden.
+// DISEÑO
+//  1. Vitrina de las piezas decorativas (ojos y labios) con el configurador "Personaliza tu pieza".
+//  2. Índice de proyectos: portadas que se abren a pantalla completa.
 import Base from '../../layouts/Base.astro';
-import ProyectoDiseno from '../ProyectoDiseno.astro';
-import Personaliza from '../Personaliza.astro';
+import VitrinaPiezas from '../VitrinaPiezas.astro';
+import ProyectosIndice from '../ProyectosIndice.astro';
 import VisorImagen from '../VisorImagen.astro';
-import { proyectos } from '../../data/proyectos';
 import { textos, type Idioma } from '../../i18n/textos';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
-const disena = idioma === 'es' ? 'Diseña tu pieza' : 'Design your piece';
+const enlaces = idioma === 'es'
+  ? [['#piezas', 'Piezas decorativas'], ['#proyectos', 'Proyectos']]
+  : [['#piezas', 'Decorative pieces'], ['#proyectos', 'Projects']];
 ---
 
 <Base idioma={idioma} pagina="diseno" titulo={t.disenoTitulo}>
   <div class="contenedor subcabecera">
     <h1 class="titulo-pagina">{t.disenoTitulo}</h1>
     <nav class="indice" aria-label={t.disenoTitulo}>
-      <a href="#disena-tu-pieza">{disena}</a>
-      {proyectos.map((p) => <a href={`#${p.id}`}>{p.titulo[idioma]}</a>)}
+      {enlaces.map(([href, texto]) => <a href={href}>{texto}</a>)}
     </nav>
   </div>
-  <div class="contenedor">
-    <Personaliza idioma={idioma} />
-  </div>
-  {proyectos.map((p, i) => <ProyectoDiseno proyecto={p} idioma={idioma} numero={i + 1} />)}
+  <VitrinaPiezas idioma={idioma} />
+  <ProyectosIndice idioma={idioma} />
   <VisorImagen idioma={idioma} />
 </Base>

@@ -1,0 +1,104 @@
+---
+// ÍNDICE DE PROYECTOS DE DISEÑO
+// Cada proyecto es una portada (una imagen central) que aparece al hacer scroll.
+// Al pulsarla se abre el proyecto completo a pantalla completa, sobre fondo blanco.
+import { Image } from 'astro:assets';
+import ProyectoDiseno from './ProyectoDiseno.astro';
+import { proyectos } from '../data/proyectos';
+import { textos, type Idioma } from '../i18n/textos';
+import { imagen } from '../utils/imagenes';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+const t = textos[idioma];
+const tx = { es: { etiqueta: 'Proyectos', ver: 'Ver proyecto' }, en: { etiqueta: 'Projects', ver: 'View project' } }[idioma];
+---
+
+<section class="indice-proyectos contenedor" id="proyectos">
+  <p class="mono etiqueta">{tx.etiqueta}</p>
+  <ul>
+    {proyectos.map((p, i) => (
+      <li data-aparece style={`--retraso:${(i % 3) * 120}ms`}>
+        <button type="button" class="portada" data-abrir-proyecto={`proyecto-${p.id}`} aria-label={`${tx.ver}: ${p.titulo[idioma]}`}>
+          <span class="marco">
+            <Image src={imagen(p.portada)} alt={p.titulo[idioma]} widths={[500, 900, 1300]} sizes="(max-width: 760px) 90vw, 40vw" loading="lazy" />
+          </span>
+          <span class="pie mono">
+            <span class="numero">{String(i + 1).padStart(2, '0')}</span>
+            <span class="titulo">{p.titulo[idioma]}</span>
+            {p.año && <span class="año">{p.año}</span>}
+            <span class="ver">{tx.ver} →</span>
+          </span>
+        </button>
+      </li>
+    ))}
+  </ul>
+</section>
+
+{proyectos.map((p, i) => (
+  <dialog class="dialogo-proyecto" id={`proyecto-${p.id}`} aria-label={p.titulo[idioma]}>
+    <button type="button" class="cerrar mono" data-cerrar-proyecto>{t.cerrar} ×</button>
+    <ProyectoDiseno proyecto={p} idioma={idioma} numero={i + 1} />
+  </dialog>
+))}
+
+<style>
+  .indice-proyectos { margin-top: clamp(6rem, 14vw, 11rem); scroll-margin-top: 5rem; }
+  .etiqueta { color: var(--texto-suave); margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+
+  /* Portadas a alturas y tamaños desiguales, con mucho aire (como blancagtarrio.com) */
+  ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(1rem, 3vw, 2.5rem); row-gap: clamp(3rem, 7vw, 6rem); align-items: start; }
+  li:nth-child(5n + 1) { grid-column: 1 / span 5; }
+  li:nth-child(5n + 2) { grid-column: 7 / span 4; margin-top: 8rem; }
+  li:nth-child(5n + 3) { grid-column: 2 / span 4; }
+  li:nth-child(5n + 4) { grid-column: 7 / span 5; margin-top: 5rem; }
+  li:nth-child(5n + 5) { grid-column: 4 / span 5; }
+  @media (max-width: 760px) {
+    ul { grid-template-columns: repeat(6, 1fr); row-gap: 3rem; }
+    li:nth-child(n) { grid-column: 1 / span 5; margin-top: 0; }
+    li:nth-child(2n) { grid-column: 2 / span 5; }
+  }
+
+  .portada { display: grid; gap: 0.8rem; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--texto); }
+  .marco { display: block; overflow: hidden; }
+  .marco img { width: 100%; height: auto; transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.6s; }
+  .portada:hover .marco img { transform: scale(1.04); }
+  .pie { display: flex; align-items: baseline; gap: 0.9rem; padding-bottom: 0.45rem; border-bottom: 1px solid var(--linea); }
+  .numero, .año { color: var(--texto-tenue); }
+  .ver { margin-left: auto; color: var(--texto-suave); opacity: 0; transform: translateX(-6px); transition: opacity 0.4s, transform 0.4s; }
+  .portada:hover .ver, .portada:focus-visible .ver { opacity: 1; transform: none; }
+  @media (hover: none) { .ver { opacity: 1; transform: none; } }
+
+  /* El proyecto abierto, a pantalla completa sobre blanco */
+  .dialogo-proyecto {
+    width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; margin: 0; padding: clamp(1rem, 3vw, 2.5rem) 0 4rem;
+    border: 0; background: var(--fondo); overflow-y: auto;
+  }
+  .dialogo-proyecto[open] { animation: entrarProyecto 0.5s ease; }
+  .dialogo-proyecto::backdrop { background: #fff; }
+  .dialogo-proyecto :global(.proyecto) { margin-top: 1.5rem; }
+  .cerrar {
+    position: sticky; top: 0; z-index: 6; display: block; margin: 0 var(--margen) 0 auto;
+    padding: 0.4rem 0.8rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--fondo); cursor: pointer; color: var(--texto);
+  }
+  @keyframes entrarProyecto { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-abrir-proyecto]').forEach((boton) => {
+    const dialogo = document.getElementById(boton.dataset.abrirProyecto!) as HTMLDialogElement;
+    boton.addEventListener('click', () => {
+      dialogo.showModal();
+      dialogo.scrollTop = 0;
+      document.documentElement.style.overflow = 'hidden';
+      // las imágenes del collage aparecen poco a poco dentro del proyecto
+      dialogo.querySelectorAll('li').forEach((li, i) => {
+        li.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], {
+          duration: 700, delay: Math.min(i, 10) * 70, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards',
+        });
+      });
+    });
+    dialogo.querySelector('[data-cerrar-proyecto]')?.addEventListener('click', () => dialogo.close());
+    dialogo.addEventListener('close', () => { document.documentElement.style.overflow = ''; });
+  });
+</script>

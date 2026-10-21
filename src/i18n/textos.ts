@@ -14,7 +14,7 @@ export const textos = {
     // Pintura
     pinturaTitulo: 'Pintura',
     series: {
-      formas: 'Serie DE-Formano',
+      formas: 'Serie DE-formando',
       open: 'Serie Open',
       interfaces: 'Serie Interfaces',
       sueltas: 'Obras sueltas',
@@ -35,6 +35,12 @@ export const textos = {
     siguiente: 'Siguiente',
     cerrar: 'Cerrar',
     verObra: 'Ver obra',
+    año: 'Año',
+    sobreObra: 'Sobre la obra',
+    sobreSerie: 'Sobre la serie',
+    todas: 'Todas',
+    disponibles: 'Disponibles',
+    obras: 'obras',
     mensajeObra: (titulo: string, medidas?: string) =>
       `Hola Natalia, me ha interesado la obra «${titulo}»${medidas ? ` (${medidas} cm)` : ''}. ¿Podrías darme más información sobre el precio y la disponibilidad?`,
 
@@ -61,7 +67,7 @@ export const textos = {
 
     pinturaTitulo: 'Painting',
     series: {
-      formas: 'DE-Formano series',
+      formas: 'DE-formando series',
       open: 'Open series',
       interfaces: 'Interfaces series',
       sueltas: 'Individual works',
@@ -82,6 +88,12 @@ export const textos = {
     siguiente: 'Next',
     cerrar: 'Close',
     verObra: 'View artwork',
+    año: 'Year',
+    sobreObra: 'About the work',
+    sobreSerie: 'About the series',
+    todas: 'All',
+    disponibles: 'Available',
+    obras: 'works',
     mensajeObra: (titulo: string, medidas?: string) =>
       `Hi Natalia, I'm interested in the artwork “${titulo}”${medidas ? ` (${medidas} cm)` : ''}. Could you tell me more about its price and availability?`,
 
