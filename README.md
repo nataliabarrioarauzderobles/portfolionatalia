@@ -10,7 +10,7 @@ Abre una terminal en esta carpeta (en VS Code: menú *Terminal → Nueva termina
 | Comando | Qué hace |
 |---|---|
 | `npm install` | Instala Astro. Solo hace falta la primera vez (o si borras `node_modules`). |
-| `npm run dev` | Abre la web en tu ordenador en http://localhost:4321/portfolionatalia/. Se actualiza sola al guardar cambios. Para pararla: `Ctrl + C`. |
+| `npm run dev` | Abre la web en tu ordenador en http://localhost:4321/. Se actualiza sola al guardar cambios. Para pararla: `Ctrl + C`. |
 | `npm run build` | Construye la versión final en la carpeta `dist/` (para comprobar que todo está bien). |
 
 ## Dónde está cada cosa
