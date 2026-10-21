@@ -5,10 +5,19 @@
 // Al final la foto se queda tenue, casi un fondo, y la intervención es la protagonista.
 // Capas: foto sin dibujo (tenue) → trazos que se animan y se quedan nítidos encima.
 import Base from '../../layouts/Base.astro';
-import type { Idioma } from '../../i18n/textos';
+import { textos, type Idioma } from '../../i18n/textos';
+import { rutaIdioma } from '../../utils/enlaces';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
+const t = textos[idioma];
+// menú que aparece sobre la foto al terminar la intro (una sección en cada esquina)
+const secciones = [
+  { pagina: 'pintura', texto: t.menuPintura, sitio: 'arriba-izquierda' },
+  { pagina: 'diseno', texto: t.menuDiseno, sitio: 'arriba-derecha' },
+  { pagina: 'encargos', texto: t.menuEncargos, sitio: 'abajo-izquierda' },
+  { pagina: 'contacto', texto: t.menuContacto, sitio: 'abajo-derecha' },
+];
 
 const base = imagen('inicio/foto-base.jpg');
 // posición de cada trazo en % de la foto (calculada al separar el dibujo de la foto)
@@ -32,6 +41,14 @@ const trazos = [
           data-trazo={t.desde.join(',')}
         />
       ))}
+      <!-- menú sobre la foto: letra fina que gana grosor al pasar el cursor -->
+      <nav class="menu-inicio" aria-label={t.menu}>
+        {secciones.map((s, i) => (
+          <a href={rutaIdioma(idioma, s.pagina)} class={s.sitio} data-seccion>
+            <span class="mono">{String(i + 1).padStart(2, '0')}</span>{s.texto}
+          </a>
+        ))}
+      </nav>
     </figure>
     <h1 class="nombre" data-nombre>Natalia Barrio Araúz de Robles</h1>
   </section>
@@ -53,6 +70,31 @@ const trazos = [
   .base { inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(0.5); }
   .trazo { transform-origin: center; will-change: transform, opacity; }
 
+  /* MENÚ SOBRE LA FOTO: cada sección asoma desde una esquina, medio encima de la foto */
+  .menu-inicio a {
+    position: absolute;
+    display: flex; align-items: baseline; gap: 0.5rem;
+    font-size: clamp(1.3rem, 2.4vw, 2.1rem);
+    font-weight: 200;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--texto);
+    transition: font-weight 0.45s ease, letter-spacing 0.45s ease;
+  }
+  .menu-inicio a:hover, .menu-inicio a:focus-visible { font-weight: 600; letter-spacing: 0; }
+  .menu-inicio .mono { font-size: 0.6rem; font-weight: 400; color: var(--texto-tenue); }
+  .arriba-izquierda { right: calc(100% - 2.6rem); top: 14%; }
+  .arriba-derecha { left: calc(100% - 2.6rem); top: 26%; }
+  .abajo-izquierda { right: calc(100% - 2.6rem); bottom: 26%; }
+  .abajo-derecha { left: calc(100% - 2.6rem); bottom: 12%; }
+  /* en pantallas estrechas el menú va debajo de la foto, en dos filas */
+  @media (max-width: 760px) {
+    .menu-inicio { position: absolute; top: calc(100% + 4.2rem); left: 50%; transform: translateX(-50%); width: 86vw; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+    .menu-inicio a { position: static; justify-content: center; font-size: 1.3rem; }
+    .portada { padding-bottom: 9rem; }
+  }
+
   .nombre {
     font-size: clamp(0.62rem, 0.9vw, 0.74rem);
     font-weight: 300;
@@ -64,7 +106,7 @@ const trazos = [
   }
 
   /* Estado inicial cuando hay JavaScript: solo el blanco. Sin JavaScript se ve el resultado final directamente. */
-  :global(.js) .base, :global(.js) .trazo, :global(.js) .nombre { opacity: 0; }
+  :global(.js) .base, :global(.js) .trazo, :global(.js) .nombre, :global(.js) [data-seccion] { opacity: 0; }
   /* la cabecera aparece al final de la intro */
   :global(body.intro .cabecera) { opacity: 0; }
   :global(body .cabecera) { transition: opacity 1s ease; }
@@ -74,6 +116,7 @@ const trazos = [
   const base = document.querySelector<HTMLImageElement>('[data-base]');
   const nombre = document.querySelector<HTMLElement>('[data-nombre]');
   const trazos = [...document.querySelectorAll<HTMLImageElement>('[data-trazo]')];
+  const secciones = [...document.querySelectorAll<HTMLElement>('[data-seccion]')];
   const portada = document.querySelector<HTMLElement>('[data-portada]');
 
   if (base && nombre && portada) {
@@ -86,6 +129,7 @@ const trazos = [
       base.style.opacity = String(tenue);
       trazos.forEach((el) => (el.style.opacity = '1'));
       nombre.style.opacity = '1';
+      secciones.forEach((el) => (el.style.opacity = '1'));
       document.body.classList.remove('intro');
     };
 
@@ -118,6 +162,17 @@ const trazos = [
           [{ opacity: 0, letterSpacing: '0.7em', transform: 'translateY(8px)' }, { opacity: 1, letterSpacing: '0.34em', transform: 'none' }],
           { duration: 1400, delay: aterriza + 400, easing: curva, fill: 'forwards' },
         ));
+        // 5. el menú aparece sobre la foto, una sección tras otra, deslizándose desde fuera
+        secciones.forEach((el, i) => {
+          const lado = i % 2 === 0 ? -1 : 1;
+          const a = el.animate(
+            [{ opacity: 0, transform: `translateX(${lado * 24}px)`, fontWeight: 100 }, { opacity: 1, transform: 'none', fontWeight: 200 }],
+            { duration: 1100, delay: aterriza + 900 + i * 140, easing: curva, fill: 'backwards' },
+          );
+          // al terminar, la animación se suelta para que el grosor pueda cambiar con el cursor
+          a.onfinish = () => (el.style.opacity = '1');
+          animaciones.push(a);
+        });
         setTimeout(() => document.body.classList.remove('intro'), aterriza + 900);
       });
       // un clic durante la intro la salta

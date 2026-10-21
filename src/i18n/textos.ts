@@ -36,7 +36,10 @@ export const textos = {
     precio: 'Precio',
     consultarPrecio: 'Consultar precio',
     vendida: 'Vendida',
-    botonConsultar: 'Consultar por WhatsApp',
+    botonConsultar: 'Saber más sobre esta obra',
+    encargarParecida: '¿Te gustaría una parecida? Encárgala',
+    soloDisponibles: 'Solo disponibles',
+    estado: 'Estado',
     anterior: 'Anterior',
     siguiente: 'Siguiente',
     cerrar: 'Cerrar',
@@ -48,7 +51,7 @@ export const textos = {
     disponibles: 'Disponibles',
     obras: 'obras',
     mensajeObra: (titulo: string, medidas?: string) =>
-      `Hola Natalia, me ha interesado la obra «${titulo}»${medidas ? ` (${medidas} cm)` : ''}. ¿Podrías darme más información sobre el precio y la disponibilidad?`,
+      `Hola Natalia, he visto «${titulo}»${medidas ? ` (${medidas} cm)` : ''} en tu web y me encantaría saber más sobre esta obra.`,
 
     // Diseño
     disenoTitulo: 'Diseño',
@@ -95,7 +98,10 @@ export const textos = {
     precio: 'Price',
     consultarPrecio: 'Price on request',
     vendida: 'Sold',
-    botonConsultar: 'Ask on WhatsApp',
+    botonConsultar: 'Find out more about this work',
+    encargarParecida: 'Would you like a similar one? Commission it',
+    soloDisponibles: 'Available only',
+    estado: 'Status',
     anterior: 'Previous',
     siguiente: 'Next',
     cerrar: 'Close',
@@ -107,7 +113,7 @@ export const textos = {
     disponibles: 'Available',
     obras: 'works',
     mensajeObra: (titulo: string, medidas?: string) =>
-      `Hi Natalia, I'm interested in the artwork “${titulo}”${medidas ? ` (${medidas} cm)` : ''}. Could you tell me more about its price and availability?`,
+      `Hi Natalia, I saw “${titulo}”${medidas ? ` (${medidas} cm)` : ''} on your website and I would love to know more about this work.`,
 
     disenoTitulo: 'Design',
     verImagen: 'View image',

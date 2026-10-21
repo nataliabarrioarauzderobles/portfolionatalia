@@ -1,0 +1,299 @@
+---
+// GALERÍA DE PINTURA: todas las obras a la vez, en una cuadrícula.
+// - Al entrar, los cuadros llegan desde los dos lados de la pantalla hasta formar la cuadrícula
+//   (los de la izquierda desde la izquierda, los de la derecha desde la derecha); al bajar, igual.
+// - Al pasar el cursor, el cuadro crece un poco: se intuye que se puede pulsar.
+// - Al pulsarlo se abre el visor: moviendo el cursor sobre la imagen se pasa del cuadro a sus mockups.
+// - Filtros: por serie y "solo disponibles".
+import { Image } from 'astro:assets';
+import { series } from '../data/obras';
+import { textos, type Idioma } from '../i18n/textos';
+import { enlaceWhatsApp, rutaIdioma } from '../utils/enlaces';
+import { imagenesDe } from '../utils/imagenes';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+const t = textos[idioma];
+
+// todas las obras seguidas, serie a serie; la foto principal primero y después los mockups
+const obras = series.flatMap((serie) =>
+  serie.obras.map((obra) => ({ ...obra, serie, imagenes: imagenesDe(`pintura/${serie.id}/${obra.id}`) })),
+);
+---
+
+<div class="contenedor filtros">
+  <div class="series mono" role="group" aria-label={t.pinturaTitulo}>
+    <button type="button" data-serie="todas" aria-pressed="true">{t.todas}</button>
+    {series.map((s) => (
+      <button type="button" data-serie={s.id} aria-pressed="false" data-texto={s.texto?.[idioma] ?? ''}>{t.series[s.id]}</button>
+    ))}
+  </div>
+  <label class="solo-disponibles mono">
+    <input type="checkbox" data-disponibles />
+    <span class="interruptor" aria-hidden="true"></span>
+    {t.soloDisponibles}
+  </label>
+</div>
+<!-- texto de la serie elegida -->
+<p class="contenedor texto-serie" data-texto-serie hidden></p>
+
+<ul class="contenedor obras" data-obras>
+  {obras.map((obra, i) => (
+    <li data-serie={obra.serie.id} data-vendida={obra.vendida ? '' : undefined}>
+      <button class="miniatura" type="button" data-abrir={`obra-${obra.id}`} aria-label={`${t.verObra}: ${obra.titulo}`}>
+        <span class="marco">
+          <Image src={obra.imagenes[0]} alt={obra.titulo} widths={[400, 700, 1000]} sizes="(max-width: 700px) 45vw, (max-width: 1100px) 30vw, 22vw" loading={i < 8 ? 'eager' : 'lazy'} />
+        </span>
+        <span class="pie-obra mono">
+          <span class="numero">{String(i + 1).padStart(2, '0')}</span>
+          <span class="titulo-obra">{obra.titulo}</span>
+          {obra.vendida
+            ? <span class="vendida">{t.vendida}</span>
+            : obra.medidas && <span class="medidas">{obra.medidas.replace(' x ', ' × ')}</span>}
+        </span>
+      </button>
+    </li>
+  ))}
+</ul>
+
+{obras.map((obra, i) => (
+  <dialog class="visor" id={`obra-${obra.id}`} aria-label={obra.titulo}>
+    <button class="cerrar" type="button" data-cerrar aria-label={t.cerrar}>×</button>
+    <div class="visor-cuerpo">
+      <div class="carrusel" data-carrusel>
+        <div class="pista" data-pista>
+          {obra.imagenes.map((img, j) => (
+            <figure class="diapositiva">
+              <Image src={img} alt={j === 0 ? obra.titulo : `${obra.titulo} — mockup`} widths={[800, 1400]} sizes="(max-width: 900px) 100vw, 65vw" loading="lazy" />
+            </figure>
+          ))}
+        </div>
+        <!-- marcas finas: una por imagen; se mueven solas al pasar el cursor -->
+        {obra.imagenes.length > 1 && (
+          <div class="marcas" aria-hidden="true">
+            {obra.imagenes.map((_, j) => <span class:list={{ activa: j === 0 }}></span>)}
+          </div>
+        )}
+      </div>
+
+      <div class="ficha">
+        <p class="mono serie-obra"><span>{String(i + 1).padStart(2, '0')}</span> {t.series[obra.serie.id]}</p>
+        <h3 class="titulo-ficha">{obra.titulo}</h3>
+        <dl>
+          {obra.medidas && (<><dt>{t.medidas}</dt><dd>{obra.medidas.replace(' x ', ' × ')} cm</dd></>)}
+          {obra.serie.tecnica && (<><dt>{t.tecnica}</dt><dd>{t.tecnicas[obra.serie.tecnica]}</dd></>)}
+          {obra.serie.año && (<><dt>{t.año}</dt><dd>{obra.serie.año}</dd></>)}
+          {obra.vendida && (<><dt>{t.estado}</dt><dd>{t.vendida}</dd></>)}
+        </dl>
+        {obra.vendida ? (
+          <a class="boton" href={rutaIdioma(idioma, 'encargos')}>{t.encargarParecida} →</a>
+        ) : (
+          <a class="boton boton-principal" href={enlaceWhatsApp(t.mensajeObra(obra.titulo, obra.medidas))} target="_blank" rel="noopener">
+            {t.botonConsultar} →
+          </a>
+        )}
+        <!-- texto de la obra: plegado bajo la ficha, para no competir con la imagen -->
+        {obra.texto && (
+          <details class="sobre-obra">
+            <summary class="mono">{t.sobreObra} <span aria-hidden="true">+</span></summary>
+            <p>{obra.texto[idioma]}</p>
+          </details>
+        )}
+      </div>
+    </div>
+  </dialog>
+))}
+
+<style>
+  /* FILTROS */
+  .filtros { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem; margin-top: 0.5rem; }
+  .series { display: flex; flex-wrap: wrap; gap: 0.4rem 1.3rem; }
+  .series button {
+    padding: 0 0 0.2rem; border: 0; border-bottom: 1px solid transparent; background: none;
+    font: inherit; color: var(--texto-tenue); cursor: pointer; transition: color 0.2s, border-color 0.2s;
+  }
+  .series button:hover { color: var(--texto); }
+  .series button[aria-pressed='true'] { color: var(--texto); border-color: var(--texto); }
+  .solo-disponibles { display: inline-flex; align-items: center; gap: 0.6rem; cursor: pointer; color: var(--texto-suave); }
+  .solo-disponibles input { position: absolute; opacity: 0; pointer-events: none; }
+  .interruptor { position: relative; width: 26px; height: 14px; border: 1px solid var(--texto-tenue); border-radius: 999px; transition: border-color 0.2s, background 0.2s; }
+  .interruptor::after { content: ''; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: var(--texto-tenue); transition: transform 0.25s, background 0.2s; }
+  .solo-disponibles input:checked + .interruptor { border-color: var(--texto); background: var(--texto); }
+  .solo-disponibles input:checked + .interruptor::after { transform: translateX(12px); background: var(--fondo); }
+  .solo-disponibles input:focus-visible + .interruptor { outline: 2px solid var(--texto); outline-offset: 2px; }
+  .texto-serie { max-width: 560px; margin-top: 1.4rem; margin-bottom: 0; font-size: 0.84rem; line-height: 1.75; color: var(--texto-suave); animation: aparecerTexto 0.4s ease; }
+  @keyframes aparecerTexto { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  /* CUADRÍCULA */
+  .obras {
+    list-style: none;
+    margin-top: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: clamp(4rem, 10vw, 7rem);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(2.5rem, 5vw, 4.5rem) clamp(1.2rem, 3vw, 2.8rem);
+    align-items: end;
+  }
+  @media (max-width: 1100px) { .obras { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 700px) { .obras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 1rem; } }
+  .obras li[hidden] { display: none; }
+  /* hasta que llegan, los cuadros no se ven (solo con JavaScript) */
+  :global(.js) .obras li:not(.llegado) { opacity: 0; }
+
+  .miniatura { display: grid; gap: 0.8rem; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--texto); }
+  /* todas las obras en un hueco igual; cada una conserva su proporción, apoyada abajo */
+  .marco { display: flex; align-items: flex-end; justify-content: center; aspect-ratio: 4 / 5; }
+  .marco img {
+    max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transform-origin: center bottom;
+  }
+  .miniatura:hover .marco img, .miniatura:focus-visible .marco img { transform: scale(1.06); }
+
+  .pie-obra { display: flex; align-items: baseline; gap: 0.7rem; min-width: 0; }
+  .titulo-obra { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .numero { color: var(--texto-tenue); }
+  .medidas, .vendida { margin-left: auto; white-space: nowrap; color: var(--texto-tenue); }
+  @media (max-width: 700px) { .medidas { display: none; } }
+
+  /* VISOR */
+  .visor { width: min(1300px, 94vw); max-height: 92vh; padding: 0; border: 0; background: var(--fondo); color: var(--texto); }
+  .visor[open] { animation: abrirVisor 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .visor::backdrop { background: rgba(255, 255, 255, 0.94); }
+  @keyframes abrirVisor { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+  .visor-cuerpo { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 2.5rem; padding: clamp(1rem, 3vw, 2.5rem); align-items: center; }
+  @media (max-width: 900px) { .visor-cuerpo { grid-template-columns: 1fr; } }
+  .cerrar { position: absolute; top: 0.4rem; right: 0.8rem; z-index: 2; border: 0; background: none; font-size: 1.8rem; font-weight: 200; line-height: 1; color: var(--texto); cursor: pointer; }
+
+  /* Carrusel: en ordenador cambia de imagen al mover el cursor; en el móvil, deslizando */
+  .carrusel { position: relative; }
+  .pista { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .pista::-webkit-scrollbar { display: none; }
+  .diapositiva { flex: 0 0 100%; margin: 0; scroll-snap-align: center; display: flex; justify-content: center; }
+  .diapositiva img { max-height: 74vh; width: auto; object-fit: contain; }
+  .marcas { display: flex; justify-content: center; gap: 6px; margin-top: 1rem; }
+  .marcas span { width: 22px; height: 1px; background: var(--texto-tenue); transition: background 0.3s, width 0.3s; }
+  .marcas span.activa { width: 36px; background: var(--texto); }
+
+  /* Ficha: el título con la misma letra que las etiquetas de la cuadrícula, más grande */
+  .serie-obra { color: var(--texto-tenue); margin: 0 0 0.9rem; }
+  .serie-obra span { color: var(--texto); margin-right: 0.5rem; }
+  .titulo-ficha {
+    font-family: var(--fuente-mono);
+    font-weight: 400;
+    font-size: clamp(1.15rem, 1.9vw, 1.55rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.25;
+    margin: 0 0 1.6rem;
+  }
+  dl { margin: 0 0 2rem; display: grid; grid-template-columns: auto 1fr; gap: 0.6rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--linea); }
+  dt { font-family: var(--fuente-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); padding-top: 0.2rem; }
+  dd { margin: 0; font-size: 0.88rem; }
+
+  details summary { list-style: none; cursor: pointer; color: var(--texto-tenue); transition: color 0.2s; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary:hover, details[open] summary { color: var(--texto); }
+  details[open] summary span { display: inline-block; transform: rotate(45deg); }
+  .sobre-obra { margin-top: 1.8rem; padding-top: 1rem; border-top: 1px solid var(--linea); }
+  .sobre-obra p { margin: 0.9rem 0 0; font-size: 0.82rem; line-height: 1.75; color: var(--texto-suave); max-width: 38ch; }
+</style>
+
+<script>
+  const lista = document.querySelector<HTMLElement>('[data-obras]')!;
+  const cuadros = [...lista.querySelectorAll<HTMLLIElement>('li')];
+  const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // LLEGADA DESDE LOS LADOS: cada cuadro entra desde el lado de la pantalla en el que está
+  let tanda = 0;
+  let reinicio = 0;
+  const llegar = (li: HTMLLIElement) => {
+    li.classList.add('llegado');
+    if (sinMovimiento) return;
+    const caja = li.getBoundingClientRect();
+    const lado = caja.left + caja.width / 2 < window.innerWidth / 2 ? -1 : 1;
+    // cuanto más al borde está, desde más lejos viene
+    const distancia = Math.abs(caja.left + caja.width / 2 - window.innerWidth / 2) + window.innerWidth * 0.35;
+    li.animate(
+      [
+        { opacity: 0, transform: `translateX(${lado * distancia}px) rotate(${lado * 4}deg)` },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: 1300, delay: tanda++ * 70, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'backwards' },
+    );
+    // los que llegan a la vez van escalonados; la cuenta se reinicia en cada tanda
+    clearTimeout(reinicio);
+    reinicio = window.setTimeout(() => (tanda = 0), 120);
+  };
+  const observador = new IntersectionObserver((entradas) => {
+    entradas.filter((e) => e.isIntersecting).forEach((e) => {
+      observador.unobserve(e.target);
+      llegar(e.target as HTMLLIElement);
+    });
+  }, { rootMargin: '0px 0px -5% 0px' });
+  cuadros.forEach((li) => observador.observe(li));
+
+  // FILTROS: serie y "solo disponibles"
+  const botonesSerie = [...document.querySelectorAll<HTMLButtonElement>('[data-serie]')].filter((b) => b.tagName === 'BUTTON');
+  const disponibles = document.querySelector<HTMLInputElement>('[data-disponibles]')!;
+  const textoSerie = document.querySelector<HTMLElement>('[data-texto-serie]')!;
+  let serie = 'todas';
+  const filtrar = () => {
+    cuadros.forEach((li) => {
+      const ver = (serie === 'todas' || li.dataset.serie === serie) && !(disponibles.checked && li.hasAttribute('data-vendida'));
+      li.hidden = !ver;
+      // al filtrar, los cuadros vuelven a llegar desde los lados
+      if (ver) { li.classList.remove('llegado'); observador.observe(li); }
+    });
+    const boton = botonesSerie.find((b) => b.dataset.serie === serie);
+    textoSerie.textContent = boton?.dataset.texto ?? '';
+    textoSerie.hidden = !textoSerie.textContent;
+  };
+  botonesSerie.forEach((b) => b.addEventListener('click', () => {
+    serie = b.dataset.serie!;
+    botonesSerie.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    filtrar();
+  }));
+  disponibles.addEventListener('change', filtrar);
+
+  // VISOR
+  document.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((boton) => {
+    boton.addEventListener('click', () => (document.getElementById(boton.dataset.abrir!) as HTMLDialogElement).showModal());
+  });
+
+  document.querySelectorAll<HTMLDialogElement>('dialog.visor').forEach((visor) => {
+    visor.querySelector('[data-cerrar]')?.addEventListener('click', () => visor.close());
+    visor.addEventListener('click', (e) => { if (e.target === visor) visor.close(); });
+
+    const carrusel = visor.querySelector<HTMLElement>('[data-carrusel]')!;
+    const pista = visor.querySelector<HTMLElement>('[data-pista]')!;
+    const marcas = [...visor.querySelectorAll<HTMLElement>('.marcas span')];
+    const total = pista.children.length;
+    if (total < 2) return;
+    let actual = 0;
+    const ir = (i: number, suave = true) => {
+      actual = Math.max(0, Math.min(total - 1, i));
+      pista.scrollTo({ left: actual * pista.clientWidth, behavior: suave ? 'smooth' : 'auto' });
+    };
+    // con el ratón: la posición del cursor sobre la imagen elige la imagen (izquierda = cuadro, derecha = mockups)
+    carrusel.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const caja = carrusel.getBoundingClientRect();
+      const i = Math.floor(((e.clientX - caja.left) / caja.width) * total);
+      if (i !== actual) ir(i);
+    });
+    // al sacar el cursor vuelve al cuadro
+    carrusel.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') ir(0); });
+    visor.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') ir(actual - 1);
+      if (e.key === 'ArrowRight') ir(actual + 1);
+    });
+    // las marcas siguen a la imagen que se ve (también al deslizar con el dedo)
+    pista.addEventListener('scroll', () => {
+      const i = Math.round(pista.scrollLeft / pista.clientWidth);
+      marcas.forEach((m, j) => m.classList.toggle('activa', j === i));
+      if (!matchMedia('(pointer: fine)').matches) actual = i;
+    });
+    visor.addEventListener('close', () => ir(0, false));
+  });
+</script>

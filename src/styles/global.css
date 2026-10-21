@@ -28,6 +28,7 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
+  overflow-x: clip; /* lo que entra animado desde los lados no crea scroll horizontal */
   background: var(--fondo);
   color: var(--texto);
   font-family: var(--fuente);
