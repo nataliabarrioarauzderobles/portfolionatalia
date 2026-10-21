@@ -13,6 +13,8 @@
 
   --fuente: 'Geist', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --fuente-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  /* títulos de serie y proyecto: grotesca parecida a Founders Grotesk (Lavoie Studio) */
+  --fuente-titulos: 'Schibsted Grotesk', 'Helvetica Neue', Arial, sans-serif;
 
   --ancho-max: 1320px;
   --margen: clamp(1.1rem, 4vw, 3.5rem);
@@ -93,9 +95,11 @@ h1, h2, h3 {
 
 /* Título de serie o proyecto */
 .titulo-seccion {
-  font-size: clamp(1.4rem, 2.6vw, 2rem);
-  font-weight: 300;
-  letter-spacing: -0.01em;
+  font-family: var(--fuente-titulos);
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.15;
   margin: 0 0 1.2rem;
 }
 

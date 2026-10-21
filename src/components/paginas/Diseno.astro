@@ -1,8 +1,8 @@
 ---
-// DISEÑO: primero el configurador "Diseña tu pieza" (ojos y labios) y después los proyectos en orden.
+// DISEÑO: primero "Diseña tu pieza" (colorear ojos y labios) y después los proyectos en orden.
 import Base from '../../layouts/Base.astro';
 import ProyectoDiseno from '../ProyectoDiseno.astro';
-import Configurador from '../Configurador.astro';
+import Personaliza from '../Personaliza.astro';
 import VisorImagen from '../VisorImagen.astro';
 import { proyectos } from '../../data/proyectos';
 import { textos, type Idioma } from '../../i18n/textos';
@@ -21,7 +21,7 @@ const disena = idioma === 'es' ? 'Diseña tu pieza' : 'Design your piece';
     </nav>
   </div>
   <div class="contenedor">
-    <Configurador idioma={idioma} />
+    <Personaliza idioma={idioma} />
   </div>
   {proyectos.map((p, i) => <ProyectoDiseno proyecto={p} idioma={idioma} numero={i + 1} />)}
   <VisorImagen idioma={idioma} />
