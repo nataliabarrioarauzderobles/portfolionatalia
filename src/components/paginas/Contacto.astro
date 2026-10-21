@@ -104,7 +104,7 @@ const ayuda = { es: 'Arrástrame', en: 'Drag me' }[idioma];
   .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; }
   .ayuda { margin: 1.8rem 0 0; color: var(--texto-tenue); }
 
-  /* LAS CARTAS: todas del mismo tamaño, con borde blanco, como fotos impresas */
+  /* LAS FOTOS: todas del mismo tamaño, sin borde, con una sombra suave */
   .carta {
     --ancho: clamp(92px, 12vw, 190px);
     position: absolute; left: 0; top: 0; z-index: 2;
@@ -114,8 +114,7 @@ const ayuda = { es: 'Arrástrame', en: 'Drag me' }[idioma];
     will-change: transform;
   }
   .flota {
-    display: block; padding: calc(var(--ancho) * 0.045);
-    background: #fff;
+    display: block;
     box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 8px 22px -8px rgba(0,0,0,0.28);
     transition: box-shadow 0.25s ease, scale 0.3s ease;
   }
@@ -194,32 +193,51 @@ const ayuda = { es: 'Arrástrame', en: 'Drag me' }[idioma];
       });
     };
 
-    // Al entrar: las cartas salen del "mazo" (abajo, en el centro) y caen una a una sobre la mesa
+    // Al entrar: las fotos aparecen formando un círculo que da vueltas en el centro de la pantalla
+    // y, al terminar, salen disparadas a su sitio sobre la mesa.
+    const APARECER = 700, GIRO = 2600, REPARTIR = 1000, TOTAL = APARECER + GIRO + REPARTIR;
     const lanzar = () => {
       repartir();
-      const W = mesa.clientWidth, H = mesa.clientHeight;
+      const W = mesa.clientWidth;
+      const visible = Math.min(mesa.clientHeight, window.innerHeight - mesa.getBoundingClientRect().top);
+      const cx = W / 2, cy = Math.max(visible / 2, 200);
+      const radio = Math.min(W, visible) * 0.36;
+      const n = cartas.length;
+      const vueltas = 1.25;
       cartas.forEach((c, i) => {
         const e = estados.get(c)!;
         c.classList.add('repartida');
         c.style.zIndex = String(++capa);
         aplicar(c, e);
         if (sinMovimiento) return;
-        const desdeX = W / 2 - c.offsetWidth / 2, desdeY = H + 40;
-        const caida = c.animate(
-          [
-            { transform: `translate(${desdeX}px, ${desdeY}px) rotate(${e.giro * 3}deg) scale(1.15)`, opacity: 0 },
-            { opacity: 1, offset: 0.2 },
-            { transform: `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(1)`, opacity: 1 },
-          ],
-          { duration: 900, delay: 250 + i * 110, easing: 'cubic-bezier(.2,.9,.25,1.05)', fill: 'backwards' },
-        );
-        // al caer, empieza a mecerse
-        caida.onfinish = () => c.classList.add('viva');
-        setTimeout(() => c.classList.add('viva'), 250 + i * 110 + 950);
+        const cw = c.offsetWidth, ch = c.offsetHeight;
+        // mientras giran, las fotos van más pequeñas y casi derechas, con un leve vaivén
+        const punto = (a: number, escala = 0.6) =>
+          `translate(${cx + radio * Math.cos(a) - cw / 2}px, ${cy + radio * Math.sin(a) - ch / 2}px) rotate(${Math.sin(a * 2) * 9}deg) scale(${escala})`;
+        const inicio = (i / n) * Math.PI * 2 - Math.PI / 2;
+        const t1 = APARECER / TOTAL, t2 = (APARECER + GIRO) / TOTAL;
+        const marcos: Keyframe[] = [
+          { offset: 0, transform: `translate(${cx - cw / 2}px, ${cy - ch / 2}px) rotate(0deg) scale(0.2)`, opacity: 0, easing: 'cubic-bezier(.2,.8,.3,1)' },
+          { offset: t1, transform: punto(inicio), opacity: 1, easing: 'linear' },
+        ];
+        // el giro: muchos puntos del círculo para que la foto recorra la curva
+        const pasos = 36;
+        for (let k = 1; k <= pasos; k++) {
+          const avance = k / pasos;
+          // acelera al principio y frena al final del giro
+          const suave = avance < 0.5 ? 2 * avance * avance : 1 - Math.pow(-2 * avance + 2, 2) / 2;
+          marcos.push({ offset: t1 + (t2 - t1) * avance, transform: punto(inicio + suave * vueltas * Math.PI * 2), opacity: 1, easing: k === pasos ? 'cubic-bezier(.2,.9,.25,1.05)' : 'linear' });
+        }
+        marcos.push({ offset: 1, transform: `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(1)`, opacity: 1 });
+        // salen del círculo una detrás de otra
+        const retraso = 200 + i * 35;
+        const vuelo = c.animate(marcos, { duration: TOTAL, delay: retraso, fill: 'backwards' });
+        // al caer en la mesa, empieza a mecerse
+        vuelo.onfinish = () => c.classList.add('viva');
+        setTimeout(() => c.classList.add('viva'), retraso + TOTAL + 50);
       });
-      if (!sinMovimiento) setTimeout(mostrarPista, 250 + cartas.length * 110 + 900);
+      if (!sinMovimiento) setTimeout(mostrarPista, 200 + n * 35 + TOTAL + 200);
     };
-
     // PISTA: una etiqueta junto a la foto más cercana al texto, que de vez en cuando
     // se desplaza un poco sola (como si alguien la empujara), hasta que el visitante mueve alguna
     const pista = mesa.querySelector<HTMLElement>('[data-pista]')!;
