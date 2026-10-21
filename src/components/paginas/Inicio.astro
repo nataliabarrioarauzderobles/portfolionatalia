@@ -2,15 +2,14 @@
 // HOME (inspirada en la intro de Brandon Yasin: blanco, limpio, una sola imagen)
 // Al entrar, los rasgos dibujados con rotulador (cejas y ojos, y boca) llegan muy grandes
 // y se van haciendo pequeños hasta colocarse en su sitio sobre la foto de carnet.
-// Al final se ve la foto intervenida original (yo1) y aparece el nombre.
-// Capas: foto sin dibujo (tenue al principio) → trazos que se animan → foto original encima al final.
+// Al final la foto se queda tenue, casi un fondo, y la intervención es la protagonista.
+// Capas: foto sin dibujo (tenue) → trazos que se animan y se quedan nítidos encima.
 import Base from '../../layouts/Base.astro';
 import type { Idioma } from '../../i18n/textos';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 
-const final = imagen('inicio/foto-final.jpg');
 const base = imagen('inicio/foto-base.jpg');
 // posición de cada trazo en % de la foto (calculada al separar el dibujo de la foto)
 const trazos = [
@@ -22,8 +21,8 @@ const trazos = [
 
 <Base idioma={idioma} pagina="">
   <section class="portada" data-portada>
-    <figure class="retrato" style={`aspect-ratio:${final.width} / ${final.height}`}>
-      <img class="capa base" src={base.src} alt="" width={base.width} height={base.height} data-base />
+    <figure class="retrato" style={`aspect-ratio:${base.width} / ${base.height}`}>
+      <img class="capa base" src={base.src} alt="Natalia Barrio Araúz de Robles" width={base.width} height={base.height} data-base />
       {trazos.map((t) => (
         <img
           class="capa trazo"
@@ -33,7 +32,6 @@ const trazos = [
           data-trazo={t.desde.join(',')}
         />
       ))}
-      <img class="capa final" src={final.src} alt="Natalia Barrio Araúz de Robles" width={final.width} height={final.height} data-final />
     </figure>
     <h1 class="nombre" data-nombre>Natalia Barrio Araúz de Robles</h1>
   </section>
@@ -49,22 +47,24 @@ const trazos = [
     padding: 1rem var(--margen) 3rem;
     text-align: center;
   }
-  .retrato { position: relative; margin: 0; height: min(62vh, 600px); max-width: 90vw; }
+  .retrato { position: relative; margin: 0; height: min(44vh, 400px); max-width: 80vw; }
   .capa { position: absolute; display: block; }
-  .base, .final { inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* la foto queda en segundo plano: tenue y algo desaturada */
+  .base { inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(0.5); }
   .trazo { transform-origin: center; will-change: transform, opacity; }
 
   .nombre {
-    font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+    font-size: clamp(0.62rem, 0.9vw, 0.74rem);
     font-weight: 300;
-    letter-spacing: 0.32em;
+    letter-spacing: 0.34em;
+    color: var(--texto-suave);
     text-transform: uppercase;
     line-height: 1.6;
     margin: 0;
   }
 
-  /* Estado inicial cuando hay JavaScript: solo el blanco. Sin JavaScript se ve la foto final directamente. */
-  :global(.js) .base, :global(.js) .trazo, :global(.js) .final, :global(.js) .nombre { opacity: 0; }
+  /* Estado inicial cuando hay JavaScript: solo el blanco. Sin JavaScript se ve el resultado final directamente. */
+  :global(.js) .base, :global(.js) .trazo, :global(.js) .nombre { opacity: 0; }
   /* la cabecera aparece al final de la intro */
   :global(body.intro .cabecera) { opacity: 0; }
   :global(body .cabecera) { transition: opacity 1s ease; }
@@ -72,24 +72,25 @@ const trazos = [
 
 <script>
   const base = document.querySelector<HTMLImageElement>('[data-base]');
-  const final = document.querySelector<HTMLImageElement>('[data-final]');
   const nombre = document.querySelector<HTMLElement>('[data-nombre]');
   const trazos = [...document.querySelectorAll<HTMLImageElement>('[data-trazo]')];
   const portada = document.querySelector<HTMLElement>('[data-portada]');
 
-  if (base && final && nombre && portada) {
+  if (base && nombre && portada) {
     const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const fin = { opacity: 1 };
+    const tenue = 0.3;
     const curva = 'cubic-bezier(.16, 1, .3, 1)';
     const animaciones: Animation[] = [];
     const mostrarTodo = () => {
       animaciones.forEach((a) => a.finish());
-      [final, nombre].forEach((el) => (el.style.opacity = '1'));
+      base.style.opacity = String(tenue);
+      trazos.forEach((el) => (el.style.opacity = '1'));
+      nombre.style.opacity = '1';
       document.body.classList.remove('intro');
     };
 
     // espera a que las imágenes estén cargadas para que la intro no empiece a medias
-    const cargadas = [base, final, ...trazos].map((img) => (img.complete ? Promise.resolve() : new Promise((ok) => (img.onload = img.onerror = ok))));
+    const cargadas = [base, ...trazos].map((img) => (img.complete ? Promise.resolve() : new Promise((ok) => (img.onload = img.onerror = ok))));
 
     if (sinMovimiento) {
       mostrarTodo();
@@ -97,7 +98,7 @@ const trazos = [
       document.body.classList.add('intro');
       Promise.all(cargadas).then(() => {
         // 1. la foto aparece muy tenue
-        animaciones.push(base.animate([{ opacity: 0, transform: 'scale(1.03)' }, { opacity: 0.32, transform: 'scale(1)' }], { duration: 1200, easing: 'ease-out', fill: 'forwards' }));
+        animaciones.push(base.animate([{ opacity: 0, transform: 'scale(1.03)' }, { opacity: tenue, transform: 'scale(1)' }], { duration: 1200, easing: 'ease-out', fill: 'forwards' }));
         // 2. cada rasgo llega grande desde fuera y se hace pequeño hasta su sitio
         trazos.forEach((trazo, i) => {
           const [dx, dy, giro] = trazo.dataset.trazo!.split(',').map(Number);
@@ -111,12 +112,10 @@ const trazos = [
           ));
         });
         const aterriza = 450 + (trazos.length - 1) * 380 + 1700;
-        // 3. la foto se completa y se funde con la imagen original intervenida
-        animaciones.push(base.animate([{ opacity: 0.32 }, fin], { duration: 500, delay: aterriza - 300, fill: 'forwards' }));
-        animaciones.push(final.animate([{ opacity: 0 }, fin], { duration: 800, delay: aterriza, easing: 'ease', fill: 'forwards' }));
+        // 3. la foto se queda tenue: el dibujo manda
         // 4. aparece el nombre y después la cabecera
         animaciones.push(nombre.animate(
-          [{ opacity: 0, letterSpacing: '0.6em', transform: 'translateY(8px)' }, { opacity: 1, letterSpacing: '0.32em', transform: 'none' }],
+          [{ opacity: 0, letterSpacing: '0.7em', transform: 'translateY(8px)' }, { opacity: 1, letterSpacing: '0.34em', transform: 'none' }],
           { duration: 1400, delay: aterriza + 400, easing: curva, fill: 'forwards' },
         ));
         setTimeout(() => document.body.classList.remove('intro'), aterriza + 900);

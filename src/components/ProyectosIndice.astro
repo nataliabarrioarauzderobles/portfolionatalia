@@ -11,7 +11,10 @@ import { imagen } from '../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
-const tx = { es: { etiqueta: 'Proyectos', ver: 'Ver proyecto' }, en: { etiqueta: 'Projects', ver: 'View project' } }[idioma];
+const tx = {
+  es: { etiqueta: 'Proyectos', ver: 'Ver proyecto', volver: 'Volver', siguiente: 'Siguiente proyecto' },
+  en: { etiqueta: 'Projects', ver: 'View project', volver: 'Back', siguiente: 'Next project' },
+}[idioma];
 ---
 
 <section class="indice-proyectos contenedor" id="proyectos">
@@ -35,28 +38,57 @@ const tx = { es: { etiqueta: 'Proyectos', ver: 'Ver proyecto' }, en: { etiqueta:
   </ul>
 </section>
 
-{proyectos.map((p, i) => (
-  <dialog class="dialogo-proyecto" id={`proyecto-${p.id}`} aria-label={p.titulo[idioma]}>
-    <button type="button" class="cerrar mono" data-cerrar-proyecto>{t.cerrar} ×</button>
-    <ProyectoDiseno proyecto={p} idioma={idioma} numero={i + 1} />
-  </dialog>
-))}
+{proyectos.map((p, i) => {
+  const siguiente = proyectos[(i + 1) % proyectos.length];
+  return (
+    <dialog class="dialogo-proyecto" id={`proyecto-${p.id}`} aria-label={p.titulo[idioma]}>
+      <!-- barra fija: menú hamburguesa con todos los proyectos y botón para volver -->
+      <div class="barra">
+        <button type="button" class="hamburguesa mono" data-menu-proyectos aria-expanded="false">
+          <span class="lineas" aria-hidden="true"><i></i><i></i><i></i></span>
+          {tx.etiqueta}
+        </button>
+        <span class="mono actual">{String(i + 1).padStart(2, '0')} / {String(proyectos.length).padStart(2, '0')}</span>
+        <button type="button" class="cerrar mono" data-cerrar-proyecto>← {tx.volver}</button>
+        <nav class="lista-proyectos" aria-label={tx.etiqueta} hidden>
+          <ol>
+            {proyectos.map((q, j) => (
+              <li>
+                <button type="button" data-ir-proyecto={`proyecto-${q.id}`} aria-current={q.id === p.id ? 'true' : undefined}>
+                  <Image src={imagen(q.portada)} alt="" widths={[160]} sizes="80px" loading="lazy" />
+                  <span class="mono">{String(j + 1).padStart(2, '0')}</span>
+                  <span class="nombre-proyecto">{q.titulo[idioma]}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </div>
+      <ProyectoDiseno proyecto={p} idioma={idioma} numero={i + 1} />
+      <!-- al terminar, el siguiente proyecto -->
+      <button type="button" class="siguiente contenedor" data-ir-proyecto={`proyecto-${siguiente.id}`}>
+        <span class="mono">{tx.siguiente}</span>
+        <span class="titulo-seccion">{siguiente.titulo[idioma]} →</span>
+      </button>
+    </dialog>
+  );
+})}
 
 <style>
   .indice-proyectos { margin-top: clamp(6rem, 14vw, 11rem); scroll-margin-top: 5rem; }
   .etiqueta { color: var(--texto-suave); margin-bottom: clamp(2rem, 5vw, 3.5rem); }
 
   /* Portadas a alturas y tamaños desiguales, con mucho aire (como blancagtarrio.com) */
-  ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(1rem, 3vw, 2.5rem); row-gap: clamp(3rem, 7vw, 6rem); align-items: start; }
-  li:nth-child(5n + 1) { grid-column: 1 / span 5; }
-  li:nth-child(5n + 2) { grid-column: 7 / span 4; margin-top: 8rem; }
-  li:nth-child(5n + 3) { grid-column: 2 / span 4; }
-  li:nth-child(5n + 4) { grid-column: 7 / span 5; margin-top: 5rem; }
-  li:nth-child(5n + 5) { grid-column: 4 / span 5; }
+  .indice-proyectos ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(1rem, 3vw, 2.5rem); row-gap: clamp(3rem, 7vw, 6rem); align-items: start; }
+  .indice-proyectos li:nth-child(5n + 1) { grid-column: 1 / span 5; }
+  .indice-proyectos li:nth-child(5n + 2) { grid-column: 7 / span 4; margin-top: 8rem; }
+  .indice-proyectos li:nth-child(5n + 3) { grid-column: 2 / span 4; }
+  .indice-proyectos li:nth-child(5n + 4) { grid-column: 7 / span 5; margin-top: 5rem; }
+  .indice-proyectos li:nth-child(5n + 5) { grid-column: 4 / span 5; }
   @media (max-width: 760px) {
-    ul { grid-template-columns: repeat(6, 1fr); row-gap: 3rem; }
-    li:nth-child(n) { grid-column: 1 / span 5; margin-top: 0; }
-    li:nth-child(2n) { grid-column: 2 / span 5; }
+    .indice-proyectos ul { grid-template-columns: repeat(6, 1fr); row-gap: 3rem; }
+    .indice-proyectos li:nth-child(n) { grid-column: 1 / span 5; margin-top: 0; }
+    .indice-proyectos li:nth-child(2n) { grid-column: 2 / span 5; }
   }
 
   .portada { display: grid; gap: 0.8rem; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--texto); }
@@ -71,34 +103,93 @@ const tx = { es: { etiqueta: 'Proyectos', ver: 'Ver proyecto' }, en: { etiqueta:
 
   /* El proyecto abierto, a pantalla completa sobre blanco */
   .dialogo-proyecto {
-    width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; margin: 0; padding: clamp(1rem, 3vw, 2.5rem) 0 4rem;
+    width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; margin: 0; padding: 0 0 4rem;
     border: 0; background: var(--fondo); overflow-y: auto;
   }
   .dialogo-proyecto[open] { animation: entrarProyecto 0.5s ease; }
   .dialogo-proyecto::backdrop { background: #fff; }
   .dialogo-proyecto :global(.proyecto) { margin-top: 1.5rem; }
-  .cerrar {
-    position: sticky; top: 0; z-index: 6; display: block; margin: 0 var(--margen) 0 auto;
-    padding: 0.4rem 0.8rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--fondo); cursor: pointer; color: var(--texto);
+  /* Barra fija arriba del proyecto */
+  .barra {
+    position: sticky; top: 0; z-index: 6;
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.9rem var(--margen); background: color-mix(in srgb, var(--fondo) 94%, transparent); backdrop-filter: blur(6px);
   }
+  .barra button { padding: 0.4rem 0.8rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--fondo); cursor: pointer; color: var(--texto); }
+  .barra button:hover { border-color: var(--texto); }
+  .actual { color: var(--texto-tenue); }
+  .cerrar { margin-left: auto; }
+  .hamburguesa { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .lineas { display: grid; gap: 3px; width: 14px; }
+  .lineas i { display: block; height: 1px; background: currentColor; transition: transform 0.3s, opacity 0.3s; }
+  .hamburguesa[aria-expanded='true'] .lineas i:nth-child(1) { transform: translateY(4px) rotate(45deg); }
+  .hamburguesa[aria-expanded='true'] .lineas i:nth-child(2) { opacity: 0; }
+  .hamburguesa[aria-expanded='true'] .lineas i:nth-child(3) { transform: translateY(-4px) rotate(-45deg); }
+
+  /* Desplegable con todos los proyectos */
+  .lista-proyectos {
+    position: absolute; top: 100%; left: var(--margen); width: min(360px, calc(100vw - 2 * var(--margen)));
+    background: var(--fondo); border: 1px solid var(--linea); padding: 0.5rem; animation: desplegar 0.3s ease;
+  }
+  .lista-proyectos ol { list-style: none; margin: 0; padding: 0; }
+  .lista-proyectos button {
+    display: grid; grid-template-columns: 56px auto 1fr; align-items: center; gap: 0.9rem; width: 100%;
+    padding: 0.45rem; border: 0; border-radius: 0; text-align: left; background: none;
+  }
+  .lista-proyectos button:hover, .lista-proyectos button[aria-current] { background: var(--fondo-suave); }
+  .lista-proyectos img { width: 56px; height: 42px; object-fit: cover; }
+  .lista-proyectos .mono { color: var(--texto-tenue); }
+  .nombre-proyecto { font-family: var(--fuente-titulos); font-size: 0.95rem; }
+  @keyframes desplegar { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+  /* Enlace al siguiente proyecto, al final */
+  .siguiente {
+    display: grid; gap: 0.6rem; width: 100%; margin-top: clamp(5rem, 12vw, 9rem); padding-top: 2rem; padding-bottom: 2rem;
+    border: 0; border-top: 1px solid var(--linea); background: none; cursor: pointer; text-align: left; color: var(--texto);
+  }
+  .siguiente .mono { color: var(--texto-suave); }
+  .siguiente .titulo-seccion { margin: 0; font-size: clamp(1.6rem, 4vw, 2.8rem); transition: transform 0.4s; }
+  .siguiente:hover .titulo-seccion { transform: translateX(8px); }
   @keyframes entrarProyecto { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 </style>
 
 <script>
-  document.querySelectorAll<HTMLButtonElement>('[data-abrir-proyecto]').forEach((boton) => {
-    const dialogo = document.getElementById(boton.dataset.abrirProyecto!) as HTMLDialogElement;
-    boton.addEventListener('click', () => {
-      dialogo.showModal();
-      dialogo.scrollTop = 0;
-      document.documentElement.style.overflow = 'hidden';
-      // las imágenes del collage aparecen poco a poco dentro del proyecto
-      dialogo.querySelectorAll('li').forEach((li, i) => {
-        li.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], {
-          duration: 700, delay: Math.min(i, 10) * 70, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards',
-        });
+  const abrir = (id: string) => {
+    const dialogo = document.getElementById(id) as HTMLDialogElement | null;
+    if (!dialogo) return;
+    // si ya hay otro proyecto abierto, se cierra sin soltar el scroll de la página
+    document.querySelectorAll<HTMLDialogElement>('.dialogo-proyecto[open]').forEach((d) => {
+      if (d !== dialogo) d.close();
+    });
+    if (!dialogo.open) dialogo.showModal();
+    dialogo.scrollTop = 0;
+    document.documentElement.style.overflow = 'hidden';
+    // las imágenes del collage aparecen poco a poco dentro del proyecto
+    dialogo.querySelectorAll('.proyecto li').forEach((li, i) => {
+      li.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], {
+        duration: 700, delay: Math.min(i, 10) * 70, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards',
       });
     });
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('[data-abrir-proyecto]').forEach((boton) => {
+    boton.addEventListener('click', () => abrir(boton.dataset.abrirProyecto!));
+  });
+
+  document.querySelectorAll<HTMLDialogElement>('.dialogo-proyecto').forEach((dialogo) => {
+    const menu = dialogo.querySelector<HTMLButtonElement>('[data-menu-proyectos]')!;
+    const lista = dialogo.querySelector<HTMLElement>('.lista-proyectos')!;
+    const plegar = (abierto: boolean) => { lista.hidden = !abierto; menu.setAttribute('aria-expanded', String(abierto)); };
+    menu.addEventListener('click', (e) => { e.stopPropagation(); plegar(lista.hidden); });
+    dialogo.addEventListener('click', (e) => { if (!lista.hidden && !lista.contains(e.target as Node)) plegar(false); });
+    dialogo.querySelectorAll<HTMLButtonElement>('[data-ir-proyecto]').forEach((b) => {
+      b.addEventListener('click', () => { plegar(false); abrir(b.dataset.irProyecto!); });
+    });
     dialogo.querySelector('[data-cerrar-proyecto]')?.addEventListener('click', () => dialogo.close());
-    dialogo.addEventListener('close', () => { document.documentElement.style.overflow = ''; });
+    dialogo.addEventListener('close', () => {
+      plegar(false);
+      // solo se devuelve el scroll a la página si no se ha abierto otro proyecto
+      if (!document.querySelector('.dialogo-proyecto[open]')) document.documentElement.style.overflow = '';
+    });
   });
 </script>
