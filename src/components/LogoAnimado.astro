@@ -1,0 +1,38 @@
+---
+// LOGO ANIMADO (public/logo-animacion.mp4): el personaje se dibuja solo.
+// Se reproduce una vez cuando entra en pantalla. "TALIARTE" queda tapado con una banda blanca.
+import { url } from '../utils/enlaces';
+---
+
+<figure class="logo-animado" data-logo-animado>
+  <span class="lamina">
+    <video src={url('logo-animacion.mp4')} muted playsinline preload="metadata" data-video></video>
+    <!-- banda blanca sobre "TALIARTE" (coordenadas del vídeo: 1088 × 1248) -->
+    <span class="tapa" aria-hidden="true"></span>
+  </span>
+</figure>
+
+<style>
+  .logo-animado { margin: 0 auto; display: grid; justify-items: center; }
+  .lamina { position: relative; display: block; height: min(46vh, 420px); aspect-ratio: 1088 / 1248; }
+  .lamina video { width: 100%; height: 100%; display: block; }
+  .tapa { position: absolute; left: 82.1%; top: 46%; width: 8.6%; height: 47.2%; background: #fff; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-logo-animado]').forEach((figura) => {
+    const video = figura.querySelector<HTMLVideoElement>('[data-video]')!;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // sin animaciones: se muestra el dibujo terminado
+      video.addEventListener('loadedmetadata', () => { video.currentTime = video.duration - 0.05; }, { once: true });
+      return;
+    }
+    const observador = new IntersectionObserver((entradas) => {
+      if (entradas.some((e) => e.isIntersecting)) {
+        video.play().catch(() => { video.currentTime = video.duration || 7.7; });
+        observador.disconnect();
+      }
+    }, { threshold: 0.5 });
+    observador.observe(figura);
+  });
+</script>

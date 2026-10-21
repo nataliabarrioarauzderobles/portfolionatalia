@@ -2,6 +2,7 @@
 // CONTACTO: una sola columna centrada → foto, texto breve justificado, datos y botones.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import LogoAnimado from '../LogoAnimado.astro';
 import { textos, type Idioma } from '../../i18n/textos';
 import { contacto, enlaceWhatsApp, url } from '../../utils/enlaces';
 import { imagen } from '../../utils/imagenes';
@@ -9,10 +10,16 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 
-// Texto PROVISIONAL: sustitúyelo por el tuyo
+// Texto del cuadernillo (CUADERNILLO_VENEZUELA); el inglés es traducción
 const sobreMi = {
-  es: 'Soy Natalia Barrio Araúz de Robles, Tali. Trabajo entre la pintura y el diseño. En mi pintura las formas se abrazan, se encajan y se desbordan: cuerpos y rostros que se convierten en volumen, color y estructura. En el diseño llevo ese mismo lenguaje al objeto, al mobiliario, a la moda y a la identidad de marca.',
-  en: "I'm Natalia Barrio Araúz de Robles, Tali. I work between painting and design. In my paintings, forms embrace, interlock and overflow: bodies and faces turned into volume, colour and structure. In design I take that same language into objects, furniture, fashion and brand identity.",
+  es: [
+    'Soy artista visual y diseñadora, y mi práctica se desarrolla principalmente a través de la pintura. Investigo la relación entre forma, materia y gesto, explorando cómo una imagen puede transformarse, perder sus límites y adquirir nuevas formas de presencia.',
+    'Mi trabajo parte de la abstracción para acercarse a lo humano, creando composiciones en las que la figura aparece, se transforma y finalmente se deshace. A través de la pintura busco generar un diálogo entre lo reconocible y lo ambiguo, entre lo que toma forma y lo que está en proceso de desaparecer.',
+  ],
+  en: [
+    'I am a visual artist and designer, and my practice is mainly developed through painting. I research the relationship between form, matter and gesture, exploring how an image can transform, lose its limits and take on new forms of presence.',
+    'My work starts from abstraction to come closer to the human, creating compositions in which the figure appears, transforms and finally comes undone. Through painting I seek a dialogue between the recognisable and the ambiguous, between what takes shape and what is in the process of disappearing.',
+  ],
 }[idioma];
 ---
 
@@ -23,7 +30,7 @@ const sobreMi = {
     <section class="sobre-mi" aria-labelledby="titulo-sobre-mi">
       <Image src={imagen('sobre-mi/retrato.jpg')} alt={contacto.nombre} widths={[360, 720]} sizes="360px" class="retrato" />
       <h2 id="titulo-sobre-mi" class="etiqueta">{t.sobreMi}</h2>
-      <p class="texto" lang={idioma}>{sobreMi}</p>
+      {sobreMi.map((p) => <p class="texto" lang={idioma}>{p}</p>)}
     </section>
 
     <hr />
@@ -48,6 +55,11 @@ const sobreMi = {
         <a class="boton" href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV}</a>
       </div>
     </section>
+
+    <!-- cierre de la página: el personaje se dibuja como una firma -->
+    <section class="firma-animada">
+      <LogoAnimado />
+    </section>
   </div>
 </Base>
 
@@ -61,7 +73,7 @@ const sobreMi = {
   /* Texto breve, justificado y centrado en la página */
   .texto {
     max-width: 480px;
-    margin: 0;
+    margin: 0 0 1rem;
     font-size: 0.92rem;
     line-height: 1.8;
     text-align: justify;
@@ -84,4 +96,5 @@ const sobreMi = {
   dd a:hover { color: var(--texto-suave); }
 
   .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
+  .firma-animada { margin-top: clamp(4rem, 10vw, 7rem); }
 </style>

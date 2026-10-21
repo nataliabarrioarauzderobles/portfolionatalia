@@ -1,133 +1,128 @@
 ---
-// HOME
-// 1. Al entrar se reproduce la animación del logo (public/logo-animacion.mp4).
-//    "TALIARTE" queda tapado por una banda blanca y, al terminar, aparece una mano que saluda.
-// 2. Al hacer clic en el dibujo, desaparece y se muestra el nombre.
+// HOME (inspirada en la intro de Brandon Yasin: blanco, limpio, una sola imagen)
+// Al entrar, los rasgos dibujados con rotulador (cejas y ojos, y boca) llegan muy grandes
+// y se van haciendo pequeños hasta colocarse en su sitio sobre la foto de carnet.
+// Al final se ve la foto intervenida original (yo1) y aparece el nombre.
+// Capas: foto sin dibujo (tenue al principio) → trazos que se animan → foto original encima al final.
 import Base from '../../layouts/Base.astro';
 import type { Idioma } from '../../i18n/textos';
-import { url } from '../../utils/enlaces';
+import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
-const aviso = idioma === 'es' ? 'Haz clic para entrar' : 'Click to enter';
-const avisoTactil = idioma === 'es' ? 'Toca para entrar' : 'Tap to enter';
+
+const final = imagen('inicio/foto-final.jpg');
+const base = imagen('inicio/foto-base.jpg');
+// posición de cada trazo en % de la foto (calculada al separar el dibujo de la foto)
+const trazos = [
+  { img: imagen('inicio/trazo-izquierda.png'), x: 6.466, y: 33.875, w: 44.655, h: 26.313, desde: [-38, -12, -9] },
+  { img: imagen('inicio/trazo-derecha.png'), x: 49.655, y: 36.313, w: 32.759, h: 20.625, desde: [40, -18, 8] },
+  { img: imagen('inicio/trazo-boca.png'), x: 27.5, y: 59.563, w: 30.603, h: 12, desde: [6, 46, -6] },
+];
 ---
 
 <Base idioma={idioma} pagina="">
   <section class="portada" data-portada>
-    <!-- Animación del logo -->
-    <button type="button" class="escena" data-escena aria-label={aviso}>
-      <span class="lamina">
-        <video src={url('logo-animacion.mp4')} muted playsinline autoplay preload="auto" data-video></video>
-        <!-- banda blanca sobre "TALIARTE" (coordenadas del vídeo: 1088 × 1248) -->
-        <span class="tapa" aria-hidden="true"></span>
-        <!-- mano que saluda, dibujada con el mismo trazo que el logo -->
-        <svg class="mano" viewBox="0 0 1088 1248" aria-hidden="true">
-          <g class="mano-giro">
-            <path pathLength="1" d="M952 432 C948 392 938 362 928 332 L895 307 C882 297 890 282 904 288 L940 314 C935 282 932 247 934 232 C936 218 954 218 956 232 L962 292 C960 257 962 217 966 204 C970 190 988 192 988 206 L990 290 C994 257 998 227 1002 218 C1006 204 1024 208 1022 222 L1016 294 C1024 272 1030 254 1034 246 C1040 234 1056 240 1052 254 C1046 282 1040 322 1034 352 C1030 382 1026 407 1024 432" />
-            <path class="lineas" pathLength="1" d="M876 238 C866 252 864 270 870 286 M858 216 C842 236 838 268 850 294" />
-          </g>
-        </svg>
-      </span>
-      <span class="mono aviso" aria-hidden="true">
-        <span class="raton">{aviso}</span><span class="tactil">{avisoTactil}</span>
-      </span>
-    </button>
-
-    <!-- Nombre (aparece al hacer clic) -->
-    <h1 class="nombre">Natalia Barrio<br />Araúz de Robles</h1>
+    <figure class="retrato" style={`aspect-ratio:${final.width} / ${final.height}`}>
+      <img class="capa base" src={base.src} alt="" width={base.width} height={base.height} data-base />
+      {trazos.map((t) => (
+        <img
+          class="capa trazo"
+          src={t.img.src}
+          alt=""
+          style={`left:${t.x}%;top:${t.y}%;width:${t.w}%;height:${t.h}%`}
+          data-trazo={t.desde.join(',')}
+        />
+      ))}
+      <img class="capa final" src={final.src} alt="Natalia Barrio Araúz de Robles" width={final.width} height={final.height} data-final />
+    </figure>
+    <h1 class="nombre" data-nombre>Natalia Barrio Araúz de Robles</h1>
   </section>
 </Base>
 
 <style>
   .portada {
-    position: relative;
-    min-height: calc(100vh - 120px);
+    min-height: calc(100vh - 90px);
     display: grid;
     place-items: center;
-    padding: 1rem var(--margen) 2rem;
+    align-content: center;
+    gap: clamp(1.4rem, 3vw, 2.2rem);
+    padding: 1rem var(--margen) 3rem;
     text-align: center;
   }
-  .portada > * { grid-area: 1 / 1; }
+  .retrato { position: relative; margin: 0; height: min(62vh, 600px); max-width: 90vw; }
+  .capa { position: absolute; display: block; }
+  .base, .final { inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .trazo { transform-origin: center; will-change: transform, opacity; }
 
-  /* ESCENA DE LA ANIMACIÓN */
-  .escena {
-    display: grid;
-    justify-items: center;
-    gap: 1.2rem;
-    padding: 0;
-    border: 0;
-    background: none;
-    cursor: pointer;
-    transition: opacity 0.7s ease, transform 0.9s ease;
-  }
-  .lamina { position: relative; display: block; height: min(68vh, 620px); aspect-ratio: 1088 / 1248; }
-  .lamina video { width: 100%; height: 100%; display: block; }
-  .tapa { position: absolute; left: 82.1%; top: 46%; width: 8.6%; height: 47.2%; background: #fff; }
-  .mano { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .mano path { fill: none; stroke: #111; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
-  .mano-giro { transform-box: view-box; transform-origin: 988px 432px; }
-
-  /* cuando termina el vídeo: la mano se dibuja y saluda */
-  .escena.saluda .mano path { animation: trazar 0.9s ease forwards; }
-  .escena.saluda .mano .lineas { animation: trazar 0.5s ease 0.9s forwards, parpadeo 1.4s ease-in-out 1.4s infinite; }
-  .escena.saluda .mano-giro { animation: saludar 1.4s ease-in-out 0.9s infinite; }
-  @keyframes trazar { to { stroke-dashoffset: 0; } }
-  @keyframes saludar {
-    0%, 100% { transform: rotate(0deg); }
-    20% { transform: rotate(-14deg); }
-    45% { transform: rotate(10deg); }
-    70% { transform: rotate(-10deg); }
-    85% { transform: rotate(4deg); }
-  }
-  @keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
-
-  .aviso { color: var(--texto-suave); opacity: 0; transition: opacity 0.6s ease; }
-  .escena.saluda .aviso { opacity: 1; }
-  .tactil { display: none; }
-  @media (pointer: coarse) { .raton { display: none; } .tactil { display: inline; } }
-
-  /* NOMBRE */
   .nombre {
-    font-size: clamp(1.3rem, 3.4vw, 2.6rem);
+    font-size: clamp(0.85rem, 1.4vw, 1.1rem);
     font-weight: 300;
-    letter-spacing: 0.26em;
+    letter-spacing: 0.32em;
     text-transform: uppercase;
-    line-height: 1.5;
-    opacity: 0;
-    transform: translateY(12px);
-    pointer-events: none;
-    transition: opacity 0.9s ease 0.3s, transform 0.9s ease 0.3s;
+    line-height: 1.6;
+    margin: 0;
   }
 
-  /* al hacer clic: fuera el dibujo, entra el nombre */
-  .portada.entrada .escena { opacity: 0; transform: scale(0.96); pointer-events: none; }
-  .portada.entrada .nombre { opacity: 1; transform: none; pointer-events: auto; }
-
-  /* sin animaciones: dibujo completo y mano quieta */
-  @media (prefers-reduced-motion: reduce) {
-    .mano path { stroke-dashoffset: 0; }
-    .escena.saluda .mano-giro, .escena.saluda .mano .lineas { animation: none; }
-  }
+  /* Estado inicial cuando hay JavaScript: solo el blanco. Sin JavaScript se ve la foto final directamente. */
+  :global(.js) .base, :global(.js) .trazo, :global(.js) .final, :global(.js) .nombre { opacity: 0; }
+  /* la cabecera aparece al final de la intro */
+  :global(body.intro .cabecera) { opacity: 0; }
+  :global(body .cabecera) { transition: opacity 1s ease; }
 </style>
 
 <script>
+  const base = document.querySelector<HTMLImageElement>('[data-base]');
+  const final = document.querySelector<HTMLImageElement>('[data-final]');
+  const nombre = document.querySelector<HTMLElement>('[data-nombre]');
+  const trazos = [...document.querySelectorAll<HTMLImageElement>('[data-trazo]')];
   const portada = document.querySelector<HTMLElement>('[data-portada]');
-  const escena = document.querySelector<HTMLElement>('[data-escena]');
-  const video = document.querySelector<HTMLVideoElement>('[data-video]');
-  if (portada && escena && video) {
-    const saludar = () => escena.classList.add('saluda');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // muestra directamente el dibujo terminado
-      video.removeAttribute('autoplay');
-      video.addEventListener('loadedmetadata', () => { video.currentTime = video.duration - 0.05; saludar(); }, { once: true });
+
+  if (base && final && nombre && portada) {
+    const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fin = { opacity: 1 };
+    const curva = 'cubic-bezier(.16, 1, .3, 1)';
+    const animaciones: Animation[] = [];
+    const mostrarTodo = () => {
+      animaciones.forEach((a) => a.finish());
+      [final, nombre].forEach((el) => (el.style.opacity = '1'));
+      document.body.classList.remove('intro');
+    };
+
+    // espera a que las imágenes estén cargadas para que la intro no empiece a medias
+    const cargadas = [base, final, ...trazos].map((img) => (img.complete ? Promise.resolve() : new Promise((ok) => (img.onload = img.onerror = ok))));
+
+    if (sinMovimiento) {
+      mostrarTodo();
     } else {
-      video.addEventListener('ended', saludar);
-      // por si el navegador no reproduce el vídeo automáticamente
-      video.play().catch(() => { video.currentTime = video.duration || 7.7; saludar(); });
+      document.body.classList.add('intro');
+      Promise.all(cargadas).then(() => {
+        // 1. la foto aparece muy tenue
+        animaciones.push(base.animate([{ opacity: 0, transform: 'scale(1.03)' }, { opacity: 0.32, transform: 'scale(1)' }], { duration: 1200, easing: 'ease-out', fill: 'forwards' }));
+        // 2. cada rasgo llega grande desde fuera y se hace pequeño hasta su sitio
+        trazos.forEach((trazo, i) => {
+          const [dx, dy, giro] = trazo.dataset.trazo!.split(',').map(Number);
+          animaciones.push(trazo.animate(
+            [
+              { opacity: 0, transform: `translate(${dx}%, ${dy}%) scale(3.6) rotate(${giro}deg)` },
+              { opacity: 1, offset: 0.25 },
+              { opacity: 1, transform: 'translate(0, 0) scale(1) rotate(0deg)' },
+            ],
+            { duration: 1700, delay: 450 + i * 380, easing: curva, fill: 'both' },
+          ));
+        });
+        const aterriza = 450 + (trazos.length - 1) * 380 + 1700;
+        // 3. la foto se completa y se funde con la imagen original intervenida
+        animaciones.push(base.animate([{ opacity: 0.32 }, fin], { duration: 500, delay: aterriza - 300, fill: 'forwards' }));
+        animaciones.push(final.animate([{ opacity: 0 }, fin], { duration: 800, delay: aterriza, easing: 'ease', fill: 'forwards' }));
+        // 4. aparece el nombre y después la cabecera
+        animaciones.push(nombre.animate(
+          [{ opacity: 0, letterSpacing: '0.6em', transform: 'translateY(8px)' }, { opacity: 1, letterSpacing: '0.32em', transform: 'none' }],
+          { duration: 1400, delay: aterriza + 400, easing: curva, fill: 'forwards' },
+        ));
+        setTimeout(() => document.body.classList.remove('intro'), aterriza + 900);
+      });
+      // un clic durante la intro la salta
+      portada.addEventListener('click', mostrarTodo, { once: true });
     }
-    escena.addEventListener('click', () => {
-      portada.classList.add('entrada');
-      video.pause();
-    });
   }
 </script>
