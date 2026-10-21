@@ -1,5 +1,6 @@
 ---
-// UN PROYECTO DE DISEÑO: título, texto y bloques de imágenes.
+// UN PROYECTO DE DISEÑO, presentado como un collage (inspirado en blancagtarrio.com):
+// imágenes de distintos tamaños, a alturas desiguales y algo solapadas, con mucho aire.
 // Cada imagen se puede ampliar (usa el visor compartido de VisorImagen.astro).
 import { Image, getImage } from 'astro:assets';
 import type { Proyecto } from '../data/proyectos';
@@ -18,7 +19,7 @@ const bloques = await Promise.all(
       b.imagenes.map(async (ruta) => {
         const src = imagen(ruta);
         const grande = await getImage({ src, width: Math.min(src.width, 1800) });
-        return { src, grande: grande.src };
+        return { src, grande: grande.src, vertical: src.height > src.width * 1.1 };
       }),
     ),
   })),
@@ -27,23 +28,25 @@ const bloques = await Promise.all(
 
 <article class="proyecto contenedor" id={proyecto.id}>
   <header class="encabezado">
-    <span class="etiqueta">{String(numero).padStart(2, '0')}</span>
-    <h2 class="titulo-seccion">{proyecto.titulo[idioma]}</h2>
+    <div class="nombre">
+      <span class="mono numero">{String(numero).padStart(2, '0')}</span>
+      <h2 class="titulo-seccion">{proyecto.titulo[idioma]}</h2>
+    </div>
     <p class="texto">{proyecto.texto[idioma]}</p>
   </header>
 
   {bloques.map((b) => (
-    <section class={`bloque ${b.disposicion ?? 'rejilla'}`}>
-      {b.subtitulo && <h3>{b.subtitulo[idioma]}</h3>}
+    <section class:list={['bloque', b.disposicion === 'trio' ? 'secuencia' : 'collage']}>
+      {b.subtitulo && <h3 class="mono">{b.subtitulo[idioma]}</h3>}
       <ul>
         {b.imagenes.map((img) => (
-          <li>
+          <li class:list={{ vertical: img.vertical, ancha: b.disposicion === 'ancho' }}>
             <button type="button" class="ampliar" data-ampliar={img.grande} aria-label={t.verImagen}>
               <Image
                 src={img.src}
                 alt={`${proyecto.titulo[idioma]}${b.subtitulo ? ' — ' + b.subtitulo[idioma] : ''}`}
-                widths={b.disposicion === 'ancho' ? [800, 1600] : [400, 800]}
-                sizes={b.disposicion === 'ancho' ? '100vw' : '(max-width: 700px) 50vw, 33vw'}
+                widths={[400, 800, 1400]}
+                sizes={b.disposicion === 'ancho' ? '(max-width: 700px) 100vw, 66vw' : '(max-width: 700px) 70vw, 34vw'}
                 loading="lazy"
               />
             </button>
@@ -52,33 +55,62 @@ const bloques = await Promise.all(
       </ul>
     </section>
   ))}
-
-  <slot />
 </article>
 
 <style>
-  .proyecto { margin-top: clamp(4rem, 10vw, 8rem); scroll-margin-top: 6rem; }
-  .encabezado { max-width: 680px; margin-bottom: 2.5rem; }
-  .encabezado .titulo-seccion { margin: 0.3rem 0 1rem; }
-  .texto { margin: 0; color: var(--texto); }
+  .proyecto { margin-top: clamp(6rem, 14vw, 11rem); scroll-margin-top: 5rem; }
 
-  .bloque { margin-top: 2.5rem; }
-  .bloque h3 {
-    font-family: var(--fuente-mono); font-size: 0.66rem; font-weight: 400; letter-spacing: 0.06em;
-    text-transform: uppercase; color: var(--texto-suave);
-    margin-bottom: 0.9rem; padding-bottom: 0.45rem; border-bottom: 1px solid var(--linea);
+  /* Encabezado: número y título a la izquierda, texto breve a la derecha */
+  .encabezado {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 1.5rem clamp(2rem, 6vw, 6rem);
+    align-items: start;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--linea);
+    margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
   }
-  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(0.8rem, 2vw, 1.5rem); }
+  @media (max-width: 760px) { .encabezado { grid-template-columns: 1fr; } }
+  .nombre { display: flex; align-items: baseline; gap: 1rem; }
+  .numero { color: var(--texto-tenue); }
+  .nombre .titulo-seccion { margin: 0; }
+  .texto { margin: 0; max-width: 460px; font-size: 0.86rem; color: var(--texto-suave); }
 
-  .rejilla ul { grid-template-columns: repeat(3, 1fr); align-items: center; }
-  .trio ul { grid-template-columns: repeat(3, 1fr); align-items: center; }
-  .ancho ul { grid-template-columns: 1fr; }
+  .bloque { margin-top: clamp(3rem, 7vw, 5.5rem); }
+  .bloque:first-of-type { margin-top: 0; }
+  .bloque h3 { color: var(--texto-suave); margin: 0 0 1.5rem; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { position: relative; transition: z-index 0s 0.3s; }
+  li:hover { z-index: 5; transition: z-index 0s; }
+
+  /* COLLAGE: rejilla de 12 columnas; cada imagen cae en una posición distinta (patrón de 7) */
+  .collage ul { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(0.8rem, 2vw, 1.6rem); row-gap: 0; align-items: start; }
+  .collage li:nth-child(7n + 1) { grid-column: 1 / span 4; margin-top: 0; }
+  .collage li:nth-child(7n + 2) { grid-column: 6 / span 3; margin-top: 7rem; }
+  .collage li:nth-child(7n + 3) { grid-column: 10 / span 3; margin-top: 1.5rem; }
+  .collage li:nth-child(7n + 4) { grid-column: 2 / span 3; margin-top: -2.5rem; }
+  .collage li:nth-child(7n + 5) { grid-column: 5 / span 4; margin-top: 4.5rem; }
+  .collage li:nth-child(7n + 6) { grid-column: 9 / span 3; margin-top: -1.5rem; }
+  .collage li:nth-child(7n + 7) { grid-column: 3 / span 5; margin-top: 3rem; }
+  /* las verticales, un poco más estrechas dentro de su hueco */
+  .collage li.vertical { width: 82%; }
+  .collage li:nth-child(7n + 3).vertical, .collage li:nth-child(7n + 6).vertical { justify-self: end; }
+  /* imagen apaisada protagonista (mural, estantería, troquel de las latas) */
+  .collage li.ancha { grid-column: 2 / span 10 !important; margin-top: 0 !important; width: auto; }
+
+  /* SECUENCIA (Wannabes: diseño → mockup → modelo), en fila */
+  .secuencia ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 3vw, 2.5rem); align-items: center; }
+
+  /* Móvil: dos columnas alternadas */
   @media (max-width: 700px) {
-    .rejilla ul, .trio ul { grid-template-columns: repeat(2, 1fr); }
+    .collage ul { grid-template-columns: repeat(6, 1fr); row-gap: 1rem; }
+    .collage li:nth-child(n) { grid-column: 1 / span 4; margin-top: 0; width: auto; justify-self: stretch; }
+    .collage li:nth-child(2n) { grid-column: 3 / span 4; margin-top: -2rem; }
+    .collage li.ancha { grid-column: 1 / -1 !important; }
+    .secuencia ul { grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
   }
 
   .ampliar { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
-  .ampliar img { width: 100%; transition: opacity 0.3s; }
-  .rejilla .ampliar img, .trio .ampliar img { aspect-ratio: 1; object-fit: cover; }
-  .ampliar:hover img { opacity: 0.88; }
+  .ampliar img { width: 100%; height: auto; transition: transform 0.4s ease; }
+  .ampliar:hover img { transform: scale(1.015); }
 </style>
