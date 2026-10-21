@@ -90,12 +90,21 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
 <style>
   .serie { margin-top: clamp(3rem, 8vw, 6rem); scroll-margin-top: 4rem; }
 
-  .cabecera-serie { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
-  .contador-serie { color: var(--texto-suave); }
+  /* Nombre de la serie: arriba del todo, pequeño y en gris; el protagonismo es de las obras */
+  .cabecera-serie {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1.2rem;
+  }
+  .cabecera-serie .titulo-seccion { font-size: 0.95rem; color: var(--texto-suave); margin: 0; }
+  .contador-serie { color: var(--texto-tenue); }
 
   /* LA TIRA: todas las obras a la misma altura, una al lado de otra */
   .tira {
-    --alto-obra: min(50vh, 500px);
+    --alto-obra: min(62vh, 640px);
     list-style: none;
     margin: 0;
     padding: 0.5rem var(--margen) 1.5rem;
@@ -118,9 +127,11 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
     height: calc(100vh - var(--alto-cabecera, 72px));
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* el nombre de la serie arriba; las obras ocupan el resto */
     overflow: hidden;
   }
+  /* en pantalla fija, las obras aprovechan casi toda la altura disponible */
+  .serie.activo .tira { --alto-obra: min(calc(100vh - var(--alto-cabecera, 72px) - 9rem), 760px); }
   .serie.activo .tira { will-change: transform; }
 
   @media (max-width: 700px) { .tira { --alto-obra: 46vh; } }

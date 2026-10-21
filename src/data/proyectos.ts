@@ -91,7 +91,8 @@ export const proyectos: Proyecto[] = [
     bloques: [
       {
         subtitulo: { es: 'MOTOMAMI', en: 'MOTOMAMI' },
-        imagenes: d('moda', 'motomami-00-letra', 'motomami-01', 'motomami-02', 'motomami-03', 'motomami-04', 'motomami-05', 'motomami-06', 'motomami-07', 'motomami-08', 'motomami-09', 'motomami-10', 'motomami-11'),
+        // disco (portada, contraportada, interior y discos), póster, etiquetas, lettering y sesión de fotos
+        imagenes: d('moda', 'motomami-01-portada', 'motomami-02-contraportada', 'motomami-03-interior', 'motomami-04-disco1', 'motomami-05-disco2', 'motomami-06-poster', 'motomami-07-etiquetas', 'motomami-08-letra', 'motomami-09-foto', 'motomami-10-foto', 'motomami-11-foto'),
         disposicion: 'rejilla',
       },
       {

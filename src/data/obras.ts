@@ -27,6 +27,7 @@ export const series: SerieObras[] = [
     tecnica: 'oleo',
     // Empieza con obras disponibles; las vendidas van al final de la serie.
     obras: [
+      { id: 'distorsion-de-la-forma', titulo: 'Distorsión de la forma', medidas: '260 x 180' },
       { id: 'desglose', titulo: 'Desglose', medidas: '90 x 70' },
       { id: 'encuentro', titulo: 'Encuentro', medidas: '130 x 90' },
       { id: 'estructura', titulo: 'Estructura', medidas: '120 x 90' },
@@ -84,7 +85,6 @@ export const series: SerieObras[] = [
     obras: [
       { id: 'color', titulo: 'Color' },
       { id: 'hombres', titulo: 'Hombres' },
-      { id: 'mural-beige', titulo: 'Mural' },
       { id: 'rostros-color', titulo: 'Rostros' },
       { id: 'azul', titulo: 'Azul' },
       { id: 'figuras-amarillo', titulo: 'Figuras en amarillo' },
