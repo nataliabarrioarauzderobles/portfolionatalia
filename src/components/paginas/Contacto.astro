@@ -1,14 +1,18 @@
 ---
-// CONTACTO: una sola columna centrada → foto, texto breve justificado, datos y botones.
+// CONTACTO
+// Una "mesa": tus fotos (src/assets/sobre-mi/cartas, todas del mismo tamaño) se reparten al entrar
+// como cartas lanzadas sobre la mesa. Después se pueden coger y mover con el ratón o con el dedo.
+// El texto "Sobre mí" y tus datos de contacto quedan siempre en el centro, bien legibles.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import LogoAnimado from '../LogoAnimado.astro';
 import { textos, type Idioma } from '../../i18n/textos';
 import { contacto, enlaceWhatsApp, url } from '../../utils/enlaces';
-import { imagen } from '../../utils/imagenes';
+import { imagenesDe } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
+const cartas = imagenesDe('sobre-mi/cartas');
 
 // Texto del cuadernillo (CUADERNILLO_VENEZUELA); el inglés es traducción
 const sobreMi = {
@@ -21,22 +25,17 @@ const sobreMi = {
     'My work starts from abstraction to come closer to the human, creating compositions in which the figure appears, transforms and finally comes undone. Through painting I seek a dialogue between the recognisable and the ambiguous, between what takes shape and what is in the process of disappearing.',
   ],
 }[idioma];
+const ayuda = { es: 'Mueve las fotos', en: 'Move the photos around' }[idioma];
 ---
 
 <Base idioma={idioma} pagina="contacto" titulo={t.contactoTitulo}>
-  <div class="contenedor columna">
-    <h1 class="titulo-pagina">{t.contactoTitulo}</h1>
-
-    <section class="sobre-mi" aria-labelledby="titulo-sobre-mi">
-      <Image src={imagen('sobre-mi/retrato.jpg')} alt={contacto.nombre} widths={[360, 720]} sizes="360px" class="retrato" />
-      <h2 id="titulo-sobre-mi" class="etiqueta">{t.sobreMi}</h2>
+  <section class="mesa" data-mesa>
+    <!-- el texto, en el centro -->
+    <div class="centro" data-centro>
+      <h1 class="mono etiqueta">{t.sobreMi}</h1>
       {sobreMi.map((p) => <p class="texto" lang={idioma}>{p}</p>)}
-    </section>
 
-    <hr />
-
-    <section class="datos" aria-label={t.contactoTitulo}>
-      <dl>
+      <dl class="datos">
         <div>
           <dt>{t.email}</dt>
           <dd><a href={`mailto:${contacto.email}`}>{contacto.email}</a></dd>
@@ -51,50 +50,187 @@ const sobreMi = {
         </div>
       </dl>
       <div class="botones">
-        <a class="boton boton-whatsapp" href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">{t.escribemeWhatsApp}</a>
+        <a class="boton boton-principal" href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">{t.escribemeWhatsApp}</a>
         <a class="boton" href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV}</a>
       </div>
-    </section>
+      <p class="mono ayuda" aria-hidden="true">↔ {ayuda}</p>
+    </div>
 
-    <!-- cierre de la página: el personaje se dibuja como una firma -->
-    <section class="firma-animada">
-      <LogoAnimado />
-    </section>
-  </div>
+    <!-- las cartas -->
+    {cartas.map((img, i) => (
+      <figure class="carta" data-carta style={`--i:${i}`}>
+        <Image src={img} alt="" widths={[260, 440]} sizes="(max-width: 700px) 120px, 200px" loading={i < 8 ? 'eager' : 'lazy'} draggable="false" />
+      </figure>
+    ))}
+  </section>
+
+  <!-- cierre de la página: el personaje se dibuja como una firma -->
+  <section class="firma-animada">
+    <LogoAnimado />
+  </section>
 </Base>
 
 <style>
-  .columna { max-width: 640px; text-align: center; }
-  .columna .titulo-pagina { display: block; margin: clamp(2rem, 5vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); color: var(--texto-suave); }
-
-  .sobre-mi { display: flex; flex-direction: column; align-items: center; }
-  .retrato { width: min(100%, 340px); height: auto; margin-bottom: 2.5rem; }
-  .sobre-mi .etiqueta { margin-bottom: 1.2rem; }
-  /* Texto breve, justificado y centrado en la página */
-  .texto {
-    max-width: 480px;
-    margin: 0 0 1rem;
-    font-size: 0.92rem;
-    line-height: 1.8;
-    text-align: justify;
-    text-align-last: center;
-    hyphens: auto;
+  /* LA MESA: ocupa la pantalla; el texto en el centro y las cartas alrededor (y por encima) */
+  .mesa {
+    position: relative;
+    min-height: calc(100svh - 80px);
+    display: grid;
+    place-items: center;
+    padding: clamp(3rem, 8vh, 6rem) var(--margen);
+    overflow: clip;
+    touch-action: pan-y;
+  }
+  @media (max-width: 700px) {
+    /* en el móvil las cartas caen arriba y abajo del texto */
+    .mesa { padding-top: 16rem; padding-bottom: 17rem; }
   }
 
-  hr { width: 48px; margin: clamp(2.5rem, 6vw, 4rem) auto; border: 0; border-top: 1px solid var(--texto); }
+  .centro { position: relative; z-index: 1; max-width: 480px; text-align: center; }
+  .etiqueta { color: var(--texto-suave); margin: 0 0 1.4rem; font-weight: 400; }
+  .texto { margin: 0 0 1rem; font-size: 0.92rem; line-height: 1.8; text-align: justify; text-align-last: center; hyphens: auto; }
 
-  /* Datos: etiqueta pequeña en mayúsculas y el dato en un tipo firme y sobrio */
-  dl { display: grid; gap: 1.6rem; margin: 0 0 3rem; }
-  dt { font-family: var(--fuente-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 0.35rem; }
-  dd {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 400;
-    word-break: break-word;
+  /* datos de contacto, con la misma letra que el resto de la web */
+  .datos { display: grid; gap: 1.1rem; margin: 2.4rem 0 2rem; padding-top: 2rem; border-top: 1px solid var(--linea); }
+  .datos dt { font-family: var(--fuente-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 0.25rem; }
+  .datos dd { margin: 0; font-size: 1rem; font-weight: 300; word-break: break-word; }
+  .datos a { color: var(--texto); transition: color 0.2s; }
+  .datos a:hover { color: var(--texto-suave); }
+  .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; }
+  .ayuda { margin: 1.8rem 0 0; color: var(--texto-tenue); }
+
+  /* LAS CARTAS: todas del mismo tamaño, con borde blanco, como fotos impresas */
+  .carta {
+    --ancho: clamp(92px, 12vw, 190px);
+    position: absolute; left: 0; top: 0; z-index: 2;
+    width: var(--ancho); margin: 0; padding: calc(var(--ancho) * 0.045);
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 8px 22px -8px rgba(0,0,0,0.28);
+    cursor: grab; user-select: none; -webkit-user-select: none;
+    touch-action: none;
+    will-change: transform;
+    transition: box-shadow 0.25s ease;
   }
-  dd a { transition: color 0.2s; }
-  dd a:hover { color: var(--texto-suave); }
+  .carta :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; pointer-events: none; }
+  .carta.cogida { cursor: grabbing; box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 22px 40px -12px rgba(0,0,0,0.38); }
+  /* sin JavaScript las cartas no se ven (solo tienen sentido para jugar con ellas) */
+  :global(html:not(.js)) .carta { display: none; }
+  :global(.js) .carta:not(.repartida) { visibility: hidden; }
 
-  .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
-  .firma-animada { margin-top: clamp(4rem, 10vw, 7rem); }
+  .firma-animada { margin: clamp(3rem, 8vw, 6rem) 0 0; }
 </style>
+
+<script>
+  const mesa = document.querySelector<HTMLElement>('[data-mesa]');
+  const centro = document.querySelector<HTMLElement>('[data-centro]');
+  if (mesa && centro) {
+    const cartas = [...mesa.querySelectorAll<HTMLElement>('[data-carta]')];
+    const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    type Estado = { x: number; y: number; giro: number; movida: boolean };
+    const estados = new Map<HTMLElement, Estado>();
+    let capa = 10;
+
+    const aplicar = (c: HTMLElement, e: Estado, escala = 1) => {
+      c.style.transform = `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(${escala})`;
+    };
+
+    // Reparte las cartas alrededor del texto, sin taparlo, y lo más separadas posible entre ellas
+    const repartir = () => {
+      const W = mesa.clientWidth, H = mesa.clientHeight;
+      const t = centro.getBoundingClientRect(), m = mesa.getBoundingClientRect();
+      // margen de seguridad: las cartas van giradas y sus esquinas sobresalen
+      const margen = window.innerWidth < 700 ? 14 : 44;
+      const hueco = { x0: t.left - m.left - margen, y0: t.top - m.top - margen, x1: t.right - m.left + margen, y1: t.bottom - m.top + margen };
+      const colocadas: { x: number; y: number }[] = [];
+      cartas.forEach((c) => {
+        const e = estados.get(c);
+        if (e?.movida) return; // las que ya ha movido el visitante se quedan donde están
+        const cw = c.offsetWidth, ch = c.offsetHeight;
+        let mejor = { x: 0, y: 0 }, mejorPuntos = -Infinity;
+        for (let intento = 0; intento < 120; intento++) {
+          const x = Math.random() * Math.max(1, W - cw), y = Math.random() * Math.max(1, H - ch);
+          // ¿tapa el texto?
+          const tapa = Math.max(0, Math.min(x + cw, hueco.x1) - Math.max(x, hueco.x0)) * Math.max(0, Math.min(y + ch, hueco.y1) - Math.max(y, hueco.y0));
+          const distancia = colocadas.reduce((min, p) => Math.min(min, Math.hypot(p.x - x, p.y - y)), Infinity);
+          // tapar el texto está prohibido (salvo que no quepa en otro sitio); después, cuanto más separadas, mejor
+          const puntos = Math.min(distancia, cw * 1.6) - (tapa > 0 ? 100000 + tapa : 0);
+          if (puntos > mejorPuntos) { mejorPuntos = puntos; mejor = { x, y }; }
+        }
+        colocadas.push(mejor);
+        estados.set(c, { x: mejor.x, y: mejor.y, giro: (Math.random() - 0.5) * 28, movida: false });
+      });
+    };
+
+    // Al entrar: las cartas salen del "mazo" (abajo, en el centro) y caen una a una sobre la mesa
+    const lanzar = () => {
+      repartir();
+      const W = mesa.clientWidth, H = mesa.clientHeight;
+      cartas.forEach((c, i) => {
+        const e = estados.get(c)!;
+        c.classList.add('repartida');
+        c.style.zIndex = String(++capa);
+        aplicar(c, e);
+        if (sinMovimiento) return;
+        const desdeX = W / 2 - c.offsetWidth / 2, desdeY = H + 40;
+        c.animate(
+          [
+            { transform: `translate(${desdeX}px, ${desdeY}px) rotate(${e.giro * 3}deg) scale(1.15)`, opacity: 0 },
+            { opacity: 1, offset: 0.2 },
+            { transform: `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(1)`, opacity: 1 },
+          ],
+          { duration: 900, delay: 250 + i * 110, easing: 'cubic-bezier(.2,.9,.25,1.05)', fill: 'backwards' },
+        );
+      });
+    };
+
+    // Coger y mover (ratón o dedo)
+    cartas.forEach((c) => {
+      let inicio: { px: number; py: number; x: number; y: number } | null = null;
+      c.addEventListener('pointerdown', (ev) => {
+        const e = estados.get(c);
+        if (!e) return;
+        c.getAnimations().forEach((a) => a.finish());
+        c.setPointerCapture(ev.pointerId);
+        c.style.zIndex = String(++capa);
+        c.classList.add('cogida');
+        inicio = { px: ev.clientX, py: ev.clientY, x: e.x, y: e.y };
+        aplicar(c, e, 1.06);
+      });
+      c.addEventListener('pointermove', (ev) => {
+        if (!inicio) return;
+        const e = estados.get(c)!;
+        const W = mesa.clientWidth, H = mesa.clientHeight;
+        e.x = Math.max(-c.offsetWidth * 0.4, Math.min(W - c.offsetWidth * 0.6, inicio.x + ev.clientX - inicio.px));
+        e.y = Math.max(-c.offsetHeight * 0.3, Math.min(H - c.offsetHeight * 0.6, inicio.y + ev.clientY - inicio.py));
+        // al arrastrar, la carta se inclina un poco hacia donde va
+        e.giro = Math.max(-20, Math.min(20, e.giro + ev.movementX * 0.08));
+        e.movida = true;
+        aplicar(c, e, 1.06);
+      });
+      const soltar = () => {
+        if (!inicio) return;
+        inicio = null;
+        c.classList.remove('cogida');
+        const e = estados.get(c)!;
+        c.animate([{ transform: c.style.transform }, { transform: `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(1)` }], { duration: 220, easing: 'ease-out' });
+        aplicar(c, e);
+      };
+      c.addEventListener('pointerup', soltar);
+      c.addEventListener('pointercancel', soltar);
+    });
+
+    // si cambia el tamaño de la pantalla, se vuelven a repartir las que no se han movido
+    let espera = 0;
+    let anchoPrevio = window.innerWidth;
+    window.addEventListener('resize', () => {
+      if (Math.abs(window.innerWidth - anchoPrevio) < 40) return; // la barra del móvil cambia el alto sin importar
+      anchoPrevio = window.innerWidth;
+      clearTimeout(espera);
+      espera = window.setTimeout(() => { repartir(); cartas.forEach((c) => aplicar(c, estados.get(c)!)); }, 200);
+    });
+
+    // se lanzan cuando la mesa se ve (y con las primeras fotos ya cargadas)
+    const primeras = cartas.slice(0, 6).map((c) => c.querySelector('img')!).map((img) => (img.complete ? Promise.resolve() : new Promise((ok) => (img.onload = img.onerror = ok))));
+    Promise.race([Promise.all(primeras), new Promise((ok) => setTimeout(ok, 1500))]).then(lanzar);
+  }
+</script>

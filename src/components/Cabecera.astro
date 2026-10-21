@@ -1,7 +1,10 @@
 ---
-// CABECERA: botón "Menú" a la izquierda, tu firma en el centro y el idioma a la derecha.
-// El menú se abre a pantalla completa: secciones grandes y numeradas, con una imagen
-// de cada sección que aparece al pasar el ratón, y tus datos de contacto abajo.
+// CABECERA
+//  · En la home: las secciones a la vista arriba, en letra fina (crecen y se oscurecen al pasar el cursor).
+//  · En las demás páginas: la sección en la que estás a la izquierda, tu firma en el centro
+//    y a la derecha el idioma y el menú hamburguesa.
+//  · El menú se abre sobre la página (que se ve difuminada detrás), centrado y "en modo diccionario":
+//    cada sección en mayúsculas, con la primera letra en negrita, y una breve definición debajo.
 import { Image } from 'astro:assets';
 import { textos, type Idioma } from '../i18n/textos';
 import { contacto, enlaceWhatsApp, rutaIdioma } from '../utils/enlaces';
@@ -11,70 +14,71 @@ interface Props { idioma: Idioma; pagina: string }
 const { idioma, pagina } = Astro.props;
 const t = textos[idioma];
 const enlaces = [
-  { pagina: 'pintura', texto: t.menuPintura, nota: t.notaPintura, foto: 'pintura/formas/encuentro/encuentro.jpg' },
-  { pagina: 'diseno', texto: t.menuDiseno, nota: t.notaDiseno, foto: 'diseno/ojo-y-labios/ojo-pestanas-azules.jpg' },
-  { pagina: 'encargos', texto: t.menuEncargos, nota: t.notaEncargos, foto: 'pintura/formas/desglose/desglose-mockup.jpg' },
-  { pagina: 'contacto', texto: t.menuContacto, nota: t.notaContacto, foto: 'sobre-mi/retrato.jpg' },
+  { pagina: 'pintura', texto: t.menuPintura, nota: t.notaPintura },
+  { pagina: 'diseno', texto: t.menuDiseno, nota: t.notaDiseno },
+  { pagina: 'encargos', texto: t.menuEncargos, nota: t.notaEncargos },
+  { pagina: 'contacto', texto: t.menuContacto, nota: t.notaContacto },
 ];
+const enHome = pagina === '';
 const actual = enlaces.find((e) => e.pagina === pagina);
 ---
 
-<header class="cabecera">
+<header class:list={['cabecera', { 'en-home': enHome }]}>
   <div class="contenedor fila">
-    <button type="button" class="abrir-menu" data-abrir-menu aria-expanded="false" aria-controls="menu-principal">
-      <span class="lineas" aria-hidden="true"><i></i><i></i></span>
-      <span class="mono">{t.menu}</span>
-      {actual && <span class="donde">{actual.texto}</span>}
-    </button>
+    {enHome ? (
+      <nav class="secciones" aria-label={t.menu}>
+        {enlaces.map((e) => <a href={rutaIdioma(idioma, e.pagina)}>{e.texto}</a>)}
+      </nav>
+    ) : (
+      <span class="donde mono">{actual?.texto}</span>
+    )}
     <a href={rutaIdioma(idioma)} class="firma" aria-label={t.inicio}>
       <Image src={imagen('marca/firma.png')} alt="Tali" width={240} />
     </a>
-    <div class="idiomas">
-      <a href={rutaIdioma('es', pagina)} aria-current={idioma === 'es' ? 'true' : undefined} lang="es">ES</a>
-      <span aria-hidden="true">/</span>
-      <a href={rutaIdioma('en', pagina)} aria-current={idioma === 'en' ? 'true' : undefined} lang="en">EN</a>
+    <div class="derecha">
+      <div class="idiomas">
+        <a href={rutaIdioma('es', pagina)} aria-current={idioma === 'es' ? 'true' : undefined} lang="es">ES</a>
+        <span aria-hidden="true">/</span>
+        <a href={rutaIdioma('en', pagina)} aria-current={idioma === 'en' ? 'true' : undefined} lang="en">EN</a>
+      </div>
+      {!enHome && (
+        <button type="button" class="abrir-menu" data-abrir-menu aria-expanded="false" aria-controls="menu-principal" aria-label={t.menu}>
+          <span class="lineas" aria-hidden="true"><i></i><i></i><i></i></span>
+        </button>
+      )}
     </div>
   </div>
 </header>
 
-<!-- Menú a pantalla completa -->
-<dialog class="menu-principal" id="menu-principal" aria-label={t.menu}>
-  <div class="contenedor arriba">
-    <button type="button" class="cerrar-menu mono" data-cerrar-menu>{t.cerrar} ×</button>
-    <a href={rutaIdioma(idioma)} class="firma" aria-label={t.inicio}>
-      <Image src={imagen('marca/firma.png')} alt="Tali" width={240} />
-    </a>
-    <span></span>
-  </div>
-
-  <div class="contenedor cuerpo">
+{!enHome && (
+  <dialog class="menu-principal" id="menu-principal" aria-label={t.menu}>
+    <button type="button" class="cerrar-menu" data-cerrar-menu aria-label={t.cerrar}>
+      <span aria-hidden="true"><i></i><i></i></span>
+    </button>
     <nav aria-label={t.menu}>
       <ol>
+        <li style="--i:0">
+          <a href={rutaIdioma(idioma)}>
+            <span class="palabra"><b>{t.inicio.charAt(0)}</b>{t.inicio.slice(1)}</span>
+          </a>
+        </li>
         {enlaces.map((e, i) => (
-          <li style={`--i:${i}`}>
-            <a href={rutaIdioma(idioma, e.pagina)} aria-current={pagina === e.pagina ? 'page' : undefined} data-vista={i}>
-              <span class="mono numero">{String(i + 1).padStart(2, '0')}</span>
-              <span class="nombre">{e.texto}</span>
-              <span class="nota">{e.nota}</span>
+          <li style={`--i:${i + 1}`}>
+            <a href={rutaIdioma(idioma, e.pagina)} aria-current={pagina === e.pagina ? 'page' : undefined}>
+              <span class="palabra"><b>{e.texto.charAt(0)}</b>{e.texto.slice(1)}</span>
+              <span class="definicion">{e.nota}</span>
             </a>
           </li>
         ))}
       </ol>
     </nav>
-    <!-- imagen de la sección sobre la que está el ratón -->
-    <div class="vistas" aria-hidden="true">
-      {enlaces.map((e, i) => (
-        <Image src={imagen(e.foto)} alt="" widths={[500, 900]} sizes="30vw" class="vista" data-foto={i} loading="lazy" />
-      ))}
-    </div>
-  </div>
-
-  <div class="contenedor abajo mono">
-    <a href={`mailto:${contacto.email}`}>{contacto.email}</a>
-    <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener">Instagram</a>
-    <a href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">WhatsApp</a>
-  </div>
-</dialog>
+    <p class="contacto-menu mono">
+      <a href={`mailto:${contacto.email}`}>{contacto.email}</a>
+      <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener">Instagram</a>
+      <a href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">WhatsApp</a>
+    </p>
+  </dialog>
+)}
 
 <style>
   .cabecera {
@@ -84,7 +88,7 @@ const actual = enlaces.find((e) => e.pagina === pagina);
     background: color-mix(in srgb, var(--fondo) 94%, transparent);
     backdrop-filter: blur(6px);
   }
-  .fila, .arriba {
+  .fila {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -96,93 +100,89 @@ const actual = enlaces.find((e) => e.pagina === pagina);
   a { color: var(--texto-suave); transition: color 0.2s; }
   a:hover, a[aria-current] { color: var(--texto); }
 
-  /* Botón Menú: dos líneas que se mueven al pasar por encima + la sección en la que estás */
-  .abrir-menu {
-    justify-self: start; display: inline-flex; align-items: center; gap: 0.7rem;
-    padding: 0.3rem 0; border: 0; background: none; cursor: pointer; color: var(--texto);
+  /* HOME: las secciones a la vista, en letra fina; al pasar crecen un poco y se oscurecen */
+  .secciones { display: flex; gap: clamp(1rem, 2.4vw, 2rem); }
+  .secciones a {
+    display: inline-block;
+    font-size: 0.82rem; font-weight: 300; letter-spacing: 0.02em;
+    color: var(--texto-suave);
+    transform-origin: left center;
+    transition: transform 0.3s ease, color 0.3s ease;
   }
+  .secciones a:hover, .secciones a:focus-visible { transform: scale(1.12); color: var(--texto); }
+
+  .donde { color: var(--texto-suave); }
+
+  .derecha { display: flex; justify-content: flex-end; align-items: center; gap: 1.4rem; }
+  .idiomas { display: flex; gap: 0.35rem; font-family: var(--fuente-mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--texto-tenue); }
+
+  /* botón hamburguesa (a la derecha) */
+  .abrir-menu { display: grid; place-items: center; width: 36px; height: 36px; margin-right: -8px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--texto); }
   .lineas { display: grid; gap: 5px; width: 22px; }
-  .lineas i { display: block; height: 1px; background: currentColor; transition: width 0.35s ease, transform 0.35s ease; }
-  .lineas i:last-child { width: 60%; }
-  .abrir-menu:hover .lineas i:last-child { width: 100%; }
-  .abrir-menu:hover .lineas i:first-child { transform: translateX(3px); }
-  .donde { font-size: 0.8rem; font-weight: 300; color: var(--texto-suave); }
-  .donde::before { content: '—'; margin-right: 0.7rem; color: var(--texto-tenue); }
+  .lineas i { display: block; height: 1px; background: currentColor; transition: transform 0.35s ease, width 0.35s ease; }
+  .lineas i:nth-child(2) { width: 70%; justify-self: end; }
+  .abrir-menu:hover .lineas i:nth-child(2) { width: 100%; }
 
-  .idiomas { font-family: var(--fuente-mono); font-size: 0.66rem; letter-spacing: 0.06em; }
-  .idiomas { display: flex; justify-content: flex-end; gap: 0.35rem; color: var(--texto-tenue); }
-
-  /* MENÚ A PANTALLA COMPLETA */
+  /* MENÚ: sobre la página difuminada */
   .menu-principal {
     width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; border: 0;
-    background: var(--fondo); color: var(--texto); overflow-y: auto;
+    background: transparent; color: var(--texto);
   }
-  .menu-principal[open] { display: grid; grid-template-rows: auto 1fr auto; animation: menuEntra 0.45s ease; }
-  .menu-principal::backdrop { background: #fff; }
-  .cerrar-menu { justify-self: start; padding: 0.4rem 0.8rem; border: 1px solid var(--linea); border-radius: 999px; background: none; cursor: pointer; color: var(--texto); }
-  .cerrar-menu:hover { border-color: var(--texto); }
+  .menu-principal[open] { display: grid; place-items: center; grid-template-rows: 1fr auto; animation: aparecerMenu 0.4s ease; }
+  .menu-principal::backdrop { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); animation: aparecerMenu 0.4s ease; }
+  @keyframes aparecerMenu { from { opacity: 0; } to { opacity: 1; } }
 
-  .cuerpo { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); align-items: center; padding-top: 2rem; padding-bottom: 2rem; }
-  ol { list-style: none; margin: 0; padding: 0; }
-  li { border-top: 1px solid var(--linea); }
-  li:last-child { border-bottom: 1px solid var(--linea); }
-  .menu-principal[open] li { animation: lineaEntra 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: calc(120ms + var(--i) * 70ms); }
-  li a { display: grid; grid-template-columns: 3rem 1fr auto; align-items: baseline; gap: 1rem; padding: clamp(0.8rem, 2vw, 1.3rem) 0; color: var(--texto); }
-  .numero { color: var(--texto-tenue); }
-  .nombre {
-    font-family: var(--fuente-titulos); font-weight: 400; font-size: clamp(2.2rem, 6vw, 4.6rem); line-height: 1; letter-spacing: -0.02em;
-    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.3s;
+  .cerrar-menu { position: absolute; top: 1.1rem; right: var(--margen); width: 36px; height: 36px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--texto); }
+  .cerrar-menu:focus { outline: none; }
+  .cerrar-menu:focus-visible { outline: 1px solid var(--texto-tenue); outline-offset: 2px; }
+  .cerrar-menu span { position: relative; display: block; width: 22px; height: 22px; margin: auto; }
+  .cerrar-menu i { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: currentColor; transform: rotate(45deg); }
+  .cerrar-menu i + i { transform: rotate(-45deg); }
+
+  nav ol { list-style: none; margin: 0; padding: 0; text-align: center; display: grid; gap: clamp(1rem, 2.6vh, 1.8rem); }
+  .menu-principal[open] li { animation: entradaMenu 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: calc(80ms + var(--i) * 60ms); }
+  @keyframes entradaMenu { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  nav a { display: grid; justify-items: center; gap: 0.3rem; color: var(--texto); }
+  /* "modo diccionario": mayúsculas, primera letra en negrita y el resto fino */
+  .palabra {
+    font-family: var(--fuente); font-size: clamp(1.35rem, 2.6vw, 1.9rem); font-weight: 200;
+    letter-spacing: 0.16em; text-transform: uppercase; line-height: 1.1;
+    transition: letter-spacing 0.4s ease, color 0.3s;
   }
-  .nota { font-size: 0.8rem; font-weight: 300; color: var(--texto-suave); text-align: right; max-width: 16rem; }
-  /* al pasar por una sección, las demás se apagan y esa se desplaza un poco */
-  ol:hover a .nombre { color: var(--texto-tenue); }
-  ol:hover a:hover .nombre, li a:focus-visible .nombre { color: var(--texto); transform: translateX(0.6rem); }
-  a[aria-current='page'] .numero::after { content: ' ●'; color: var(--texto); }
+  .palabra b { font-weight: 700; }
+  .definicion { font-size: 0.74rem; font-weight: 300; color: var(--texto-suave); letter-spacing: 0.01em; }
+  nav a:hover .palabra, nav a:focus-visible .palabra { letter-spacing: 0.24em; }
+  nav a[aria-current='page'] .palabra { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.35em; }
 
-  .vistas { position: relative; aspect-ratio: 4 / 5; max-height: 62vh; justify-self: center; width: 100%; max-width: 420px; }
-  .vista { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.04); transition: opacity 0.5s ease, transform 0.9s ease; }
-  .vista.activa { opacity: 1; transform: none; }
+  .contacto-menu { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.8rem; margin: 0; padding: 0 var(--margen) 2rem; }
 
-  .abajo { display: flex; flex-wrap: wrap; gap: 0.6rem 2rem; padding-top: 1.2rem; padding-bottom: 1.6rem; font-size: 0.66rem; }
-
-  @keyframes menuEntra { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes lineaEntra { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-
-  @media (max-width: 760px) {
-    .cuerpo { grid-template-columns: 1fr; align-items: start; }
-    .vistas { display: none; }
-    .nota { display: none; }
-    li a { grid-template-columns: 2.4rem 1fr; }
-  }
   @media (max-width: 640px) {
     .fila { padding-top: 0.8rem; padding-bottom: 0.8rem; }
     .firma img { height: 32px; }
-    .donde { display: none; }
+    /* en el móvil, en la home la firma va arriba y las secciones debajo, centradas */
+    .en-home .fila { grid-template-columns: 1fr auto; row-gap: 0.7rem; }
+    .en-home .firma { grid-column: 1 / -1; grid-row: 1; justify-self: center; }
+    .en-home .secciones { grid-row: 2; gap: 0.9rem; flex-wrap: wrap; }
+    .en-home .derecha { grid-row: 2; }
+    .derecha { gap: 0.9rem; }
   }
 </style>
 
 <script>
-  const menu = document.getElementById('menu-principal') as HTMLDialogElement;
-  const boton = document.querySelector<HTMLButtonElement>('[data-abrir-menu]')!;
-  const fotos = [...menu.querySelectorAll<HTMLElement>('[data-foto]')];
-  const mostrar = (i: number) => fotos.forEach((f) => f.classList.toggle('activa', f.dataset.foto === String(i)));
-
-  boton.addEventListener('click', () => {
-    menu.showModal();
-    boton.setAttribute('aria-expanded', 'true');
-    document.documentElement.style.overflow = 'hidden';
-    // al abrir se ve la imagen de la sección en la que estás (o la primera)
-    const actual = menu.querySelector<HTMLElement>('a[aria-current="page"]');
-    mostrar(Number(actual?.dataset.vista ?? 0));
-  });
-  menu.querySelector('[data-cerrar-menu]')!.addEventListener('click', () => menu.close());
-  menu.addEventListener('close', () => {
-    boton.setAttribute('aria-expanded', 'false');
-    document.documentElement.style.overflow = '';
-  });
-  menu.querySelectorAll<HTMLElement>('[data-vista]').forEach((a) => {
-    const i = Number(a.dataset.vista);
-    a.addEventListener('mouseenter', () => mostrar(i));
-    a.addEventListener('focus', () => mostrar(i));
-  });
+  const menu = document.getElementById('menu-principal') as HTMLDialogElement | null;
+  const boton = document.querySelector<HTMLButtonElement>('[data-abrir-menu]');
+  if (menu && boton) {
+    boton.addEventListener('click', () => {
+      menu.showModal();
+      boton.setAttribute('aria-expanded', 'true');
+      document.documentElement.style.overflow = 'hidden';
+    });
+    menu.querySelector('[data-cerrar-menu]')!.addEventListener('click', () => menu.close());
+    // pulsar fuera de las palabras también cierra
+    menu.addEventListener('click', (e) => { if (e.target === menu) menu.close(); });
+    menu.addEventListener('close', () => {
+      boton.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.overflow = '';
+    });
+  }
 </script>
