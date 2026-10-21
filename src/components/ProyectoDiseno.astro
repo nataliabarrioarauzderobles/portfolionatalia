@@ -63,7 +63,11 @@ const bloques = await Promise.all(
   .texto { margin: 0; color: var(--texto); }
 
   .bloque { margin-top: 2.5rem; }
-  .bloque h3 { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 1rem; }
+  .bloque h3 {
+    font-family: var(--fuente-mono); font-size: 0.66rem; font-weight: 400; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--texto-suave);
+    margin-bottom: 0.9rem; padding-bottom: 0.45rem; border-bottom: 1px solid var(--linea);
+  }
   ul { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(0.8rem, 2vw, 1.5rem); }
 
   .rejilla ul { grid-template-columns: repeat(3, 1fr); align-items: center; }

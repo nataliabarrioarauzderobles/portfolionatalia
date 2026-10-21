@@ -16,27 +16,36 @@ const t = textos[idioma];
 const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintura/${serie.id}/${obra.id}`) }));
 ---
 
-<section class="serie contenedor" id={serie.id}>
-  <h2 class="titulo-seccion">{t.series[serie.id]}</h2>
-
-  <!-- Filas de altura igual: cada obra ocupa el ancho que le corresponde según su proporción (--r) -->
-  <ul class="rejilla">
-    {obras.map((obra) => {
-      const principal = obra.imagenes[0];
-      const proporcion = (principal.width / principal.height).toFixed(3);
-      return (
-        <li class:list={{ destacada: obra.destacada }} style={`--r:${proporcion}`}>
-          <button class="miniatura" type="button" data-abrir={`obra-${obra.id}`} aria-label={`${t.verObra}: ${obra.titulo}`}>
-            <Image src={principal} alt={obra.titulo} widths={[500, 900, 1400]} sizes={obra.destacada ? '100vw' : '(max-width: 700px) 100vw, 40vw'} loading="lazy" />
-          </button>
-          <p class="pie-obra">
-            <span>{obra.titulo}</span>
-            {obra.vendida && <span class="vendida">{t.vendida}</span>}
+<!--
+  CARRUSEL HORIZONTAL
+  En ordenador: la serie se queda fija en pantalla y, al hacer scroll hacia abajo,
+  la tira de cuadros se desliza hacia la izquierda (lo hace el script de abajo).
+  En móvil, o si el visitante prefiere menos movimiento: la tira se desliza con el dedo.
+-->
+<section class="serie" id={serie.id} data-carrusel>
+  <div class="pegajoso">
+    <div class="contenedor cabecera-serie">
+      <h2 class="titulo-seccion">{t.series[serie.id]}</h2>
+      <span class="mono contador-serie">{String(obras.length).padStart(2, '0')} {idioma === 'es' ? 'obras' : 'works'}</span>
+    </div>
+    <ul class="tira" data-tira>
+      {obras.map((obra, i) => (
+        <li>
+          <p class="pie-obra mono">
+            <span class="numero">{String(i + 1).padStart(2, '0')}</span>
+            <span class="titulo-obra">
+              {obra.titulo}
+              {obra.vendida && <span class="vendida"> · {t.vendida}</span>}
+            </span>
+            {obra.medidas && <span class="medidas">{obra.medidas.replace(' x ', ' × ')}</span>}
           </p>
+          <button class="miniatura" type="button" data-abrir={`obra-${obra.id}`} aria-label={`${t.verObra}: ${obra.titulo}`}>
+            <Image src={obra.imagenes[0]} alt={obra.titulo} widths={[500, 900, 1300]} sizes="(max-width: 700px) 80vw, 45vw" loading="lazy" />
+          </button>
         </li>
-      );
-    })}
-  </ul>
+      ))}
+    </ul>
+  </div>
 </section>
 
 {obras.map((obra) => (
@@ -53,9 +62,9 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
         </div>
         {obra.imagenes.length > 1 && (
           <div class="controles">
-            <button type="button" data-anterior aria-label={t.anterior}>‹</button>
+            <button type="button" data-anterior aria-label={t.anterior}>←</button>
             <span class="contador"><span data-actual>1</span> / {obra.imagenes.length}</span>
-            <button type="button" data-siguiente aria-label={t.siguiente}>›</button>
+            <button type="button" data-siguiente aria-label={t.siguiente}>→</button>
           </div>
         )}
       </div>
@@ -79,60 +88,69 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
 ))}
 
 <style>
-  .serie { margin-top: clamp(3rem, 8vw, 6rem); scroll-margin-top: 6rem; }
+  .serie { margin-top: clamp(3rem, 8vw, 6rem); scroll-margin-top: 4rem; }
 
-  /* LA REJILLA DEL SCROLL
-     Filas de la misma altura (--alto). Cada obra crece en proporción a su forma (--r = ancho/alto),
-     así un cuadro apaisado ocupa más ancho que uno vertical y todo queda alineado. */
-  .rejilla {
-    --alto: 340px;
-    --hueco: clamp(1.25rem, 3vw, 2.5rem);
+  .cabecera-serie { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  .contador-serie { color: var(--texto-suave); }
+
+  /* LA TIRA: todas las obras a la misma altura, una al lado de otra */
+  .tira {
+    --alto-obra: min(50vh, 500px);
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0.5rem var(--margen) 1.5rem;
     display: flex;
-    flex-wrap: wrap;
-    gap: calc(var(--hueco) * 1.4) var(--hueco);
+    gap: clamp(1rem, 2vw, 1.8rem);
+    width: max-content;
   }
-  /* evita que la última fila se estire de más */
-  .rejilla::after { content: ''; flex-grow: 999; }
-  .rejilla li { flex: var(--r) 1 calc(var(--r) * var(--alto)); min-width: 0; }
+  /* cada obra mide lo que su imagen; la etiqueta se ajusta a ese ancho */
+  .tira li { flex: none; width: min-content; }
 
-  /* La obra destacada (Arquitectura del abrazo) ocupa una fila entera */
-  .rejilla li.destacada { flex-basis: 100%; }
-  .rejilla li.destacada img { max-height: 72vh; width: auto; margin: 0 auto; }
+  /* Sin el efecto de scroll (móvil, o si se prefiere menos movimiento): se desliza con el dedo */
+  .serie:not(.activo) .tira { width: auto; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .serie:not(.activo) .tira::-webkit-scrollbar { display: none; }
+  .serie:not(.activo) .tira li { scroll-snap-align: start; scroll-margin-left: var(--margen); }
 
-  @media (max-width: 900px) { .rejilla { --alto: 240px; } }
-  @media (max-width: 560px) { .rejilla li { flex-basis: 100%; } }
+  /* Con el efecto: la serie se queda fija mientras la tira se mueve */
+  .serie.activo .pegajoso {
+    position: sticky;
+    top: var(--alto-cabecera, 72px);
+    height: calc(100vh - var(--alto-cabecera, 72px));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .serie.activo .tira { will-change: transform; }
+
+  @media (max-width: 700px) { .tira { --alto-obra: 46vh; } }
 
   .miniatura {
     display: block;
-    width: 100%;
     padding: 0;
     border: 0;
     background: none;
     cursor: zoom-in;
   }
-  .miniatura img {
-    width: 100%;
-    height: auto;
-    transition: opacity 0.3s;
+  .miniatura img { height: var(--alto-obra); width: auto; max-width: none; transition: opacity 0.4s; }
+  .miniatura:hover img { opacity: 0.8; }
+  /* en móvil ninguna obra ocupa más del 82 % del ancho: se intuye que hay más deslizando */
+  @media (max-width: 700px) {
+    .miniatura img { height: auto; max-height: var(--alto-obra); max-width: 82vw; }
   }
-  .miniatura:hover img { opacity: 0.85; }
+
+  /* Etiqueta encima de cada obra: número, título y medidas en monoespaciada */
   .pie-obra {
     display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin: 0.6rem 0 0;
-    font-size: 0.85rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.9rem;
+    margin: 0 0 0.6rem;
   }
-  .destacada .pie-obra { justify-content: center; gap: 1.5rem; }
-  /* "Vendida": discreto, en gris claro junto al título */
-  .vendida {
-    font-size: 0.7rem;
-    color: #a8a8a8;
-    white-space: nowrap;
-  }
+  .titulo-obra { white-space: nowrap; }
+  .numero { color: var(--texto-tenue); }
+  .medidas { color: var(--texto-suave); }
+  .vendida { color: var(--texto-tenue); }
 
   /* VISOR */
   .visor {
@@ -140,10 +158,10 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
     max-height: 92vh;
     padding: 0;
     border: 0;
-    background: var(--fondo-claro);
+    background: var(--fondo);
     color: var(--texto);
   }
-  .visor::backdrop { background: rgba(40, 34, 28, 0.6); }
+  .visor::backdrop { background: rgba(255, 255, 255, 0.94); }
   .visor-cuerpo {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
@@ -160,7 +178,8 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
     z-index: 2;
     border: 0;
     background: none;
-    font-size: 2.2rem;
+    font-size: 1.8rem;
+    font-weight: 200;
     line-height: 1;
     color: var(--texto);
     cursor: pointer;
@@ -186,30 +205,83 @@ const obras = serie.obras.map((obra) => ({ ...obra, imagenes: imagenesDe(`pintur
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1.2rem;
-    margin-top: 0.8rem;
-    font-size: 0.85rem;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    font-family: var(--fuente-mono);
+    font-size: 0.66rem;
     color: var(--texto-suave);
   }
   .controles button {
-    border: 1px solid var(--linea);
+    border: 0;
     background: none;
-    width: 2.4rem;
-    height: 2.4rem;
-    font-size: 1.4rem;
-    line-height: 1;
+    padding: 0.3rem 0.5rem;
+    font-family: var(--fuente-mono);
+    font-size: 0.9rem;
     cursor: pointer;
-    color: var(--texto);
+    color: var(--texto-suave);
   }
-  .controles button:hover { border-color: var(--texto); }
+  .controles button:hover { color: var(--texto); }
 
-  .ficha h3 { font-size: 1.8rem; margin-bottom: 1.2rem; }
-  dl { margin: 0 0 1.8rem; display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1.2rem; }
-  dt { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--texto-suave); padding-top: 0.25rem; }
-  dd { margin: 0; }
+  .ficha h3 { font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 300; margin-bottom: 1.6rem; }
+  dl {
+    margin: 0 0 2rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.6rem 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--linea);
+  }
+  dt { font-family: var(--fuente-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); padding-top: 0.2rem; }
+  dd { margin: 0; font-size: 0.88rem; }
 </style>
 
 <script>
+  // CARRUSEL QUE SE MUEVE CON EL SCROLL
+  // La sección se hace tan alta como larga es la tira; mientras bajas, la tira se desplaza a la izquierda.
+  const series = [...document.querySelectorAll<HTMLElement>('[data-carrusel]')];
+  const ancho = window.matchMedia('(min-width: 701px)');
+  const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function preparar() {
+    const cabecera = document.querySelector<HTMLElement>('.cabecera');
+    document.documentElement.style.setProperty('--alto-cabecera', `${cabecera?.offsetHeight ?? 72}px`);
+    const activo = ancho.matches && !sinMovimiento.matches;
+    series.forEach((serie) => {
+      const tira = serie.querySelector<HTMLElement>('[data-tira]')!;
+      serie.classList.toggle('activo', activo);
+      tira.style.transform = '';
+      serie.style.height = '';
+      if (!activo) return;
+      const recorrido = Math.max(0, tira.scrollWidth - window.innerWidth);
+      serie.dataset.recorrido = String(recorrido);
+      // alto = pantalla + lo que tiene que recorrer la tira
+      serie.style.height = `${window.innerHeight + recorrido}px`;
+    });
+    mover();
+  }
+
+  function mover() {
+    series.forEach((serie) => {
+      if (!serie.classList.contains('activo')) return;
+      const recorrido = Number(serie.dataset.recorrido ?? 0);
+      const inicio = serie.getBoundingClientRect().top;
+      const progreso = Math.min(1, Math.max(0, -inicio / Math.max(1, recorrido)));
+      serie.querySelector<HTMLElement>('[data-tira]')!.style.transform = `translate3d(${-progreso * recorrido}px, 0, 0)`;
+    });
+  }
+
+  let pendiente = false;
+  window.addEventListener('scroll', () => {
+    if (pendiente) return;
+    pendiente = true;
+    requestAnimationFrame(() => { mover(); pendiente = false; });
+  }, { passive: true });
+  window.addEventListener('resize', preparar);
+  ancho.addEventListener('change', preparar);
+  sinMovimiento.addEventListener('change', preparar);
+  window.addEventListener('load', preparar);
+  preparar();
+
   // Abre el visor al pulsar una obra
   document.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((boton) => {
     boton.addEventListener('click', () => {

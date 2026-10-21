@@ -1,23 +1,21 @@
 /* ESTILOS GENERALES DE LA WEB
    Las "variables" de :root son la paleta y las medidas de toda la web:
-   si cambias un color aquí, cambia en todas partes. */
+   si cambias un color aquí, cambia en todas partes.
+   Tipografía: Geist (texto y menú, en peso fino) y Geist Mono (etiquetas y pies de foto). */
 
 :root {
   --fondo: #ffffff;          /* blanco */
-  --fondo-claro: #ffffff;
-  --fondo-suave: #f5f5f5;    /* gris muy claro para recuadros */
-  --texto: #111111;          /* casi negro */
-  --texto-suave: #6e6e6e;
-  --acento: #111111;
-  --acento-oscuro: #111111;
-  --linea: #e6e6e6;
-  --whatsapp: #25d366;
+  --fondo-suave: #f6f6f5;    /* gris muy claro para recuadros */
+  --texto: #1a1a1a;          /* casi negro */
+  --texto-suave: #7a7a7a;
+  --texto-tenue: #b0b0b0;    /* para "vendida" y detalles muy discretos */
+  --linea: #e4e4e2;
 
-  --fuente-titulos: 'Inter Tight', 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  --fuente-texto: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --fuente: 'Geist', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --fuente-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --ancho-max: 1200px;
-  --margen: clamp(1rem, 4vw, 3rem);
+  --ancho-max: 1320px;
+  --margen: clamp(1.1rem, 4vw, 3.5rem);
 }
 
 *,
@@ -30,22 +28,24 @@ body {
   margin: 0;
   background: var(--fondo);
   color: var(--texto);
-  font-family: var(--fuente-texto);
-  font-weight: 400;
-  font-size: 0.95rem;
+  font-family: var(--fuente);
+  font-weight: 300;
+  font-size: 0.9rem;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
 
 img { display: block; max-width: 100%; height: auto; }
 
+/* lo que lleva el atributo "hidden" no se ve nunca, aunque tenga otro display */
+[hidden] { display: none !important; }
+
 a { color: inherit; text-decoration: none; }
 
 h1, h2, h3 {
-  font-family: var(--fuente-titulos);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  font-family: var(--fuente);
+  font-weight: 300;
+  line-height: 1.15;
   margin: 0;
 }
 
@@ -56,16 +56,17 @@ h1, h2, h3 {
   padding: 0 var(--margen);
 }
 
-/* Título de página: pequeño y discreto, como una etiqueta */
+/* Etiqueta en monoespaciada: pequeña, en mayúsculas (pies de foto, apartados, datos) */
+.mono,
+.etiqueta,
 .titulo-pagina {
-  font-family: var(--fuente-texto);
-  font-size: 0.68rem;
+  font-family: var(--fuente-mono);
+  font-size: 0.66rem;
   font-weight: 400;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--texto-suave);
-  margin: clamp(2rem, 5vw, 3.5rem) 0 0.9rem;
 }
+.etiqueta { color: var(--texto-suave); }
 
 /* Línea bajo la cabecera en Pintura y Diseño: "PINTURA   Serie Open · Serie Interfaces…" */
 .subcabecera {
@@ -73,17 +74,18 @@ h1, h2, h3 {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.5rem 2.5rem;
-  margin-top: clamp(1.5rem, 4vw, 3rem);
-  padding-bottom: 1rem;
+  margin-top: clamp(1.5rem, 4vw, 2.5rem);
+  padding-bottom: 0.9rem;
   border-bottom: 1px solid var(--linea);
 }
-.subcabecera .titulo-pagina { margin: 0; color: var(--texto); }
+.titulo-pagina { margin: 0; color: var(--texto); }
 .indice {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem 1.6rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  font-family: var(--fuente-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--texto-suave);
 }
@@ -91,39 +93,36 @@ h1, h2, h3 {
 
 /* Título de serie o proyecto */
 .titulo-seccion {
-  font-size: clamp(1.15rem, 2vw, 1.4rem);
-  font-weight: 500;
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-weight: 300;
   letter-spacing: -0.01em;
-  margin: 0 0 1.5rem;
-}
-
-.etiqueta {
-  font-size: 0.75rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--texto-suave);
+  margin: 0 0 1.2rem;
 }
 
 /* Botones */
 .boton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
-  padding: 0.8rem 1.4rem;
+  padding: 0.85rem 1.5rem;
   border: 1px solid var(--texto);
   background: transparent;
   color: var(--texto);
-  font: inherit;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
+  font-family: var(--fuente-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
 .boton:hover { background: var(--texto); color: var(--fondo); }
 
-.boton-whatsapp { border-color: var(--whatsapp); background: var(--whatsapp); color: #fff; }
-.boton-whatsapp:hover { background: #1ebe5a; color: #fff; }
+/* Botón principal (WhatsApp): negro, para no romper la sobriedad */
+.boton-principal,
+.boton-whatsapp { background: var(--texto); color: var(--fondo); }
+.boton-principal:hover,
+.boton-whatsapp:hover { background: #000; }
 
 /* Visible solo para lectores de pantalla (accesibilidad) */
 .solo-lector {
@@ -131,4 +130,4 @@ h1, h2, h3 {
   clip: rect(0 0 0 0); white-space: nowrap;
 }
 
-:focus-visible { outline: 2px solid var(--acento-oscuro); outline-offset: 3px; }
+:focus-visible { outline: 1px solid var(--texto); outline-offset: 3px; }

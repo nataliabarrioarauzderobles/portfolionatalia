@@ -53,11 +53,11 @@ const sobreMi = {
 
 <style>
   .columna { max-width: 640px; text-align: center; }
-  .columna .titulo-pagina { margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+  .columna .titulo-pagina { display: block; margin: clamp(2rem, 5vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); color: var(--texto-suave); }
 
   .sobre-mi { display: flex; flex-direction: column; align-items: center; }
   .retrato { width: min(100%, 340px); height: auto; margin-bottom: 2.5rem; }
-  .sobre-mi .etiqueta { font-family: var(--fuente-texto); font-weight: 400; margin-bottom: 1.2rem; }
+  .sobre-mi .etiqueta { margin-bottom: 1.2rem; }
   /* Texto breve, justificado y centrado en la página */
   .texto {
     max-width: 480px;
@@ -73,13 +73,11 @@ const sobreMi = {
 
   /* Datos: etiqueta pequeña en mayúsculas y el dato en un tipo firme y sobrio */
   dl { display: grid; gap: 1.6rem; margin: 0 0 3rem; }
-  dt { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 0.35rem; }
+  dt { font-family: var(--fuente-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 0.35rem; }
   dd {
     margin: 0;
-    font-family: var(--fuente-titulos);
     font-size: 1.05rem;
-    font-weight: 500;
-    letter-spacing: 0.01em;
+    font-weight: 400;
     word-break: break-word;
   }
   dd a { transition: color 0.2s; }

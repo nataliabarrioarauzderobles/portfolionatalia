@@ -1,5 +1,5 @@
 ---
-// CABECERA: tu firma a la izquierda, el menú y el cambio de idioma a la derecha.
+// CABECERA: menú a la izquierda, tu firma en el centro y el cambio de idioma a la derecha.
 import { Image } from 'astro:assets';
 import { textos, type Idioma } from '../i18n/textos';
 import { rutaIdioma } from '../utils/enlaces';
@@ -62,13 +62,10 @@ const enlaces = [
     margin: 0;
     padding: 0;
   }
-  .menu, .idiomas {
-    font-size: 0.68rem;
-    font-weight: 400;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-  .idiomas { display: flex; justify-content: flex-end; gap: 0.35rem; color: var(--linea); }
+  .menu { font-size: 0.82rem; font-weight: 300; }
+  .idiomas { font-family: var(--fuente-mono); font-size: 0.66rem; letter-spacing: 0.06em; }
+  .idiomas { display: flex; justify-content: flex-end; gap: 0.35rem; color: var(--texto-tenue); }
+  .menu a[aria-current='page'] { color: var(--texto); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
   a { color: var(--texto-suave); transition: color 0.2s; }
   a:hover, a[aria-current] { color: var(--texto); }
 

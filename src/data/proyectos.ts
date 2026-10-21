@@ -17,7 +17,6 @@ export interface Proyecto {
   titulo: Texto;
   texto: Texto;
   bloques: Bloque[];
-  piezaPersonalizada?: boolean; // muestra el apartado "Diseña tu pieza"
 }
 
 const d = (carpeta: string, ...archivos: string[]) => archivos.map((a) => `diseno/${carpeta}/${a}.jpg`);
@@ -31,8 +30,9 @@ export const proyectos: Proyecto[] = [
       en: 'Sculptural pieces that turn fragments of the face —eyes and lips— into objects to live with. The Eye Chair takes the idea into furniture: a functional piece with the presence of a character. Every piece is handmade and sold as interior decoration. You can also commission your own, in the shape and colours you choose.',
     },
     bloques: [
+      // las piezas sueltas de ojos y labios ya se ven arriba, en "Diseña tu pieza"
       { subtitulo: { es: 'Silla Ojo', en: 'Eye Chair' }, imagenes: d('ojo-y-labios', 'silla-ojo-campo', 'silla-ojo-1', 'silla-ojo-detalle'), disposicion: 'rejilla' },
-      { subtitulo: { es: 'Ojos y labios', en: 'Eyes and lips' }, imagenes: d('ojo-y-labios', 'piezas-estanteria', 'ojo-lunares', 'ojo-turquesa', 'ojo-pestanas-azules', 'ojo-morado', 'labios-rojos'), disposicion: 'rejilla' },
+      { subtitulo: { es: 'En casa', en: 'At home' }, imagenes: d('ojo-y-labios', 'piezas-estanteria'), disposicion: 'ancho' },
       {
         subtitulo: { es: 'Dibujos y bocetos', en: 'Drawings and sketches' },
         imagenes: [
@@ -42,7 +42,6 @@ export const proyectos: Proyecto[] = [
         disposicion: 'rejilla',
       },
     ],
-    piezaPersonalizada: true,
   },
   {
     id: 'la-cabezona',
