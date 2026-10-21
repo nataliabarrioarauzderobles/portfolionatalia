@@ -1,8 +1,9 @@
 ---
 // CONTACTO
-// Una "mesa": tus fotos (src/assets/sobre-mi/cartas, todas del mismo tamaño) se reparten al entrar
-// como cartas lanzadas sobre la mesa. Después se pueden coger y mover con el ratón o con el dedo.
-// El texto "Sobre mí" y tus datos de contacto quedan siempre en el centro, bien legibles.
+// Arriba, en el centro, una foto tuya pequeña. Cada pocos segundos la siguiente aparece detrás
+// y la que estaba se agranda por la pantalla hasta desaparecer, dejando la nueva en su sitio.
+// Fotos: src/assets/sobre-mi/cartas (todas del mismo tamaño). Sin bordes.
+// Debajo, el texto "Sobre mí", centrado y justificado, y después los datos y botones de contacto.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import LogoAnimado from '../LogoAnimado.astro';
@@ -12,7 +13,7 @@ import { imagenesDe } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
-const cartas = imagenesDe('sobre-mi/cartas');
+const fotos = imagenesDe('sobre-mi/cartas');
 
 // Texto del cuadernillo (CUADERNILLO_VENEZUELA); el inglés es traducción
 const sobreMi = {
@@ -25,48 +26,41 @@ const sobreMi = {
     'My work starts from abstraction to come closer to the human, creating compositions in which the figure appears, transforms and finally comes undone. Through painting I seek a dialogue between the recognisable and the ambiguous, between what takes shape and what is in the process of disappearing.',
   ],
 }[idioma];
-const ayuda = { es: 'Arrástrame', en: 'Drag me' }[idioma];
 ---
 
 <Base idioma={idioma} pagina="contacto" titulo={t.contactoTitulo}>
-  <section class="mesa" data-mesa>
-    <!-- el texto, en el centro -->
-    <div class="centro" data-centro>
-      <h1 class="mono etiqueta">{t.sobreMi}</h1>
-      {sobreMi.map((p) => <p class="texto" lang={idioma}>{p}</p>)}
-
-      <dl class="datos">
-        <div>
-          <dt>{t.email}</dt>
-          <dd><a href={`mailto:${contacto.email}`}>{contacto.email}</a></dd>
-        </div>
-        <div>
-          <dt>{t.instagram}</dt>
-          <dd><a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener">@{contacto.instagram}</a></dd>
-        </div>
-        <div>
-          <dt>{t.telefono}</dt>
-          <dd><a href={`tel:${contacto.telefono.replace(/\s/g, '')}`}>{contacto.telefono}</a></dd>
-        </div>
-      </dl>
-      <div class="botones">
-        <a class="boton boton-principal" href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">{t.escribemeWhatsApp}</a>
-        <a class="boton" href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV}</a>
-      </div>
+  <!-- la foto del centro: se van relevando -->
+  <section class="galeria" aria-label={t.sobreMi}>
+    <div class="marco" data-relevo>
+      {fotos.map((img, i) => (
+        <Image src={img} alt={i === 0 ? contacto.nombre : ''} widths={[320, 640]} sizes="(max-width: 700px) 50vw, 260px" loading="eager" class:list={['foto', { actual: i === 0 }]} />
+      ))}
     </div>
-
-    <!-- las cartas -->
-    {cartas.map((img, i) => (
-      <figure class="carta" data-carta style={`--dur:${(5.5 + ((i * 37) % 30) / 10).toFixed(1)}s;--fase:-${((i * 53) % 40) / 10}s`}>
-        <!-- la foto 'flota' sola hasta que la coges -->
-        <span class="flota">
-          <Image src={img} alt="" widths={[260, 440]} sizes="(max-width: 700px) 120px, 200px" loading={i < 8 ? 'eager' : 'lazy'} draggable="false" />
-        </span>
-      </figure>
-    ))}
-    <!-- pista: una etiqueta que acompaña a una de las fotos hasta que mueves alguna -->
-    <span class="pista mono" data-pista hidden><span class="mano" aria-hidden="true">✋</span>{ayuda}</span>
   </section>
+
+  <div class="contenedor columna">
+    <h1 class="mono etiqueta">{t.sobreMi}</h1>
+    {sobreMi.map((p) => <p class="texto" lang={idioma}>{p}</p>)}
+
+    <dl class="datos">
+      <div>
+        <dt>{t.email}</dt>
+        <dd><a href={`mailto:${contacto.email}`}>{contacto.email}</a></dd>
+      </div>
+      <div>
+        <dt>{t.instagram}</dt>
+        <dd><a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener">@{contacto.instagram}</a></dd>
+      </div>
+      <div>
+        <dt>{t.telefono}</dt>
+        <dd><a href={`tel:${contacto.telefono.replace(/\s/g, '')}`}>{contacto.telefono}</a></dd>
+      </div>
+    </dl>
+    <div class="botones">
+      <a class="boton boton-principal" href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">{t.escribemeWhatsApp}</a>
+      <a class="boton" href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV}</a>
+    </div>
+  </div>
 
   <!-- cierre de la página: el personaje se dibuja como una firma -->
   <section class="firma-animada">
@@ -75,261 +69,70 @@ const ayuda = { es: 'Arrástrame', en: 'Drag me' }[idioma];
 </Base>
 
 <style>
-  /* LA MESA: ocupa la pantalla; el texto en el centro y las cartas alrededor (y por encima) */
-  .mesa {
-    position: relative;
-    min-height: calc(100svh - 80px);
-    display: grid;
-    place-items: center;
-    padding: clamp(3rem, 8vh, 6rem) var(--margen);
-    overflow: clip;
-    touch-action: pan-y;
-    isolation: isolate; /* las fotos se apilan dentro de la mesa, siempre por debajo de la cabecera y el menú */
+  /* FOTO DEL CENTRO */
+  .galeria { display: grid; place-items: center; padding: clamp(3rem, 9vh, 6rem) 0 clamp(3rem, 7vh, 5rem); }
+  .marco { position: relative; width: clamp(160px, 19vw, 260px); aspect-ratio: 4 / 5; }
+  .marco :global(.foto) {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+    opacity: 0; pointer-events: none; transform-origin: center;
   }
-  @media (max-width: 700px) {
-    /* en el móvil las cartas caen arriba y abajo del texto */
-    .mesa { padding-top: 16rem; padding-bottom: 17rem; }
-  }
+  .marco :global(.foto.actual) { opacity: 1; z-index: 2; }
+  .marco :global(.foto.siguiente) { opacity: 1; z-index: 1; }
 
-  .centro { position: relative; z-index: 1; max-width: 480px; text-align: center; }
+  /* TEXTO Y CONTACTO */
+  .columna { max-width: 460px; text-align: center; }
   .etiqueta { color: var(--texto-suave); margin: 0 0 1.4rem; font-weight: 400; }
-  .texto { margin: 0 0 1rem; font-size: 0.92rem; line-height: 1.8; text-align: justify; text-align-last: center; hyphens: auto; }
+  .texto { margin: 0 0 1rem; font-size: 0.9rem; line-height: 1.85; text-align: justify; text-align-last: center; hyphens: auto; }
 
-  /* datos de contacto, con la misma letra que el resto de la web */
-  .datos { display: grid; gap: 1.1rem; margin: 2.4rem 0 2rem; padding-top: 2rem; border-top: 1px solid var(--linea); }
+  .datos { display: grid; gap: 1.1rem; margin: 2.8rem 0 2rem; padding-top: 2.4rem; border-top: 1px solid var(--linea); }
   .datos dt { font-family: var(--fuente-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 0.25rem; }
   .datos dd { margin: 0; font-size: 1rem; font-weight: 300; word-break: break-word; }
   .datos a { color: var(--texto); transition: color 0.2s; }
   .datos a:hover { color: var(--texto-suave); }
   .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; }
-  .ayuda { margin: 1.8rem 0 0; color: var(--texto-tenue); }
 
-  /* LAS FOTOS: todas del mismo tamaño, sin borde, con una sombra suave */
-  .carta {
-    --ancho: clamp(92px, 12vw, 190px);
-    position: absolute; left: 0; top: 0; z-index: 2;
-    width: var(--ancho); margin: 0;
-    cursor: grab; user-select: none; -webkit-user-select: none;
-    touch-action: none;
-    will-change: transform;
-  }
-  .flota {
-    display: block;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 8px 22px -8px rgba(0,0,0,0.28);
-    transition: box-shadow 0.25s ease, scale 0.3s ease;
-  }
-  /* mientras nadie la toca, cada foto se mece a su ritmo */
-  .carta.viva .flota { animation: mecerse var(--dur, 6s) ease-in-out var(--fase, 0s) infinite; }
-  @keyframes mecerse {
-    0%, 100% { translate: 0 0; rotate: 0deg; }
-    25% { translate: 5px -9px; rotate: 2.2deg; }
-    50% { translate: -3px -4px; rotate: -1.4deg; }
-    75% { translate: -6px 6px; rotate: 1deg; }
-  }
-  /* al pasar el cursor crece un poco: se intuye que se puede coger */
-  .carta:hover .flota { scale: 1.05; box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 16px 30px -10px rgba(0,0,0,0.32); }
-  @media (prefers-reduced-motion: reduce) { .carta.viva .flota { animation: none; } }
-  .carta :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; pointer-events: none; }
-  .carta.cogida { cursor: grabbing; }
-  .carta.cogida .flota { box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 22px 40px -12px rgba(0,0,0,0.38); }
-
-  /* la pista que acompaña a una foto */
-  .pista {
-    position: absolute; left: 0; top: 0; z-index: 400; pointer-events: none;
-    display: inline-flex; align-items: center; gap: 0.45rem;
-    padding: 0.45rem 0.8rem; border-radius: 999px;
-    background: var(--texto); color: var(--fondo); white-space: nowrap;
-    box-shadow: 0 8px 20px -10px rgba(0,0,0,0.4);
-    transition: opacity 0.4s ease;
-  }
-  .pista .mano { display: inline-block; animation: saludar 1.4s ease-in-out infinite; transform-origin: 70% 80%; }
-  @keyframes saludar { 0%, 100% { transform: translateX(0) rotate(0); } 50% { transform: translateX(5px) rotate(-12deg); } }
-  .pista.fuera { opacity: 0; }
-  /* sin JavaScript las cartas no se ven (solo tienen sentido para jugar con ellas) */
-  :global(html:not(.js)) .carta { display: none; }
-  :global(.js) .carta:not(.repartida) { visibility: hidden; }
-
-  .firma-animada { margin: clamp(3rem, 8vw, 6rem) 0 0; }
+  .firma-animada { margin: clamp(4rem, 10vw, 7rem) 0 0; }
 </style>
 
 <script>
-  const mesa = document.querySelector<HTMLElement>('[data-mesa]');
-  const centro = document.querySelector<HTMLElement>('[data-centro]');
-  if (mesa && centro) {
-    const cartas = [...mesa.querySelectorAll<HTMLElement>('[data-carta]')];
+  const marco = document.querySelector<HTMLElement>('[data-relevo]');
+  if (marco) {
+    const fotos = [...marco.querySelectorAll<HTMLImageElement>('.foto')];
     const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    type Estado = { x: number; y: number; giro: number; movida: boolean };
-    const estados = new Map<HTMLElement, Estado>();
-    let capa = 10;
+    let actual = 0;
+    const PAUSA = 2600, CRECER = 1300;
 
-    const aplicar = (c: HTMLElement, e: Estado, escala = 1) => {
-      c.style.transform = `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(${escala})`;
-    };
-
-    // Reparte las cartas alrededor del texto, sin taparlo, y lo más separadas posible entre ellas
-    const repartir = () => {
-      const W = mesa.clientWidth, H = mesa.clientHeight;
-      const t = centro.getBoundingClientRect(), m = mesa.getBoundingClientRect();
-      // margen de seguridad: las cartas van giradas y sus esquinas sobresalen
-      const margen = window.innerWidth < 700 ? 14 : 44;
-      const hueco = { x0: t.left - m.left - margen, y0: t.top - m.top - margen, x1: t.right - m.left + margen, y1: t.bottom - m.top + margen };
-      const colocadas: { x: number; y: number }[] = [];
-      cartas.forEach((c) => {
-        const e = estados.get(c);
-        if (e?.movida) return; // las que ya ha movido el visitante se quedan donde están
-        const cw = c.offsetWidth, ch = c.offsetHeight;
-        let mejor = { x: 0, y: 0 }, mejorPuntos = -Infinity;
-        for (let intento = 0; intento < 120; intento++) {
-          const x = Math.random() * Math.max(1, W - cw), y = Math.random() * Math.max(1, H - ch);
-          // ¿tapa el texto?
-          const tapa = Math.max(0, Math.min(x + cw, hueco.x1) - Math.max(x, hueco.x0)) * Math.max(0, Math.min(y + ch, hueco.y1) - Math.max(y, hueco.y0));
-          const distancia = colocadas.reduce((min, p) => Math.min(min, Math.hypot(p.x - x, p.y - y)), Infinity);
-          // tapar el texto está prohibido (salvo que no quepa en otro sitio); después, cuanto más separadas, mejor
-          const puntos = Math.min(distancia, cw * 1.6) - (tapa > 0 ? 100000 + tapa : 0);
-          if (puntos > mejorPuntos) { mejorPuntos = puntos; mejor = { x, y }; }
-        }
-        colocadas.push(mejor);
-        estados.set(c, { x: mejor.x, y: mejor.y, giro: (Math.random() - 0.5) * 28, movida: false });
+    const preparar = () => {
+      const siguiente = (actual + 1) % fotos.length;
+      fotos.forEach((f, i) => {
+        f.classList.toggle('actual', i === actual);
+        f.classList.toggle('siguiente', i === siguiente);
       });
     };
 
-    // Al entrar: las fotos aparecen formando un círculo que da vueltas en el centro de la pantalla
-    // y, al terminar, salen disparadas a su sitio sobre la mesa.
-    const APARECER = 700, GIRO = 2600, REPARTIR = 1000, TOTAL = APARECER + GIRO + REPARTIR;
-    const lanzar = () => {
-      repartir();
-      const W = mesa.clientWidth;
-      const visible = Math.min(mesa.clientHeight, window.innerHeight - mesa.getBoundingClientRect().top);
-      const cx = W / 2, cy = Math.max(visible / 2, 200);
-      const radio = Math.min(W, visible) * 0.36;
-      const n = cartas.length;
-      const vueltas = 1.25;
-      cartas.forEach((c, i) => {
-        const e = estados.get(c)!;
-        c.classList.add('repartida');
-        c.style.zIndex = String(++capa);
-        aplicar(c, e);
-        if (sinMovimiento) return;
-        const cw = c.offsetWidth, ch = c.offsetHeight;
-        // mientras giran, las fotos van más pequeñas y casi derechas, con un leve vaivén
-        const punto = (a: number, escala = 0.6) =>
-          `translate(${cx + radio * Math.cos(a) - cw / 2}px, ${cy + radio * Math.sin(a) - ch / 2}px) rotate(${Math.sin(a * 2) * 9}deg) scale(${escala})`;
-        const inicio = (i / n) * Math.PI * 2 - Math.PI / 2;
-        const t1 = APARECER / TOTAL, t2 = (APARECER + GIRO) / TOTAL;
-        const marcos: Keyframe[] = [
-          { offset: 0, transform: `translate(${cx - cw / 2}px, ${cy - ch / 2}px) rotate(0deg) scale(0.2)`, opacity: 0, easing: 'cubic-bezier(.2,.8,.3,1)' },
-          { offset: t1, transform: punto(inicio), opacity: 1, easing: 'linear' },
-        ];
-        // el giro: muchos puntos del círculo para que la foto recorra la curva
-        const pasos = 36;
-        for (let k = 1; k <= pasos; k++) {
-          const avance = k / pasos;
-          // acelera al principio y frena al final del giro
-          const suave = avance < 0.5 ? 2 * avance * avance : 1 - Math.pow(-2 * avance + 2, 2) / 2;
-          marcos.push({ offset: t1 + (t2 - t1) * avance, transform: punto(inicio + suave * vueltas * Math.PI * 2), opacity: 1, easing: k === pasos ? 'cubic-bezier(.2,.9,.25,1.05)' : 'linear' });
-        }
-        marcos.push({ offset: 1, transform: `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(1)`, opacity: 1 });
-        // salen del círculo una detrás de otra
-        const retraso = 200 + i * 35;
-        const vuelo = c.animate(marcos, { duration: TOTAL, delay: retraso, fill: 'backwards' });
-        // al caer en la mesa, empieza a mecerse
-        vuelo.onfinish = () => c.classList.add('viva');
-        setTimeout(() => c.classList.add('viva'), retraso + TOTAL + 50);
-      });
-      if (!sinMovimiento) setTimeout(mostrarPista, 200 + n * 35 + TOTAL + 200);
-    };
-    // PISTA: una etiqueta junto a la foto más cercana al texto, que de vez en cuando
-    // se desplaza un poco sola (como si alguien la empujara), hasta que el visitante mueve alguna
-    const pista = mesa.querySelector<HTMLElement>('[data-pista]')!;
-    let guia: HTMLElement | null = null;
-    let empujon = 0;
-    let tocada = false;
-    const colocarPista = () => {
-      if (!guia || tocada) return;
-      const e = estados.get(guia)!;
-      pista.style.transform = `translate(${e.x + guia.offsetWidth * 0.35}px, ${e.y - 18}px)`;
-    };
-    function mostrarPista() {
-      if (tocada) return;
-      const t = centro!.getBoundingClientRect(), m = mesa!.getBoundingClientRect();
-      const cx = t.left - m.left + t.width / 2, cy = t.top - m.top + t.height / 2;
-      guia = cartas.reduce((a, b) => { const ea = estados.get(a)!, eb = estados.get(b)!; return Math.hypot(eb.x - cx, eb.y - cy) < Math.hypot(ea.x - cx, ea.y - cy) ? b : a; });
-      guia.style.zIndex = String(++capa);
-      pista.hidden = false;
-      colocarPista();
-      const empujar = () => {
-        if (tocada || !guia) return;
-        const e = estados.get(guia)!;
-        const base = `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg)`;
-        const lado = e.x < mesa!.clientWidth / 2 ? -1 : 1;
-        guia.animate(
-          [{ transform: base }, { transform: `translate(${e.x + lado * 34}px, ${e.y - 10}px) rotate(${e.giro + lado * 6}deg) scale(1.04)`, offset: 0.4 }, { transform: base }],
-          { duration: 1100, easing: 'ease-in-out' },
-        );
-      };
-      empujar();
-      empujon = window.setInterval(empujar, 3600);
-    }
-    const quitarPista = () => {
-      if (tocada) return;
-      tocada = true;
-      clearInterval(empujon);
-      pista.classList.add('fuera');
-      setTimeout(() => (pista.hidden = true), 400);
+    // la foto de delante crece por la pantalla y se desvanece; la de detrás se queda
+    const relevar = () => {
+      const sale = fotos[actual];
+      actual = (actual + 1) % fotos.length;
+      const animacion = sinMovimiento
+        ? sale.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, easing: 'ease' })
+        : sale.animate(
+            [
+              { transform: 'scale(1)', opacity: 1 },
+              { transform: 'scale(1.9)', opacity: 0.55, offset: 0.45 },
+              { transform: 'scale(4.2)', opacity: 0 },
+            ],
+            { duration: CRECER, easing: 'cubic-bezier(.55,0,.35,1)' },
+          );
+      // durante el relevo, la que sale va por encima de todo
+      sale.style.zIndex = '3';
+      animacion.onfinish = () => { sale.style.zIndex = ''; };
+      preparar();
     };
 
-    // Coger y mover (ratón o dedo)
-    cartas.forEach((c) => {
-      let inicio: { px: number; py: number; x: number; y: number } | null = null;
-      c.addEventListener('pointerdown', (ev) => {
-        const e = estados.get(c);
-        if (!e) return;
-        c.getAnimations().forEach((a) => a.finish());
-        quitarPista();
-        c.classList.remove('viva');
-        c.setPointerCapture(ev.pointerId);
-        c.style.zIndex = String(++capa);
-        c.classList.add('cogida');
-        inicio = { px: ev.clientX, py: ev.clientY, x: e.x, y: e.y };
-        aplicar(c, e, 1.06);
-      });
-      c.addEventListener('pointermove', (ev) => {
-        if (!inicio) return;
-        const e = estados.get(c)!;
-        const W = mesa.clientWidth, H = mesa.clientHeight;
-        e.x = Math.max(-c.offsetWidth * 0.4, Math.min(W - c.offsetWidth * 0.6, inicio.x + ev.clientX - inicio.px));
-        e.y = Math.max(-c.offsetHeight * 0.3, Math.min(H - c.offsetHeight * 0.6, inicio.y + ev.clientY - inicio.py));
-        // al arrastrar, la carta se inclina un poco hacia donde va
-        e.giro = Math.max(-20, Math.min(20, e.giro + ev.movementX * 0.08));
-        e.movida = true;
-        aplicar(c, e, 1.06);
-      });
-      const soltar = () => {
-        if (!inicio) return;
-        inicio = null;
-        c.classList.remove('cogida');
-        const e = estados.get(c)!;
-        c.animate([{ transform: c.style.transform }, { transform: `translate(${e.x}px, ${e.y}px) rotate(${e.giro}deg) scale(1)` }], { duration: 220, easing: 'ease-out' });
-        aplicar(c, e);
-        // al soltarla vuelve a mecerse
-        if (!sinMovimiento) c.classList.add('viva');
-      };
-      c.addEventListener('pointerup', soltar);
-      c.addEventListener('pointercancel', soltar);
-    });
-
-    // si cambia el tamaño de la pantalla, se vuelven a repartir las que no se han movido
-    let espera = 0;
-    let anchoPrevio = window.innerWidth;
-    window.addEventListener('resize', () => {
-      if (Math.abs(window.innerWidth - anchoPrevio) < 40) return; // la barra del móvil cambia el alto sin importar
-      anchoPrevio = window.innerWidth;
-      clearTimeout(espera);
-      espera = window.setTimeout(() => { repartir(); cartas.forEach((c) => aplicar(c, estados.get(c)!)); colocarPista(); }, 200);
-    });
-
-    // se lanzan cuando la mesa se ve (y con las primeras fotos ya cargadas)
-    const primeras = cartas.slice(0, 6).map((c) => c.querySelector('img')!).map((img) => (img.complete ? Promise.resolve() : new Promise((ok) => (img.onload = img.onerror = ok))));
-    Promise.race([Promise.all(primeras), new Promise((ok) => setTimeout(ok, 1500))]).then(lanzar);
+    preparar();
+    // empieza cuando la primera foto está cargada
+    const empezar = () => setInterval(relevar, PAUSA + CRECER);
+    if (fotos[0].complete) empezar(); else fotos[0].addEventListener('load', empezar, { once: true });
   }
 </script>
