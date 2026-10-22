@@ -1,7 +1,7 @@
 ---
 // PIEZAS DECORATIVAS (ojos y labios), lo primero de la página de Diseño:
 //  · Arriba y centrada, la invitación a crear tu propio diseño (se escribe sola al entrar).
-//  · Debajo, las piezas ya hechas caen una tras otra de arriba abajo, en zigzag, como fichas de dominó.
+//  · Debajo, las piezas ya hechas, en una fila ordenada: caen una tras otra como fichas de dominó.
 //  · Al pulsarla se abre "Crea tu pieza" (Personaliza.astro) a pantalla completa.
 //  · Debajo, cómo quedan en casa.
 import { Image } from 'astro:assets';
@@ -47,7 +47,7 @@ const tx = {
     <button type="button" class="boton boton-principal" data-abrir-personaliza>{tx.boton} →</button>
   </div>
 
-  <!-- las piezas reales, cayendo en cascada de arriba abajo, en zigzag -->
+  <!-- las piezas reales, en una fila ordenada; caen una tras otra -->
   <ul class="domino">
     {modelosPieza.map((m, i) => (
       <li style={`--i:${i}`} data-ficha>
@@ -105,15 +105,15 @@ const tx = {
   :global(html:not(.js)) .hueco { visibility: visible; }
   .sub { margin: 1.4rem 0 1.8rem; max-width: 40ch; font-size: 0.86rem; line-height: 1.6; color: var(--texto-suave); }
 
-  /* DOMINÓ: las piezas caen en cadena, de arriba abajo, alternando a un lado y a otro */
-  .domino { list-style: none; margin: 0 auto; padding: 0; max-width: 1000px; perspective: 1200px; }
-  .domino li { width: min(42%, 420px); transform-origin: 50% 0%; }
-  .domino li + li { margin-top: clamp(-5rem, -6vw, -2rem); }
-  .domino li:nth-child(4n + 1) { margin-left: 4%; }
-  .domino li:nth-child(4n + 2) { margin-left: 52%; }
-  .domino li:nth-child(4n + 3) { margin-left: 18%; }
-  .domino li:nth-child(4n + 4) { margin-left: 44%; }
-  .domino :global(img) { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
+  /* DOMINÓ: las piezas en una fila ordenada, todas del mismo tamaño; caen en cadena de arriba abajo */
+  .domino {
+    list-style: none; margin: 0 auto; padding: 0; max-width: 1240px;
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(1rem, 2.5vw, 2.4rem);
+    align-items: center; perspective: 1200px;
+  }
+  .domino li { transform-origin: 50% 0%; }
+  /* todas en un hueco igual, con la pieza centrada dentro */
+  .domino :global(img) { display: block; width: 100%; aspect-ratio: 3 / 2; height: auto; object-fit: contain; mix-blend-mode: multiply; }
   :global(.js) .domino li:not(.cae) { opacity: 0; }
   .domino li.cae { animation: caer 0.9s cubic-bezier(0.3, 1.35, 0.5, 1) backwards; animation-delay: calc(var(--i) * 170ms); }
   @keyframes caer {
@@ -133,10 +133,9 @@ const tx = {
 
   @media (max-width: 860px) {
     .grande { font-size: clamp(1.15rem, 5.6vw, 1.6rem); }
-    .domino li { width: 78%; }
-    .domino li:nth-child(odd) { margin-left: 0; }
-    .domino li:nth-child(even) { margin-left: 22%; }
-    .domino li + li { margin-top: -1.5rem; }
+    /* en el móvil, de dos en dos; la última centrada */
+    .domino { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.6rem; }
+    .domino li:last-child:nth-child(odd) { grid-column: 1 / -1; width: 50%; justify-self: center; }
     .texto { columns: 1; }
     .boton-flotante {
       position: fixed; left: 50%; bottom: 1rem; z-index: 9; transform: translateX(-50%);
