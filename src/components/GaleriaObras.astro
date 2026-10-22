@@ -1,11 +1,11 @@
 ---
-// PINTURA: tres columnas de cuadros que se mueven solas, sin fin (dos en el móvil).
-//  · Una sube, la de al lado baja y la otra sube: se ven muchos cuadros a la vez sin bajar por la página.
-//  · Si "agarras" una columna (rueda del ratón, trackpad o arrastrando con el dedo), esa se queda
-//    a tu mando mientras las demás siguen moviéndose; al soltarla un momento, vuelve a moverse sola.
-//  · Al pulsar un cuadro se abre su información en un panel, debajo de la barra de secciones (que sigue
-//    visible). Dentro, el texto a la izquierda y el cuadro y sus mockups avanzando de lado (como en avea).
-//    Pulsando fuera del panel, con Esc o con "Cerrar" se vuelve a las columnas.
+// PINTURA: una galería pensada para vender, que entre por los ojos.
+//  · Arriba, una obra destacada en grande: el cuadro colgado en una casa (mockup), con título, medidas,
+//    "Disponible" y un botón "Me interesa".
+//  · Debajo, una cuadrícula ordenada: todas las imágenes del mismo tamaño, primero las disponibles.
+//    Al pasar el cursor, la foto cambia del cuadro en una casa al cuadro solo (se ven las dos sin abrir nada).
+//  · Al pulsar una obra se abre su información en un panel, debajo de la barra de secciones (que sigue visible).
+//    Pulsando fuera del panel, con Esc o con "Cerrar" se vuelve a la galería.
 //  · Filtros arriba: por serie y "solo disponibles".
 import { Image } from 'astro:assets';
 import { series } from '../data/obras';
@@ -17,24 +17,49 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { obra: 'Obra', siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar' },
-  en: { obra: 'Work', siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close' },
+  es: { obra: 'Obra', siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', destacada: 'Obra destacada', disponible: 'Disponible', interesa: 'Me interesa', ver: 'Ver obra' },
+  en: { obra: 'Work', siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', destacada: 'Featured work', disponible: 'Available', interesa: 'I am interested', ver: 'View work' },
 }[idioma];
 
-// En DE-formando la imagen de las columnas es el mockup; en el panel, primero el cuadro y después los mockups
+// En DE-formando la imagen de la galería es el mockup; en el panel, primero el cuadro y después los mockups
 const conMockupPrimero = new Set(['formas']);
 const obras = series.flatMap((serie) =>
   serie.obras.map((obra) => {
     const imagenes = imagenesDe(`pintura/${serie.id}/${obra.id}`);
     const mockup = imagenes.find((img) => img.src.includes('-mockup'));
     const portada = conMockupPrimero.has(serie.id) && mockup ? mockup : imagenes[0];
-    return { ...obra, serie, imagenes, portada };
+    // la segunda imagen (al pasar el cursor): el cuadro solo si la portada es la casa, o la casa si no
+    const segunda = portada === imagenes[0] ? mockup : imagenes[0];
+    return { ...obra, serie, imagenes, portada, segunda };
   }),
 );
+// en la galería, primero las disponibles (manteniendo el orden de series) y al final las vendidas
+const galeria = [...obras.filter((o) => !o.vendida), ...obras.filter((o) => o.vendida)];
+const destacada = galeria[0];
+const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, o.serie.tecnica && t.tecnicas[o.serie.tecnica]].filter(Boolean).join(' · ');
 const total = String(obras.length).padStart(2, '0');
 ---
 
 <section class="pintura" data-pintura>
+  <!-- LA OBRA DESTACADA -->
+  <article class="destacada">
+    <button type="button" class="foto-destacada" data-abrir={`obra-${destacada.id}`} aria-label={`${t.verObra}: ${destacada.titulo}`}>
+      <Image src={destacada.portada} alt={destacada.titulo} widths={[800, 1300, 1900]} sizes="(max-width: 760px) 100vw, 62vw" loading="eager" />
+    </button>
+    <div class="texto-destacada">
+      <p class="etiqueta">{tx.destacada}</p>
+      <h2>{destacada.titulo}</h2>
+      <p class="serie-destacada">{t.series[destacada.serie.id]}{destacada.serie.año ? `, ${destacada.serie.año}` : ''}</p>
+      <p class="ficha-destacada">{ficha(destacada)}</p>
+      <p class="estado"><span class="punto" aria-hidden="true"></span>{tx.disponible}</p>
+      <div class="botones-destacada">
+        <a class="boton boton-principal" href={enlaceWhatsApp(t.mensajeObra(destacada.titulo, destacada.medidas))} target="_blank" rel="noopener">{tx.interesa} →</a>
+        <button type="button" class="boton" data-abrir={`obra-${destacada.id}`}>{tx.ver}</button>
+      </div>
+    </div>
+  </article>
+
+  <!-- FILTROS -->
   <div class="filtros">
     <div class="series" role="group" aria-label={t.pinturaTitulo}>
       <button type="button" data-serie="todas" aria-pressed="true">{t.todas}</button>
@@ -43,21 +68,27 @@ const total = String(obras.length).padStart(2, '0');
     <label class="solo-disponibles"><input type="checkbox" data-disponibles /> {t.soloDisponibles}</label>
   </div>
 
-  <!-- las columnas se montan con el script; aquí está la lista de cuadros de la que salen -->
-  <div class="columnas" data-columnas></div>
-  <ul class="fuente" data-fuente hidden>
-    {obras.map((o, i) => (
-      <li class="cuadro" data-serie={o.serie.id} data-vendida={o.vendida ? '' : undefined}>
+  <!-- LA GALERÍA -->
+  <ul class="galeria">
+    {galeria.map((o, i) => (
+      <li class="cuadro" data-cuadro data-serie={o.serie.id} data-vendida={o.vendida ? '' : undefined}>
         <button type="button" class="abrir" data-abrir={`obra-${o.id}`} aria-label={`${t.verObra}: ${o.titulo}`}>
-          <Image src={o.portada} alt={o.titulo} widths={[360, 600, 900]} sizes="(max-width: 760px) 46vw, 30vw" loading={i < 9 ? 'eager' : 'lazy'} draggable="false" />
+          <Image class="una" src={o.portada} alt={o.titulo} widths={[400, 700, 1000]} sizes="(max-width: 760px) 50vw, 31vw" loading={i < 6 ? 'eager' : 'lazy'} />
+          {o.segunda && <Image class="otra" src={o.segunda} alt="" widths={[400, 700, 1000]} sizes="(max-width: 760px) 50vw, 31vw" loading="lazy" />}
         </button>
-        <p class="pie"><span>{o.titulo}</span><span>{o.vendida ? t.vendida : o.medidas ? `${o.medidas.replace(' x ', ' × ')} cm` : ''}</span></p>
+        <div class="pie">
+          <p class="titulo">{o.titulo}</p>
+          <p class="datos">{ficha(o)}</p>
+          {o.vendida
+            ? <p class="estado vendida">{t.vendida}</p>
+            : <p class="estado"><span class="punto" aria-hidden="true"></span>{tx.disponible}</p>}
+        </div>
       </li>
     ))}
   </ul>
 </section>
 
-<!-- velo: tapa las columnas mientras se ve una obra; pulsarlo cierra -->
+<!-- velo: tapa la galería mientras se ve una obra; pulsarlo cierra -->
 <div class="velo" data-velo hidden></div>
 
 <!-- EL PANEL DE CADA OBRA, debajo de la barra de secciones -->
@@ -105,39 +136,51 @@ const total = String(obras.length).padStart(2, '0');
 <style>
   .pintura { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
 
+  /* LA OBRA DESTACADA */
+  .destacada { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: end; padding: 0.6rem var(--margen) clamp(3rem, 7vw, 5rem); }
+  .foto-destacada { display: block; padding: 0; border: 0; background: none; cursor: pointer; overflow: hidden; }
+  .foto-destacada :global(img) { display: block; width: 100%; height: auto; max-height: 72vh; object-fit: cover; transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .foto-destacada:hover :global(img) { transform: scale(1.03); }
+  .texto-destacada .etiqueta { margin: 0 0 1rem; color: var(--texto-tenue); font-size: inherit; }
+  .texto-destacada h2 { margin: 0 0 0.4rem; font-size: clamp(1.4rem, 2.6vw, 2.2rem); line-height: 1.05; text-transform: uppercase; letter-spacing: -0.01em; }
+  .serie-destacada { margin: 0 0 1.4rem; color: var(--texto-tenue); }
+  .ficha-destacada { margin: 0 0 0.6rem; }
+  .botones-destacada { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.6rem; }
+
+  .estado { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; }
+  .punto { width: 7px; height: 7px; border-radius: 50%; background: #3e8e5e; }
+  .vendida { color: var(--texto-tenue); }
+
   /* FILTROS */
-  .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; padding: 0.4rem var(--margen) 0.9rem; }
+  .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; margin: 0 var(--margen) 1.6rem; padding-top: 1.1rem; border-top: 1px solid var(--linea); }
   .series { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; }
   .series button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; transition: color 0.25s; }
   .series button:hover, .series button[aria-pressed='true'] { color: var(--texto); }
   .solo-disponibles { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--texto-tenue); cursor: pointer; }
   .solo-disponibles input { accent-color: var(--texto); }
 
-  /* LAS COLUMNAS: ocupan el resto de la pantalla */
-  .columnas {
-    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2.4vw, 2.4rem);
-    height: calc(100dvh - var(--alto-cabecera, 64px) - 2.6rem); padding: 0 var(--margen);
-    overflow: hidden;
-    /* arriba y abajo se funden con el blanco */
-    mask-image: linear-gradient(180deg, transparent, #000 6%, #000 94%, transparent);
-    -webkit-mask-image: linear-gradient(180deg, transparent, #000 6%, #000 94%, transparent);
-  }
-  @media (max-width: 760px) {
-    .columnas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
-    /* en el móvil, título y medidas en dos líneas para que no se corten */
-    .columnas :global(.pie) { flex-direction: column; gap: 0.1rem; }
-  }
-  .columnas :global(.columna) { position: relative; overflow: hidden; touch-action: none; cursor: grab; }
-  .columnas :global(.columna.agarrada) { cursor: grabbing; }
-  .columnas :global(.carril) { display: grid; gap: clamp(1.6rem, 4vh, 3rem); will-change: transform; }
-
-  .cuadro { display: grid; gap: 0.5rem; }
+  /* LA GALERÍA: cuadrícula ordenada, todas las imágenes del mismo tamaño */
+  .galeria { list-style: none; margin: 0; padding: 0 var(--margen); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(2.4rem, 5vw, 4rem) clamp(1rem, 2.4vw, 2rem); }
   .cuadro[hidden] { display: none; }
-  .abrir { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; overflow: hidden; }
-  .abrir :global(img) { display: block; width: 100%; height: auto; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); -webkit-user-drag: none; user-select: none; }
-  .abrir:hover :global(img) { transform: scale(1.04); }
-  .pie { display: flex; justify-content: space-between; gap: 0.8rem; margin: 0; }
-  .pie span:last-child { color: var(--texto-tenue); white-space: nowrap; }
+  .abrir { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 0; background: var(--fondo-suave); cursor: pointer; overflow: hidden; }
+  .abrir :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.6s ease, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  /* al pasar el cursor: de la casa al cuadro solo (o al revés) */
+  .abrir :global(img.otra) { opacity: 0; }
+  .abrir:hover :global(img.otra), .abrir:focus-visible :global(img.otra) { opacity: 1; }
+  .abrir:hover :global(img) { transform: scale(1.03); }
+  .pie { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 1rem; margin-top: 0.8rem; }
+  .pie p { margin: 0; }
+  .titulo { font-size: 0.8rem; }
+  .datos { grid-column: 1; color: var(--texto-tenue); }
+  .pie .estado { grid-column: 2; grid-row: 1; justify-self: end; }
+
+  @media (max-width: 1000px) { .galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) {
+    .destacada { grid-template-columns: 1fr; }
+    .galeria { gap: 2rem 0.8rem; }
+    .pie { grid-template-columns: 1fr; }
+    .pie .estado { grid-column: 1; grid-row: auto; justify-self: start; }
+  }
 
   /* VELO Y PANEL: debajo de la barra de secciones, que sigue visible */
   .velo { position: fixed; inset: var(--alto-cabecera, 64px) 0 0; z-index: 14; background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: aparecer 0.35s ease; }
@@ -186,19 +229,13 @@ const total = String(obras.length).padStart(2, '0');
 
 <script>
   const html = document.documentElement;
-  // la altura de la barra de arriba (para colocar las columnas y el panel justo debajo)
+  // la altura de la barra de arriba (para colocar el panel justo debajo)
   const medirCabecera = () => html.style.setProperty('--alto-cabecera', `${document.querySelector<HTMLElement>('.cabecera')?.offsetHeight ?? 64}px`);
   medirCabecera();
   window.addEventListener('resize', medirCabecera);
 
   const seccion = document.querySelector<HTMLElement>('[data-pintura]')!;
-  const contenedor = seccion.querySelector<HTMLElement>('[data-columnas]')!;
-  const fuente = [...seccion.querySelectorAll<HTMLElement>('[data-fuente] > li')];
-  const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const COPIAS = 3; // cada columna se repite para que el movimiento no tenga fin
-
-  type Columna = { el: HTMLElement; carril: HTMLElement; y: number; vel: number; hasta: number; alto: number };
-  let columnas: Columna[] = [];
+  const cuadros = [...seccion.querySelectorAll<HTMLElement>('[data-cuadro]')];
 
   // ── EL PANEL DE CADA OBRA ──
   const visores = [...document.querySelectorAll<HTMLDialogElement>('[data-visor]')];
@@ -217,88 +254,12 @@ const total = String(obras.length).padStart(2, '0');
   velo.addEventListener('click', cerrarTodo);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && visorAbierto()) cerrarTodo(); });
 
-  // ── agarrar una columna: rueda o arrastrar; las demás siguen ──
-  const agarre = (c: Columna) => {
-    c.el.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      c.y += e.deltaY;
-      c.hasta = performance.now() + 2500;
-    }, { passive: false });
-    let inicio: { y: number; py: number } | null = null;
-    c.el.addEventListener('pointerdown', (e) => {
-      inicio = { y: c.y, py: e.clientY };
-      contenedor.dataset.arrastrando = '0';
-      c.hasta = Infinity;
-      c.el.classList.add('agarrada');
-    });
-    c.el.addEventListener('pointermove', (e) => {
-      if (!inicio) return;
-      const d = e.clientY - inicio.py;
-      if (Math.abs(d) > 6 && contenedor.dataset.arrastrando !== '1') { contenedor.dataset.arrastrando = '1'; c.el.setPointerCapture(e.pointerId); }
-      c.y = inicio.y - d;
-    });
-    const soltar = () => {
-      if (!inicio) return;
-      inicio = null;
-      c.hasta = performance.now() + 2500; // un momento quieta y vuelve a moverse sola
-      c.el.classList.remove('agarrada');
-      setTimeout(() => (contenedor.dataset.arrastrando = '0'), 0);
-    };
-    c.el.addEventListener('pointerup', soltar);
-    c.el.addEventListener('pointercancel', soltar);
-  };
-
-  // ── montar las columnas (3 en ordenador, 2 en el móvil) con los cuadros visibles ──
-  const montar = () => {
-    const n = window.innerWidth <= 760 ? 2 : 3;
-    const visibles = fuente.filter((li) => !li.hidden);
-    contenedor.innerHTML = '';
-    columnas = Array.from({ length: n }, (_, k) => {
-      const el = document.createElement('div');
-      el.className = 'columna';
-      const carril = document.createElement('div');
-      carril.className = 'carril';
-      const mios = visibles.filter((_, i) => i % n === k);
-      for (let c = 0; c < COPIAS; c++) mios.forEach((li) => {
-        const copia = li.cloneNode(true) as HTMLElement;
-        if (c > 0) copia.setAttribute('aria-hidden', 'true');
-        carril.appendChild(copia);
-      });
-      el.appendChild(carril);
-      contenedor.appendChild(el);
-      // una sube y la siguiente baja; velocidades algo distintas para que no vayan a la par
-      return { el, carril, y: Math.random() * 400, vel: (k % 2 ? -1 : 1) * (22 + k * 4), hasta: 0, alto: 0 };
-    });
-    const medir = () => columnas.forEach((c) => (c.alto = c.carril.scrollHeight / COPIAS));
-    requestAnimationFrame(medir);
-    // las imágenes cambian la altura al cargar
-    contenedor.querySelectorAll('img').forEach((img) => img.addEventListener('load', medir, { once: true }));
-    columnas.forEach(agarre);
-    contenedor.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((b) => b.addEventListener('click', (e) => {
-      if (contenedor.dataset.arrastrando === '1') { e.preventDefault(); return; }
-      abrirVisor(document.getElementById(b.dataset.abrir!) as HTMLDialogElement);
-    }));
-  };
-
-  let anterior = performance.now();
-  const bucle = (ahora: number) => {
-    const dt = Math.min(0.05, (ahora - anterior) / 1000);
-    anterior = ahora;
-    columnas.forEach((c) => {
-      if (!sinMovimiento && ahora > c.hasta && !visorAbierto()) c.y += c.vel * dt;
-      if (c.alto > 0) c.y = ((c.y % c.alto) + c.alto) % c.alto;
-      c.carril.style.transform = `translate3d(0, ${-c.y}px, 0)`;
-    });
-    requestAnimationFrame(bucle);
-  };
-
   // ── filtros ──
   const botonesSerie = [...seccion.querySelectorAll<HTMLButtonElement>('[data-serie]')].filter((b) => b.tagName === 'BUTTON');
   const disponibles = seccion.querySelector<HTMLInputElement>('[data-disponibles]')!;
   let serie = 'todas';
   const filtrar = () => {
-    fuente.forEach((li) => (li.hidden = !((serie === 'todas' || li.dataset.serie === serie) && !(disponibles.checked && li.hasAttribute('data-vendida')))));
-    montar();
+    cuadros.forEach((li) => (li.hidden = !((serie === 'todas' || li.dataset.serie === serie) && !(disponibles.checked && li.hasAttribute('data-vendida')))));
   };
   botonesSerie.forEach((b) => b.addEventListener('click', () => {
     serie = b.dataset.serie!;
@@ -333,15 +294,8 @@ const total = String(obras.length).padStart(2, '0');
     v.querySelector('[data-cerrar]')!.addEventListener('click', cerrarTodo);
   });
 
-  montar();
-  requestAnimationFrame(bucle);
-  let ancho = window.innerWidth;
-  window.addEventListener('resize', () => {
-    // al pasar de móvil a ordenador (o al revés) cambia el número de columnas
-    if ((ancho <= 760) !== (window.innerWidth <= 760)) montar();
-    else columnas.forEach((c) => (c.alto = c.carril.scrollHeight / COPIAS));
-    ancho = window.innerWidth;
-  });
+  // botones de la galería y de la obra destacada
+  seccion.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((b) => b.addEventListener('click', () => abrirVisor(document.getElementById(b.dataset.abrir!) as HTMLDialogElement)));
 
   // si se llega con un enlace a una obra (p. ej. desde la home), se abre directamente
   if (location.hash.startsWith('#obra-')) setTimeout(() => abrirVisor(document.getElementById(location.hash.slice(1)) as HTMLDialogElement), 300);
