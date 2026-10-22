@@ -4,6 +4,7 @@
 import '../styles/global.css';
 import Cabecera from '../components/Cabecera.astro';
 import Pie from '../components/Pie.astro';
+import Cargador from '../components/Cargador.astro';
 import { textos, type Idioma } from '../i18n/textos';
 import { url } from '../utils/enlaces';
 
@@ -29,12 +30,17 @@ const tituloCompleto = titulo ? `${titulo} — Natalia Barrio Araúz de Robles` 
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..700&family=Geist+Mono:wght@400&family=Schibsted+Grotesk:wght@400;500&family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Serif:ital@0;1&display=swap"
     />
     <!-- marca que hay JavaScript: solo entonces se ocultan los elementos que "aparecen" al hacer scroll -->
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      // la pantalla de entrada (contador) solo sale la primera vez en la visita
+      try { if (sessionStorage.getItem('natalia-visto')) document.documentElement.classList.add('sin-cargador'); else document.documentElement.classList.add('cargando'); } catch (e) { document.documentElement.classList.add('sin-cargador'); }
+    </script>
   </head>
   <body>
+    <Cargador />
     <Cabecera idioma={idioma} pagina={pagina} />
     <main>
       <slot />

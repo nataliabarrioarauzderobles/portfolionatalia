@@ -302,4 +302,8 @@ const obras = series.flatMap((serie) =>
     });
     visor.addEventListener('close', () => ir(0, false));
   });
+
+  // si se llega con un enlace a una obra (p. ej. desde el anillo de la home), se abre directamente
+  const pedida = location.hash.startsWith('#obra-') ? document.getElementById(location.hash.slice(1)) as HTMLDialogElement | null : null;
+  if (pedida) setTimeout(() => pedida.showModal(), 300);
 </script>

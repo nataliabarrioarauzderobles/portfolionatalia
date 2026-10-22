@@ -356,4 +356,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
   });
 
   document.querySelectorAll<HTMLButtonElement>('[data-abrir-revista]').forEach((b) => b.addEventListener('click', () => abrir(b.dataset.abrirRevista!)));
+
+  // si se llega con un enlace a un proyecto (p. ej. desde el anillo de la home), se abre directamente
+  if (location.hash.startsWith('#revista-')) setTimeout(() => abrir(location.hash.slice(1)), 300);
 </script>

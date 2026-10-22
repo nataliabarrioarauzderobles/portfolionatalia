@@ -1,0 +1,74 @@
+---
+// PANTALLA DE ENTRADA (inspirada en avea.studio)
+// Al entrar por primera vez en la visita: pantalla blanca con un contador de 000 % a 100 %.
+// En el centro, tu foto en blanco y negro (Natali-20) se va descubriendo de abajo arriba al ritmo del contador.
+// Al llegar al 100 % la pantalla se abre y empieza la web. En el resto de páginas de la misma visita no sale.
+import { Image } from 'astro:assets';
+import { imagen } from '../utils/imagenes';
+---
+
+<div class="cargador" data-cargador aria-hidden="true">
+  <div class="marco">
+    <Image src={imagen('sobre-mi/fotos/foto-04.jpg')} alt="" widths={[200, 400]} sizes="120px" loading="eager" class="foto" />
+  </div>
+  <span class="porcentaje" data-porcentaje>000%</span>
+  <span class="nombre">Natalia Barrio Araúz de Robles</span>
+  <span class="disciplinas">Pintura · Diseño</span>
+</div>
+
+<style>
+  .cargador {
+    position: fixed; inset: 0; z-index: 100;
+    display: grid; place-items: center;
+    background: var(--fondo);
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em;
+    transition: opacity 0.7s ease, visibility 0.7s;
+  }
+  /* solo la primera vez en la visita (lo decide un script en <head>) */
+  :global(html.sin-cargador) .cargador, :global(html:not(.js)) .cargador { display: none; }
+  .cargador.fuera { opacity: 0; visibility: hidden; }
+
+  .marco { width: clamp(84px, 8vw, 120px); aspect-ratio: 4 / 5; overflow: hidden; }
+  .marco :global(.foto) {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    clip-path: inset(calc(100% - var(--p, 0%)) 0 0 0);
+    transform: scale(calc(1.25 - var(--f, 0) * 0.25));
+  }
+  .porcentaje { position: absolute; right: var(--margen); top: 50%; transform: translateY(-50%); font-variant-numeric: tabular-nums; }
+  .nombre { position: absolute; left: var(--margen); bottom: 1.2rem; }
+  .disciplinas { position: absolute; right: var(--margen); bottom: 1.2rem; color: var(--texto-tenue); }
+</style>
+
+<script>
+  const cargador = document.querySelector<HTMLElement>('[data-cargador]');
+  const html = document.documentElement;
+  if (cargador && !html.classList.contains('sin-cargador')) {
+    const numero = cargador.querySelector<HTMLElement>('[data-porcentaje]')!;
+    const DURA = 2300;
+    const inicio = performance.now();
+    // avanza a saltos irregulares, como una carga de verdad
+    const saltos = Array.from({ length: 14 }, () => Math.random());
+    const avance = (x: number) => {
+      const i = Math.min(saltos.length - 1, Math.floor(x * saltos.length));
+      const base = i / saltos.length, siguiente = (i + 1) / saltos.length;
+      const dentro = (x * saltos.length) % 1;
+      return base + (siguiente - base) * Math.pow(dentro, 0.3 + saltos[i] * 2);
+    };
+    const cuadro = (ahora: number) => {
+      const x = Math.min(1, (ahora - inicio) / DURA);
+      const p = x >= 1 ? 1 : avance(x);
+      numero.textContent = `${String(Math.round(p * 100)).padStart(3, '0')}%`;
+      cargador.style.setProperty('--p', `${p * 100}%`);
+      cargador.style.setProperty('--f', String(p));
+      if (x < 1) requestAnimationFrame(cuadro);
+      else setTimeout(terminar, 350);
+    };
+    const terminar = () => {
+      try { sessionStorage.setItem('natalia-visto', '1'); } catch { /* sin almacenamiento: no pasa nada */ }
+      cargador.classList.add('fuera');
+      html.classList.remove('cargando');
+      window.dispatchEvent(new Event('cargador-fin'));
+    };
+    requestAnimationFrame(cuadro);
+  }
+</script>

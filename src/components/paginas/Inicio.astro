@@ -5,6 +5,7 @@
 // Al final la foto se queda tenue, casi un fondo, y la intervención es la protagonista.
 // Capas: foto sin dibujo (tenue) → trazos que se animan y se quedan nítidos encima.
 import Base from '../../layouts/Base.astro';
+import Escaparate from '../Escaparate.astro';
 import type { Idioma } from '../../i18n/textos';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
@@ -35,11 +36,13 @@ const trazos = [
     </figure>
     <h1 class="nombre" data-nombre>Natalia Barrio Araúz de Robles</h1>
   </section>
+  <!-- debajo: el anillo con las obras y proyectos, que gira al bajar -->
+  <Escaparate idioma={idioma} />
 </Base>
 
 <style>
   .portada {
-    min-height: calc(100vh - 90px);
+    min-height: calc(100vh - 64px);
     display: grid;
     place-items: center;
     align-content: center;
@@ -55,8 +58,8 @@ const trazos = [
   .trazo { transform-origin: center; will-change: transform, opacity; }
 
   .nombre {
-    font-size: clamp(0.62rem, 0.9vw, 0.74rem);
-    font-weight: 300;
+    font-size: 0.72rem;
+    font-weight: 400;
     letter-spacing: 0.34em;
     color: var(--texto-suave);
     text-transform: uppercase;
@@ -97,7 +100,11 @@ const trazos = [
       mostrarTodo();
     } else {
       document.body.classList.add('intro');
-      Promise.all(cargadas).then(() => {
+      // si sale la pantalla de entrada (el contador), la intro espera a que termine
+      const finCargador = document.documentElement.classList.contains('cargando')
+        ? new Promise((ok) => window.addEventListener('cargador-fin', ok, { once: true }))
+        : Promise.resolve();
+      Promise.all([...cargadas, finCargador]).then(() => {
         // la cabecera (firma y secciones) aparece a la vez que la imagen, sin esperar al final
         setTimeout(() => document.body.classList.remove('intro'), 150);
         // 1. la foto aparece muy tenue

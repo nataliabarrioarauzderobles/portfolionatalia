@@ -1,9 +1,9 @@
 ---
-// CABECERA (igual en todas las páginas)
-//  · Tu firma en el centro y, justo debajo, las secciones en letra fina, siempre a mano:
-//    al pasar el cursor crecen un poco y se oscurecen; la sección en la que estás va subrayada.
-//  · A la derecha, un solo botón de idioma: muestra el idioma actual (ES o EN) y al pulsarlo
-//    cambia directamente al otro.
+// CABECERA (inspirada en avea.studio): fija arriba, pequeña y sobria.
+//  · Izquierda: tu firma (vuelve a la home).
+//  · Centro: "MADRID" y la hora en directo, como detalle.
+//  · Derecha: las secciones en mayúsculas pequeñas (la actual en negro, las demás en gris) y el idioma.
+//  · En el móvil: firma y "MENÚ", que abre las secciones a pantalla completa.
 import { Image } from 'astro:assets';
 import { textos, type Idioma } from '../i18n/textos';
 import { rutaIdioma } from '../utils/enlaces';
@@ -20,75 +20,101 @@ const enlaces = [
 ];
 const otroIdioma: Idioma = idioma === 'es' ? 'en' : 'es';
 const cambiar = { es: 'Ver en inglés', en: 'Ver en español' }[idioma];
+const tx = { es: { menu: 'Menú', cerrar: 'Cerrar' }, en: { menu: 'Menu', cerrar: 'Close' } }[idioma];
 ---
 
 <header class="cabecera">
-  <div class="contenedor fila">
-    <span aria-hidden="true"></span>
-    <div class="centro">
-      <a href={rutaIdioma(idioma)} class="firma" aria-label={t.inicio}>
-        <Image src={imagen('marca/firma.png')} alt="Tali" width={240} />
-      </a>
-      <nav class="secciones" aria-label={t.menu}>
-        {enlaces.map((e) => (
-          <a href={rutaIdioma(idioma, e.pagina)} aria-current={pagina === e.pagina ? 'page' : undefined}>{e.texto}</a>
-        ))}
-      </nav>
-    </div>
-    <div class="derecha">
-      <a class="idioma mono" href={rutaIdioma(otroIdioma, pagina)} lang={otroIdioma} hreflang={otroIdioma} title={cambiar} aria-label={cambiar}>
-        {idioma.toUpperCase()}
-      </a>
-    </div>
+  <div class="fila">
+    <a href={rutaIdioma(idioma)} class="firma" aria-label={t.inicio}>
+      <Image src={imagen('marca/firma.png')} alt="Tali" width={200} />
+    </a>
+    <p class="hora" aria-hidden="true">Madrid <span data-hora></span></p>
+    <nav class="secciones" aria-label={t.menu}>
+      {enlaces.map((e) => (
+        <a href={rutaIdioma(idioma, e.pagina)} aria-current={pagina === e.pagina ? 'page' : undefined}>{e.texto}</a>
+      ))}
+      <a class="idioma" href={rutaIdioma(otroIdioma, pagina)} lang={otroIdioma} hreflang={otroIdioma} title={cambiar} aria-label={cambiar}>{idioma.toUpperCase()}</a>
+    </nav>
+    <button type="button" class="abrir-menu" data-abrir-menu aria-expanded="false" aria-controls="menu-movil">{tx.menu}</button>
   </div>
 </header>
+
+<!-- menú del móvil -->
+<div class="menu-movil" id="menu-movil" hidden data-menu-movil>
+  <nav aria-label={t.menu}>
+    <a href={rutaIdioma(idioma)}>{t.inicio}</a>
+    {enlaces.map((e) => (
+      <a href={rutaIdioma(idioma, e.pagina)} aria-current={pagina === e.pagina ? 'page' : undefined}>{e.texto}</a>
+    ))}
+    <a href={rutaIdioma(otroIdioma, pagina)} lang={otroIdioma}>{otroIdioma === 'en' ? 'English' : 'Español'}</a>
+  </nav>
+</div>
 
 <style>
   .cabecera {
     position: sticky;
     top: 0;
-    z-index: 10;
-    background: color-mix(in srgb, var(--fondo) 94%, transparent);
+    z-index: 20;
+    background: color-mix(in srgb, var(--fondo) 92%, transparent);
     backdrop-filter: blur(6px);
   }
   .fila {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
-    align-items: start;
+    align-items: center;
     gap: 1rem;
-    padding-top: 1.2rem;
-    padding-bottom: 0.9rem;
+    padding: 1rem var(--margen);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
   }
-  .centro { display: grid; justify-items: center; gap: 0.65rem; }
-  .firma img { height: 38px; width: auto; }
+  .firma { justify-self: start; }
+  .firma img { height: 30px; width: auto; }
+  .hora { margin: 0; color: var(--texto-tenue); font-variant-numeric: tabular-nums; }
 
-  /* las secciones: letra fina; al pasar crecen un poco y se oscurecen */
-  .secciones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem clamp(1.1rem, 2.4vw, 2rem); }
-  .secciones a {
-    display: inline-block;
-    font-size: 0.82rem; font-weight: 300; letter-spacing: 0.02em;
-    color: var(--texto-suave);
-    text-decoration: none;
-    text-underline-offset: 5px; text-decoration-thickness: 1px;
-    transition: transform 0.3s ease, color 0.3s ease;
-  }
-  .secciones a:hover, .secciones a:focus-visible { transform: scale(1.12); color: var(--texto); }
-  .secciones a[aria-current='page'] { color: var(--texto); text-decoration: underline; }
+  .secciones { justify-self: end; display: flex; align-items: center; gap: clamp(1rem, 2.2vw, 2rem); }
+  .secciones a { color: var(--texto-tenue); transition: color 0.25s ease; }
+  .secciones a:hover, .secciones a:focus-visible, .secciones a[aria-current='page'] { color: var(--texto); }
+  .idioma { margin-left: 0.6rem; padding-left: 1.2rem; border-left: 1px solid var(--linea); }
 
-  /* un solo botón de idioma */
-  .derecha { display: flex; justify-content: flex-end; padding-top: 0.5rem; }
-  .idioma {
-    display: grid; place-items: center; min-width: 2.3rem; height: 1.9rem; padding: 0 0.5rem;
-    border: 1px solid var(--linea); border-radius: 999px;
-    color: var(--texto); text-decoration: none;
-    transition: border-color 0.2s, background 0.2s, color 0.2s;
-  }
-  .idioma:hover, .idioma:focus-visible { border-color: var(--texto); background: var(--texto); color: var(--fondo); }
+  .abrir-menu { display: none; justify-self: end; padding: 0.3rem 0; border: 0; background: none; font: inherit; text-transform: uppercase; color: var(--texto); cursor: pointer; }
 
-  @media (max-width: 640px) {
-    .fila { grid-template-columns: 2.3rem 1fr 2.3rem; gap: 0.5rem; padding-top: 0.9rem; padding-bottom: 0.7rem; }
-    .firma img { height: 32px; }
-    .secciones { gap: 0.25rem 1rem; }
-    .derecha { padding-top: 0.2rem; }
+  /* MENÚ DEL MÓVIL: a pantalla completa, sobre blanco */
+  .menu-movil { position: fixed; inset: 0; z-index: 19; display: grid; align-content: center; padding: 5rem var(--margen) 3rem; background: var(--fondo); animation: aparecerMenu 0.35s ease; }
+  .menu-movil nav { display: grid; gap: 0.6rem; }
+  .menu-movil a { font-size: 1.9rem; text-transform: uppercase; letter-spacing: -0.01em; color: var(--texto-tenue); }
+  .menu-movil a[aria-current='page'], .menu-movil a:hover { color: var(--texto); }
+  @keyframes aparecerMenu { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (max-width: 760px) {
+    .fila { grid-template-columns: 1fr auto; }
+    .hora, .secciones { display: none; }
+    .abrir-menu { display: block; }
+    .firma img { height: 26px; }
   }
 </style>
+
+<script>
+  // la hora de Madrid, en directo
+  const reloj = document.querySelector<HTMLElement>('[data-hora]');
+  if (reloj) {
+    const formato = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const poner = () => (reloj.textContent = formato.format(new Date()));
+    poner();
+    setInterval(poner, 1000);
+  }
+
+  // menú del móvil
+  const boton = document.querySelector<HTMLButtonElement>('[data-abrir-menu]');
+  const menu = document.querySelector<HTMLElement>('[data-menu-movil]');
+  if (boton && menu) {
+    const textos = { abrir: boton.textContent, cerrar: document.documentElement.lang === 'en' ? 'Close' : 'Cerrar' };
+    boton.addEventListener('click', () => {
+      const abrir = menu.hidden;
+      menu.hidden = !abrir;
+      boton.setAttribute('aria-expanded', String(abrir));
+      boton.textContent = abrir ? textos.cerrar : textos.abrir;
+      document.documentElement.style.overflow = abrir ? 'hidden' : '';
+    });
+  }
+</script>
