@@ -3,7 +3,7 @@
 //  · Izquierda: tu firma (vuelve a la home).
 //  · Centro: "MADRID" y la hora en directo, como detalle.
 //  · Derecha: las secciones en mayúsculas pequeñas (la actual en negro, las demás en gris) y el idioma.
-//  · En el móvil: firma y "MENÚ", que abre las secciones a pantalla completa.
+//  · En el móvil: arriba la firma y el idioma; debajo, las cuatro secciones siempre a la vista.
 import { Image } from 'astro:assets';
 import { textos, type Idioma } from '../i18n/textos';
 import { rutaIdioma } from '../utils/enlaces';
@@ -20,7 +20,6 @@ const enlaces = [
 ];
 const otroIdioma: Idioma = idioma === 'es' ? 'en' : 'es';
 const cambiar = { es: 'Ver en inglés', en: 'Ver en español' }[idioma];
-const tx = { es: { menu: 'Menú', cerrar: 'Cerrar' }, en: { menu: 'Menu', cerrar: 'Close' } }[idioma];
 ---
 
 <header class="cabecera">
@@ -35,20 +34,9 @@ const tx = { es: { menu: 'Menú', cerrar: 'Cerrar' }, en: { menu: 'Menu', cerrar
       ))}
       <a class="idioma" href={rutaIdioma(otroIdioma, pagina)} lang={otroIdioma} hreflang={otroIdioma} title={cambiar} aria-label={cambiar}>{idioma.toUpperCase()}</a>
     </nav>
-    <button type="button" class="abrir-menu" data-abrir-menu aria-expanded="false" aria-controls="menu-movil">{tx.menu}</button>
   </div>
 </header>
 
-<!-- menú del móvil -->
-<div class="menu-movil" id="menu-movil" hidden data-menu-movil>
-  <nav aria-label={t.menu}>
-    <a href={rutaIdioma(idioma)}>{t.inicio}</a>
-    {enlaces.map((e) => (
-      <a href={rutaIdioma(idioma, e.pagina)} aria-current={pagina === e.pagina ? 'page' : undefined}>{e.texto}</a>
-    ))}
-    <a href={rutaIdioma(otroIdioma, pagina)} lang={otroIdioma}>{otroIdioma === 'en' ? 'English' : 'Español'}</a>
-  </nav>
-</div>
 
 <style>
   .cabecera {
@@ -77,20 +65,14 @@ const tx = { es: { menu: 'Menú', cerrar: 'Cerrar' }, en: { menu: 'Menu', cerrar
   .secciones a:hover, .secciones a:focus-visible, .secciones a[aria-current='page'] { color: var(--texto); }
   .idioma { margin-left: 0.6rem; padding-left: 1.2rem; border-left: 1px solid var(--linea); }
 
-  .abrir-menu { display: none; justify-self: end; padding: 0.3rem 0; border: 0; background: none; font: inherit; text-transform: uppercase; color: var(--texto); cursor: pointer; }
 
-  /* MENÚ DEL MÓVIL: a pantalla completa, sobre blanco */
-  .menu-movil { position: fixed; inset: 0; z-index: 19; display: grid; align-content: center; padding: 5rem var(--margen) 3rem; background: var(--fondo); animation: aparecerMenu 0.35s ease; }
-  .menu-movil nav { display: grid; gap: 0.6rem; }
-  .menu-movil a { font-size: 1.9rem; text-transform: uppercase; letter-spacing: -0.01em; color: var(--texto-tenue); }
-  .menu-movil a[aria-current='page'], .menu-movil a:hover { color: var(--texto); }
-  @keyframes aparecerMenu { from { opacity: 0; } to { opacity: 1; } }
-
+  /* MÓVIL: firma e idioma arriba; las secciones debajo, repartidas a lo ancho */
   @media (max-width: 760px) {
-    .fila { grid-template-columns: 1fr auto; }
-    .hora, .secciones { display: none; }
-    .abrir-menu { display: block; }
+    .fila { position: relative; grid-template-columns: 1fr; row-gap: 0.75rem; padding-top: 0.8rem; padding-bottom: 0.7rem; }
+    .hora { display: none; }
     .firma img { height: 26px; }
+    .secciones { justify-self: stretch; justify-content: space-between; gap: 0.5rem; }
+    .idioma { position: absolute; top: 0.95rem; right: var(--margen); margin: 0; padding: 0; border: 0; color: var(--texto); }
   }
 </style>
 
@@ -104,17 +86,4 @@ const tx = { es: { menu: 'Menú', cerrar: 'Cerrar' }, en: { menu: 'Menu', cerrar
     setInterval(poner, 1000);
   }
 
-  // menú del móvil
-  const boton = document.querySelector<HTMLButtonElement>('[data-abrir-menu]');
-  const menu = document.querySelector<HTMLElement>('[data-menu-movil]');
-  if (boton && menu) {
-    const textos = { abrir: boton.textContent, cerrar: document.documentElement.lang === 'en' ? 'Close' : 'Cerrar' };
-    boton.addEventListener('click', () => {
-      const abrir = menu.hidden;
-      menu.hidden = !abrir;
-      boton.setAttribute('aria-expanded', String(abrir));
-      boton.textContent = abrir ? textos.cerrar : textos.abrir;
-      document.documentElement.style.overflow = abrir ? 'hidden' : '';
-    });
-  }
 </script>
