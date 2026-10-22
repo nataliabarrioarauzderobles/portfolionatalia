@@ -4,7 +4,7 @@
 // Al pulsar una portada se abre la revista: en ordenador a doble página, en el móvil página a página.
 //  · Pasar página: flechas de abajo, teclado, pulsando la mitad izquierda/derecha de la revista o deslizando.
 //  · Cerrar: pulsando fuera de la revista, con la × o con Esc.
-//  · "Proyectos" (menú) para saltar a otra revista y "Guías" para ver la retícula de la maqueta.
+//  · "Proyectos" (menú) para saltar a otra revista. Formato A, como la revista de Lucilla.
 import PaginaRevista from './PaginaRevista.astro';
 import { proyectos } from '../data/proyectos';
 import { revistas } from '../data/revistas';
@@ -14,23 +14,23 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { etiqueta: 'Proyectos', ver: 'Abrir revista', anterior: 'Página anterior', siguiente: 'Página siguiente', guias: 'Guías', ayuda: 'Pulsa fuera de la revista para cerrarla', deslizar: 'Desliza para pasar página' },
-  en: { etiqueta: 'Projects', ver: 'Open magazine', anterior: 'Previous page', siguiente: 'Next page', guias: 'Guides', ayuda: 'Tap outside the magazine to close it', deslizar: 'Swipe to turn the page' },
+  es: { etiqueta: 'Proyectos', ver: 'Abrir revista', anterior: 'Página anterior', siguiente: 'Página siguiente', ayuda: 'Pulsa fuera de la revista para cerrarla', deslizar: 'Desliza para pasar página' },
+  en: { etiqueta: 'Projects', ver: 'Open magazine', anterior: 'Previous page', siguiente: 'Next page', ayuda: 'Tap outside the magazine to close it', deslizar: 'Swipe to turn the page' },
 }[idioma];
-const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p, revista: revistas[p.id] }));
+const lista = proyectos.filter((p) => revistas[p.id]).map((p, i) => ({ proyecto: p, revista: revistas[p.id], numero: String(i + 1).padStart(2, '0') }));
 ---
 
 <section class="indice-proyectos contenedor" id="proyectos">
   <p class="mono etiqueta">{tx.etiqueta}</p>
   <ul class="portadas">
-    {lista.map(({ proyecto, revista }, i) => (
+    {lista.map(({ proyecto, revista, numero }, i) => (
       <li data-aparece style={`--retraso:${(i % 3) * 120}ms`}>
         <button type="button" class="abrir" data-abrir-revista={`revista-${proyecto.id}`} aria-label={`${tx.ver}: ${proyecto.titulo[idioma]}`}>
           <span class="tapa">
             <PaginaRevista pagina={revista.paginas[0]} proyecto={proyecto} revista={revista} idioma={idioma} numero={1} total={revista.paginas.length} miniatura />
           </span>
           <span class="pie mono">
-            <span class="numero">Nº {revista.numero}</span>
+            <span class="numero">{numero}</span>
             <span class="titulo">{proyecto.titulo[idioma]}</span>
             <span class="disciplina">{revista.disciplina[idioma]}</span>
           </span>
@@ -40,22 +40,21 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
   </ul>
 </section>
 
-{lista.map(({ proyecto, revista }) => (
-  <dialog class="revista" id={`revista-${proyecto.id}`} aria-label={proyecto.titulo[idioma]} style={`--acento:${revista.acento}`}>
+{lista.map(({ proyecto, revista, numero }) => (
+  <dialog class="revista" id={`revista-${proyecto.id}`} aria-label={proyecto.titulo[idioma]} data-vistas={revista.vistas ? JSON.stringify(revista.vistas) : undefined}>
     <!-- barra de arriba: proyectos, guías y cerrar -->
     <div class="barra mono">
       <button type="button" class="menu" data-menu-revistas aria-expanded="false">
         <span class="lineas" aria-hidden="true"><i></i><i></i><i></i></span>{tx.etiqueta}
       </button>
-      <span class="nombre-revista">Nº {revista.numero} — {proyecto.titulo[idioma]}</span>
-      <button type="button" class="guias-boton" data-guias aria-pressed="false">{tx.guias}</button>
+      <span class="nombre-revista">{numero} — {proyecto.titulo[idioma]}</span>
       <button type="button" class="cerrar" data-cerrar-revista aria-label={t.cerrar}>×</button>
       <nav class="lista-revistas" hidden aria-label={tx.etiqueta}>
         <ol>
           {lista.map((otro) => (
             <li>
               <button type="button" data-ir-revista={`revista-${otro.proyecto.id}`} aria-current={otro.proyecto.id === proyecto.id ? 'true' : undefined}>
-                <span>Nº {otro.revista.numero}</span>{otro.proyecto.titulo[idioma]}
+                <span>{otro.numero}</span>{otro.proyecto.titulo[idioma]}
               </button>
             </li>
           ))}
@@ -90,7 +89,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
   .portadas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(2.5rem, 5vw, 4rem) clamp(1.2rem, 3vw, 2.6rem); }
   @media (max-width: 760px) { .portadas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 1rem; } }
   .abrir { display: grid; gap: 0.9rem; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--texto); }
-  .tapa { display: block; aspect-ratio: 3 / 4; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 30px -12px rgba(0,0,0,0.25); transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.5s; }
+  .tapa { display: block; aspect-ratio: 1 / 1.4142; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 30px -12px rgba(0,0,0,0.25); transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.5s; }
   .tapa :global(.pagina) { width: 100%; height: 100%; }
   .abrir:hover .tapa, .abrir:focus-visible .tapa { transform: translateY(-8px) rotate(-1.2deg); box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 24px 40px -16px rgba(0,0,0,0.35); }
   .pie { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.9rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--linea); }
@@ -110,7 +109,6 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
   .barra { position: relative; z-index: 6; display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem var(--margen); }
   .barra button { padding: 0.4rem 0.8rem; border: 1px solid rgba(0,0,0,0.15); border-radius: 999px; background: #fff; cursor: pointer; color: var(--texto); font: inherit; }
   .barra button:hover, .barra button[aria-pressed='true'] { border-color: var(--texto); }
-  .guias-boton[aria-pressed='true'] { background: var(--texto) !important; color: #fff !important; }
   .nombre-revista { color: var(--texto-suave); margin-right: auto; }
   .cerrar { font-size: 1rem; line-height: 1; padding: 0.35rem 0.7rem !important; }
   .menu { display: inline-flex; align-items: center; gap: 0.55rem; }
@@ -127,11 +125,11 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
   /* el escenario ocupa todo; pulsar en él (fuera de la revista) la cierra */
   .escenario { display: grid; place-items: center; min-height: 0; padding: 0.5rem 1rem; perspective: 2400px; }
   .pliego {
-    --alto: min(calc(100dvh - 9.5rem), calc((100vw - 3rem) / 1.5));
-    position: relative; display: flex; height: var(--alto); aspect-ratio: 3 / 2;
+    --alto: min(calc(100dvh - 9.5rem), calc((100vw - 3rem) / 1.4142));
+    position: relative; display: flex; height: var(--alto); aspect-ratio: 1.4142 / 1;
     box-shadow: 0 30px 60px -30px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.08);
   }
-  .pliego.sencillo { aspect-ratio: 3 / 4; }
+  .pliego.sencillo { aspect-ratio: 1 / 1.4142; }
   /* sombra del lomo entre las dos páginas */
   .pliego.doble-pagina::after {
     content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 6%; transform: translateX(-50%); z-index: 4; pointer-events: none;
@@ -139,14 +137,13 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
   }
   .pliego :global(.pagina) { display: none; flex: 1 1 0; height: 100%; cursor: pointer; }
   .pliego :global(.pagina.vista) { display: block; }
-  .pliego :global(.tipo-doble .guias) { display: none; }
 
   /* MÓVIL: la revista como un libro que se hojea deslizando.
      Las páginas van en fila; la del centro está plana y las de los lados se doblan hacia el lomo. */
   @media (max-width: 899px) {
     .escenario { padding: 0.5rem 0; }
     .pliego.libro {
-      --pagina: min(78vw, calc((100dvh - 12rem) * 0.75));
+      --pagina: min(78vw, calc((100dvh - 12rem) * 0.7071));
       display: flex; align-items: center; width: 100vw; height: auto; aspect-ratio: auto;
       overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none;
       padding: 1rem calc((100vw - var(--pagina)) / 2) 1.8rem;
@@ -155,7 +152,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
     .pliego.libro::-webkit-scrollbar { display: none; }
     .pliego.libro::after { display: none; }
     .libro :global(.pagina) {
-      display: block; flex: 0 0 var(--pagina); height: auto; aspect-ratio: 3 / 4; cursor: default;
+      display: block; flex: 0 0 var(--pagina); height: auto; aspect-ratio: 1 / 1.4142; cursor: default;
       scroll-snap-align: center; scroll-snap-stop: always;
       transform-style: preserve-3d; will-change: transform;
       /* cantos de papel apilados a la derecha y sombra, como un libro */
@@ -166,7 +163,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
       content: ''; position: absolute; inset: 0 auto 0 0; width: 10%; z-index: 3; pointer-events: none;
       background: linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.04) 60%, transparent);
     }
-    .libro :global(.pagina[data-doble]) { flex-basis: calc(var(--pagina) * 1.22); aspect-ratio: 3 / 2; }
+    .libro :global(.pagina[data-doble]) { flex-basis: calc(var(--pagina) * 1.22); aspect-ratio: 1.4142 / 1; }
   }
 
   .pasar { display: flex; justify-content: center; align-items: center; gap: 1.4rem; padding: 0.4rem 0 0.2rem; }
@@ -208,6 +205,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
     const agrupar = () => {
       const n = paginas.length;
       const doble = (i: number) => paginas[i]?.hasAttribute('data-doble');
+      if (escritorio.matches && revista.dataset.vistas) return JSON.parse(revista.dataset.vistas) as number[][];
       if (!escritorio.matches) return paginas.map((_, i) => [i]);
       const v: number[][] = [[0]];
       let i = 1;
@@ -327,13 +325,6 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p) => ({ proyecto: p,
       pasar(e.clientX > caja.left + caja.width / 2 ? 1 : -1);
     });
 
-    // guías de maquetación
-    const guias = revista.querySelector<HTMLButtonElement>('[data-guias]')!;
-    guias.addEventListener('click', () => {
-      const activas = !revista.classList.contains('con-guias');
-      revista.classList.toggle('con-guias', activas);
-      guias.setAttribute('aria-pressed', String(activas));
-    });
 
     revista.querySelector('[data-cerrar-revista]')!.addEventListener('click', () => revista.close());
     revista.addEventListener('close', () => {
