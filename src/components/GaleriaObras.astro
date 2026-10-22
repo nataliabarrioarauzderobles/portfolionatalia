@@ -121,7 +121,7 @@ const tecnica = (s: (typeof obras)[number]['serie']) => (s.tecnica ? t.tecnicas[
   /* CAPA FIJA: se queda en su sitio mientras los cuadros pasan por debajo */
   .capa-fija { position: sticky; top: 0; height: 100vh; margin-bottom: -100vh; pointer-events: none; z-index: 2; }
   .capa-fija > * { pointer-events: auto; }
-  .filtros { position: absolute; top: 4.6rem; left: var(--margen); right: var(--margen); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .filtros { position: absolute; top: 4.4rem; left: var(--margen); right: var(--margen); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
   .series { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; }
   .series button, .titulos button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; text-align: left; transition: color 0.25s; }
   .series button:hover, .series button[aria-pressed='true'] { color: var(--texto); }
@@ -138,7 +138,8 @@ const tecnica = (s: (typeof obras)[number]['serie']) => (s.tecnica ? t.tecnicas[
   .extremo { right: var(--margen); font-variant-numeric: tabular-nums; }
 
   /* LA COLUMNA DE CUADROS */
-  .columna { list-style: none; margin: 0 auto; padding: 50vh 0; width: clamp(280px, 24vw, 400px); display: grid; gap: 0; }
+  /* más aire entre obras; la primera empieza cerca de arriba (sin tanto blanco al entrar) */
+  .columna { list-style: none; margin: 0 auto; padding: 7.5rem 0 45vh; width: clamp(280px, 24vw, 400px); display: grid; gap: clamp(4rem, 12vh, 8rem); }
   .columna li[hidden] { display: none; }
   .abrir { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
   .abrir :global(img) { display: block; width: 100%; height: auto; transition: filter 0.4s; }
@@ -204,7 +205,9 @@ const tecnica = (s: (typeof obras)[number]['serie']) => (s.tecnica ? t.tecnicas[
   const marcar = () => {
     const medio = window.innerHeight / 2;
     const visible = cuadros.filter((c) => !c.hidden);
-    const centro = visible.find((c) => { const r = c.getBoundingClientRect(); return r.top <= medio && r.bottom >= medio; }) ?? visible[0];
+    // el cuadro más cercano al centro de la pantalla
+    let centro = visible[0], mejor = Infinity;
+    visible.forEach((c) => { const r = c.getBoundingClientRect(); const d = Math.abs((r.top + r.bottom) / 2 - medio); if (d < mejor) { mejor = d; centro = c; } });
     if (!centro || centro.dataset.cuadro === actual) return;
     actual = centro.dataset.cuadro!;
     datoSerie.textContent = centro.dataset.nombreSerie ?? '';
