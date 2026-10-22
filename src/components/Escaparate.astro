@@ -1,8 +1,8 @@
 ---
-// ESCAPARATE (inspirado en el "showcase" de avea.studio)
-// Tus obras y proyectos colocados en un anillo en 3D. Al bajar por la página el anillo gira:
-// la obra de delante se ve grande y las de los lados, en perspectiva. Al pasar el cursor: "VER OBRA".
-// Abajo: el título de la obra que está delante y un contador.
+// ESCAPARATE (inspirado en la vista "SLIDER" de avea.studio)
+// Tus obras y proyectos en una tira horizontal, todos a la misma altura, con su título pequeño encima.
+// Al bajar por la página la tira avanza de lado. Al pasar el cursor por una: "VER OBRA" y las demás se apagan.
+// Abajo: el título de la obra que está en el centro y un contador.
 import { getImage } from 'astro:assets';
 import { series } from '../data/obras';
 import { proyectos } from '../data/proyectos';
@@ -15,13 +15,13 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { ver: 'Ver obra', intro: 'Natalia Barrio es artista visual y diseñadora. Pinta la figura que aparece, se transforma y se deshace, y diseña piezas, espacios e identidades.', ultimo: 'Último', serie: 'Serie DE-formando, 2026', bajar: 'Baja para girar' },
-  en: { ver: 'View work', intro: 'Natalia Barrio is a visual artist and designer. She paints the figure that appears, transforms and comes undone, and designs pieces, spaces and identities.', ultimo: 'Latest', serie: 'DE-formando series, 2026', bajar: 'Scroll to turn' },
+  es: { ver: 'Ver obra', intro: 'Natalia Barrio es artista visual y diseñadora. Pinta la figura que aparece, se transforma y se deshace, y diseña piezas, espacios e identidades.', ultimo: 'Último', serie: 'Serie DE-formando, 2026', bajar: 'Baja para ver más' },
+  en: { ver: 'View work', intro: 'Natalia Barrio is a visual artist and designer. She paints the figure that appears, transforms and comes undone, and designs pieces, spaces and identities.', ultimo: 'Latest', serie: 'DE-formando series, 2026', bajar: 'Scroll to see more' },
 }[idioma];
 
 // obras: de cada serie, las disponibles primero; en DE-formando, el mockup
 const obras = series.flatMap((s) =>
-  s.obras.filter((o) => !o.vendida).slice(0, s.id === 'formas' ? 6 : 2).map((o) => {
+  s.obras.filter((o) => !o.vendida).slice(0, s.id === 'formas' ? 8 : 3).map((o) => {
     const imgs = imagenesDe(`pintura/${s.id}/${o.id}`);
     const foto = (s.id === 'formas' && imgs.find((i) => i.src.includes('-mockup'))) || imgs[0];
     return { titulo: o.titulo, tipo: t.series[s.id], foto, enlace: `${rutaIdioma(idioma, 'pintura')}#obra-${o.id}` };
@@ -36,53 +36,48 @@ const todas: typeof obras = [];
 const cada = Math.max(1, Math.floor(obras.length / disenos.length));
 obras.forEach((o, i) => { todas.push(o); if ((i + 1) % cada === 0 && disenos.length) todas.push(disenos.shift()!); });
 todas.push(...disenos);
-const tarjetas = await Promise.all(todas.map(async (o) => ({ ...o, src: (await getImage({ src: o.foto, width: 520 })).src })));
+const tarjetas = await Promise.all(todas.map(async (o) => ({ ...o, src: (await getImage({ src: o.foto, width: 900 })).src })));
 ---
 
-<section class="escaparate" data-escaparate style={`--n:${tarjetas.length}`}>
+<section class="escaparate" data-escaparate>
   <div class="fijo">
     <p class="intro-texto">{tx.intro}</p>
-    <div class="escena">
-      <div class="anillo" data-anillo>
-        {tarjetas.map((c, i) => (
-          <a class="tarjeta" href={c.enlace} data-tarjeta data-titulo={c.titulo} data-tipo={c.tipo} style={`--i:${i}`}>
-            <img src={c.src} alt={c.titulo} loading={i < 8 ? 'eager' : 'lazy'} draggable="false" />
+    <ul class="tira" data-tira>
+      {tarjetas.map((c, i) => (
+        <li data-tarjeta data-titulo={c.titulo} data-tipo={c.tipo}>
+          <span class="rotulo"><span>{c.titulo}</span><span class="tipo">{c.tipo}</span></span>
+          <a href={c.enlace} class="imagen">
+            <img src={c.src} alt={c.titulo} loading={i < 6 ? "eager" : "lazy"} draggable="false" />
             <span class="ver">{tx.ver}</span>
           </a>
-        ))}
-      </div>
-    </div>
+        </li>
+      ))}
+    </ul>
     <div class="pie-escaparate">
-      <a class="ultimo" href={rutaIdioma(idioma, 'pintura')}><span>{tx.ultimo}</span>{tx.serie}</a>
+      <a class="ultimo" href={rutaIdioma(idioma, "pintura")}><span>{tx.ultimo}</span>{tx.serie}</a>
       <p class="actual"><span data-titulo-actual>{tarjetas[0]?.titulo}</span><span class="tipo" data-tipo-actual>{tarjetas[0]?.tipo}</span></p>
-      <p class="contador"><span data-numero>01</span> / {String(tarjetas.length).padStart(2, '0')}</p>
+      <p class="contador"><span data-numero>01</span> / {String(tarjetas.length).padStart(2, "0")}</p>
     </div>
     <p class="bajar">{tx.bajar} ↓</p>
   </div>
 </section>
 
 <style>
-  /* la sección es alta: el anillo da una vuelta entera mientras se baja por ella */
-  .escaparate { position: relative; height: 520vh; }
+  /* la sección es alta: mientras se baja por ella, la tira avanza de lado */
+  .escaparate { position: relative; height: 420vh; }
   .fijo { position: sticky; top: 0; height: 100vh; overflow: hidden; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
   .intro-texto { position: absolute; top: 5.2rem; right: var(--margen); max-width: 30ch; margin: 0; color: var(--texto-tenue); text-transform: none; font-size: 0.78rem; line-height: 1.45; z-index: 2; }
 
-  .escena { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% 50%; }
-  .anillo { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
-  .tarjeta {
-    --ancho: clamp(130px, 15vw, 250px);
-    position: absolute; left: calc(var(--ancho) / -2); top: calc(var(--ancho) * -0.625);
-    width: var(--ancho); aspect-ratio: 4 / 5;
-    backface-visibility: hidden; will-change: transform, opacity;
-  }
-  .tarjeta img { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--fondo-suave); transition: filter 0.4s; }
-  .ver {
-    position: absolute; left: 0; bottom: -1.6rem; color: var(--texto);
-    opacity: 0; transform: translateY(-4px); transition: opacity 0.3s, transform 0.3s;
-  }
-  .tarjeta:hover .ver, .tarjeta:focus-visible .ver { opacity: 1; transform: none; }
-  /* al pasar por una, las demás se apagan un poco */
-  .anillo:hover .tarjeta:not(:hover) img { filter: grayscale(0.6) opacity(0.65); }
+  .tira { position: absolute; top: 50%; left: 0; margin: 0; padding: 0 var(--margen); list-style: none; display: flex; align-items: flex-end; gap: 0.6rem; transform: translateY(-50%); will-change: transform; }
+  .tira li { flex: none; display: grid; gap: 0.5rem; transition: opacity 0.4s ease; }
+  .rotulo { display: flex; justify-content: space-between; gap: 1rem; white-space: nowrap; }
+  .rotulo .tipo { color: var(--texto-tenue); }
+  .imagen { position: relative; display: block; height: clamp(240px, 46vh, 460px); }
+  .imagen img { height: 100%; width: auto; display: block; }
+  .ver { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 0.4rem 0.7rem; background: var(--fondo); color: var(--texto); opacity: 0; transition: opacity 0.3s; }
+  .tira li:hover .ver { opacity: 1; }
+  /* al pasar por una, las demás se apagan */
+  .tira:hover li:not(:hover) { opacity: 0.35; }
 
   .pie-escaparate { position: absolute; left: var(--margen); right: var(--margen); bottom: 1.2rem; display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 1rem; }
   .ultimo { justify-self: start; display: inline-flex; gap: 0.6rem; padding: 0.45rem 0.7rem; background: var(--texto); color: var(--fondo); }
@@ -93,67 +88,55 @@ const tarjetas = await Promise.all(todas.map(async (o) => ({ ...o, src: (await g
   .bajar { position: absolute; left: 50%; top: 5.2rem; transform: translateX(-50%); margin: 0; color: var(--texto-tenue); }
 
   @media (max-width: 760px) {
-    .intro-texto { left: var(--margen); right: var(--margen); max-width: none; top: 4.6rem; }
+    .escaparate { height: auto; }
+    .fijo { position: static; height: auto; padding: 5rem 0 4.5rem; }
+    .intro-texto { position: static; padding: 0 var(--margen) 2rem; max-width: none; }
+    .tira { position: static; transform: none !important; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .tira li { scroll-snap-align: start; }
+    .imagen { height: 52vh; }
     .bajar { display: none; }
-    .pie-escaparate { grid-template-columns: 1fr auto; }
-    .actual { justify-items: start; grid-column: 1 / -1; grid-row: 1; }
+    .pie-escaparate { position: static; padding: 1.5rem var(--margen) 0; grid-template-columns: 1fr auto; }
+    .actual { display: none; }
   }
-  @media (prefers-reduced-motion: reduce) { .escaparate { height: auto; } }
 </style>
 
 <script>
-  const seccion = document.querySelector<HTMLElement>('[data-escaparate]');
-  if (seccion) {
-    const tarjetas = [...seccion.querySelectorAll<HTMLElement>('[data-tarjeta]')];
-    const titulo = seccion.querySelector<HTMLElement>('[data-titulo-actual]')!;
-    const tipo = seccion.querySelector<HTMLElement>('[data-tipo-actual]')!;
-    const numero = seccion.querySelector<HTMLElement>('[data-numero]')!;
-    const n = tarjetas.length;
-    const paso = (Math.PI * 2) / n;
-    let actual = -1;
-    let angulo = 0, objetivo = 0;
+  const seccion = document.querySelector<HTMLElement>("[data-escaparate]");
+  if (seccion && matchMedia("(min-width: 761px)").matches) {
+    const tira = seccion.querySelector<HTMLElement>("[data-tira]")!;
+    const tarjetas = [...seccion.querySelectorAll<HTMLElement>("[data-tarjeta]")];
+    const titulo = seccion.querySelector<HTMLElement>("[data-titulo-actual]")!;
+    const tipo = seccion.querySelector<HTMLElement>("[data-tipo-actual]")!;
+    const numero = seccion.querySelector<HTMLElement>("[data-numero]")!;
+    let x = 0, objetivo = 0, actual = -1;
 
-    const colocar = () => {
-      const ancho = tarjetas[0].offsetWidth;
-      // radio: que las tarjetas quepan alrededor del anillo con un poco de aire
-      const radio = Math.max(ancho * 1.6, (ancho * 1.12 * n) / (Math.PI * 2));
-      let delante = 0, mejor = -2;
-      tarjetas.forEach((c, i) => {
-        const a = i * paso - angulo;
-        const x = Math.sin(a) * radio, z = Math.cos(a) * radio - radio;
-        const frente = Math.cos(a);
-        c.style.transform = `translate3d(${x}px, 0, ${z}px) rotateY(${a}rad)`;
-        // las de detrás se desvanecen
-        c.style.opacity = String(Math.max(0, Math.min(1, (frente + 0.15) * 2)));
-        c.style.zIndex = String(Math.round(frente * 100) + 100);
-        c.style.pointerEvents = frente > 0.3 ? 'auto' : 'none';
-        if (frente > mejor) { mejor = frente; delante = i; }
-      });
-      if (delante !== actual) {
-        actual = delante;
-        titulo.textContent = tarjetas[delante].dataset.titulo ?? '';
-        tipo.textContent = tarjetas[delante].dataset.tipo ?? '';
-        numero.textContent = String(delante + 1).padStart(2, '0');
-      }
-    };
-
-    // el giro sigue al scroll con un poco de inercia
     const leerScroll = () => {
       const caja = seccion.getBoundingClientRect();
       const recorrido = seccion.offsetHeight - window.innerHeight;
       const progreso = Math.min(1, Math.max(0, -caja.top / Math.max(1, recorrido)));
-      objetivo = progreso * Math.PI * 2;
+      objetivo = progreso * Math.max(0, tira.scrollWidth - window.innerWidth);
     };
+    const marcar = () => {
+      const medio = window.innerWidth / 2;
+      let i = tarjetas.findIndex((c) => { const r = c.getBoundingClientRect(); return r.left <= medio && r.right >= medio; });
+      if (i < 0) i = x <= 0 ? 0 : tarjetas.length - 1;
+      if (i === actual) return;
+      actual = i;
+      titulo.textContent = tarjetas[i].dataset.titulo ?? "";
+      tipo.textContent = tarjetas[i].dataset.tipo ?? "";
+      numero.textContent = String(i + 1).padStart(2, "0");
+    };
+    // la tira sigue al scroll con un poco de inercia
     const bucle = () => {
-      angulo += (objetivo - angulo) * 0.09;
-      colocar();
+      x += (objetivo - x) * 0.1;
+      tira.style.transform = `translate3d(${-x}px, -50%, 0)`;
+      marcar();
       requestAnimationFrame(bucle);
     };
-    window.addEventListener('scroll', leerScroll, { passive: true });
-    window.addEventListener('resize', colocar);
+    window.addEventListener("scroll", leerScroll, { passive: true });
+    window.addEventListener("resize", leerScroll);
     leerScroll();
-    angulo = objetivo;
-    colocar();
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(bucle);
+    x = objetivo;
+    requestAnimationFrame(bucle);
   }
 </script>

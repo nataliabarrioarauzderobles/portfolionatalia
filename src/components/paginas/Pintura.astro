@@ -10,12 +10,8 @@ const t = textos[idioma];
 ---
 
 <Base idioma={idioma} pagina="pintura" titulo={t.pinturaTitulo}>
-  <div class="contenedor">
-    <h1 class="titulo-pagina">{t.pinturaTitulo}</h1>
-  </div>
+  <!-- el título queda para lectores de pantalla y buscadores; en pantalla, la sección ya está marcada arriba -->
+  <h1 class="solo-lector">{t.pinturaTitulo}</h1>
   <GaleriaObras idioma={idioma} />
 </Base>
 
-<style>
-  .titulo-pagina { display: block; margin: clamp(1.5rem, 4vw, 2.5rem) 0 1.2rem; color: var(--texto-suave); }
-</style>
