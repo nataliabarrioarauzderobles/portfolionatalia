@@ -1,7 +1,7 @@
 ---
 // PIEZAS DECORATIVAS (ojos y labios), lo primero de la página de Diseño:
-//  · A la izquierda, las piezas ya hechas, de arriba abajo: caen una tras otra como fichas de dominó.
-//  · A la derecha (fija mientras bajas), una invitación grande a crear tu propio diseño.
+//  · Arriba y centrada, la invitación a crear tu propio diseño (se escribe sola al entrar).
+//  · Debajo, las piezas ya hechas caen una tras otra de arriba abajo, en zigzag, como fichas de dominó.
 //  · Al pulsarla se abre "Crea tu pieza" (Personaliza.astro) a pantalla completa.
 //  · Debajo, cómo quedan en casa.
 import { Image } from 'astro:assets';
@@ -34,29 +34,30 @@ const tx = {
 ---
 
 <section class="vitrina contenedor" id="piezas">
-  <!-- las piezas reales, en cascada -->
-  <ul class="domino">
-    {modelosPieza.map((m, i) => (
-      <li style={`--i:${i}`} data-ficha>
-        <Image src={imagen(m.imagen)} alt={m.nombre[idioma]} widths={[400, 800]} sizes="(max-width: 860px) 80vw, 40vw" loading={i < 2 ? 'eager' : 'lazy'} />
-      </li>
-    ))}
-  </ul>
-
-  <!-- la invitación -->
-  <div class="lado">
+  <!-- la invitación, centrada arriba -->
+  <div class="invitacion">
+    <p class="mono etiqueta">{tx.etiqueta}</p>
     <button type="button" class="llamada" data-abrir-personaliza>
-      <span class="mono etiqueta">{tx.etiqueta}</span>
       <!-- el texto se escribe solo al entrar; mientras, cada línea guarda su sitio -->
       <span class="grande" aria-label={tx.llamada.join(" ")} data-escribir>
         {tx.llamada.map((l) => <span class="linea" data-texto={l}><span class="hueco" aria-hidden="true">{l}</span><span class="escrito" aria-hidden="true"></span></span>)}
       </span>
-      <span class="flecha" aria-hidden="true">→</span>
     </button>
     <p class="sub">{tx.sub}</p>
-    <div class="texto">
-      {textoPiezas[idioma].map((p) => <p>{p}</p>)}
-    </div>
+    <button type="button" class="boton boton-principal" data-abrir-personaliza>{tx.boton} →</button>
+  </div>
+
+  <!-- las piezas reales, cayendo en cascada de arriba abajo, en zigzag -->
+  <ul class="domino">
+    {modelosPieza.map((m, i) => (
+      <li style={`--i:${i}`} data-ficha>
+        <Image src={imagen(m.imagen)} alt={m.nombre[idioma]} widths={[400, 800]} sizes="(max-width: 860px) 80vw, 36vw" loading={i < 2 ? "eager" : "lazy"} />
+      </li>
+    ))}
+  </ul>
+
+  <div class="texto">
+    {textoPiezas[idioma].map((p) => <p>{p}</p>)}
   </div>
 </section>
 
@@ -80,48 +81,49 @@ const tx = {
 </dialog>
 
 <style>
-  .vitrina {
-    margin-top: clamp(1.5rem, 4vw, 3rem);
-    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: clamp(2rem, 6vw, 6rem); align-items: start;
-  }
+  .vitrina { margin-top: clamp(1.5rem, 4vw, 3rem); }
 
-  /* DOMINÓ: las piezas, una debajo de otra, cayendo en cadena */
-  .domino { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(0.5rem, 2vw, 1.4rem); perspective: 1200px; }
-  .domino li { transform-origin: 50% 0%; }
-  .domino li:nth-child(odd) { justify-self: start; }
-  .domino li:nth-child(even) { justify-self: end; }
-  .domino :global(img) { display: block; width: min(100%, 440px); height: auto; mix-blend-mode: multiply; }
+  /* LA INVITACIÓN: centrada, en mayúsculas finas y espaciadas */
+  .invitacion { display: grid; justify-items: center; text-align: center; padding: clamp(1rem, 6vh, 4rem) 0 clamp(2rem, 6vh, 4rem); }
+  .etiqueta { color: var(--texto-suave); margin: 0 0 1.4rem; }
+  .llamada { padding: 0; border: 0; background: none; cursor: pointer; color: var(--texto); }
+  .grande {
+    display: grid; justify-items: center;
+    font-family: var(--fuente); font-weight: 200; font-size: clamp(1.8rem, 4.2vw, 3.6rem);
+    line-height: 1.15; letter-spacing: 0.12em; text-transform: uppercase;
+    transition: letter-spacing 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .llamada:hover .grande { letter-spacing: 0.16em; }
+  /* cada línea ocupa su sitio desde el principio (texto invisible) y encima se va escribiendo */
+  .linea { position: relative; display: block; }
+  .hueco { visibility: hidden; }
+  .escrito { position: absolute; left: 0; right: 0; top: 0; white-space: pre; text-align: left; }
+  /* el cursor: una línea fina mientras escribe, que desaparece al terminar */
+  .escrito.cursor::after { content: ""; display: inline-block; width: 1px; height: 0.85em; margin-left: 0.08em; vertical-align: -0.06em; background: currentColor; animation: parpadeo 0.9s steps(1) infinite; }
+  @keyframes parpadeo { 50% { opacity: 0; } }
+  /* sin JavaScript, el texto se ve directamente */
+  :global(html:not(.js)) .hueco { visibility: visible; }
+  .sub { margin: 1.6rem 0 1.8rem; max-width: 40ch; font-size: 0.92rem; line-height: 1.6; color: var(--texto-suave); }
+
+  /* DOMINÓ: las piezas caen en cadena, de arriba abajo, alternando a un lado y a otro */
+  .domino { list-style: none; margin: 0 auto; padding: 0; max-width: 1000px; perspective: 1200px; }
+  .domino li { width: min(42%, 420px); transform-origin: 50% 0%; }
+  .domino li + li { margin-top: clamp(-5rem, -6vw, -2rem); }
+  .domino li:nth-child(4n + 1) { margin-left: 4%; }
+  .domino li:nth-child(4n + 2) { margin-left: 52%; }
+  .domino li:nth-child(4n + 3) { margin-left: 18%; }
+  .domino li:nth-child(4n + 4) { margin-left: 44%; }
+  .domino :global(img) { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
   :global(.js) .domino li:not(.cae) { opacity: 0; }
-  .domino li.cae { animation: caer 0.9s cubic-bezier(0.3, 1.35, 0.5, 1) backwards; animation-delay: calc(var(--i) * 160ms); }
+  .domino li.cae { animation: caer 0.9s cubic-bezier(0.3, 1.35, 0.5, 1) backwards; animation-delay: calc(var(--i) * 170ms); }
   @keyframes caer {
-    0% { opacity: 0; transform: translateY(-40px) rotateX(-75deg); }
+    0% { opacity: 0; transform: translateY(-50px) rotateX(-75deg); }
     60% { opacity: 1; }
     100% { opacity: 1; transform: none; }
   }
 
-  /* LA INVITACIÓN: fija mientras bajas por las piezas */
-  .lado { position: sticky; top: 8rem; padding-top: clamp(1rem, 8vh, 5rem); }
-  .llamada { display: grid; gap: 1rem; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: var(--texto); }
-  .etiqueta { color: var(--texto-suave); }
-  /* letra monoespaciada en mayúsculas, como las etiquetas de la web */
-  .grande { display: grid; font-family: var(--fuente-mono); font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.1rem); line-height: 1.12; letter-spacing: -0.02em; text-transform: uppercase; }
-  /* cada línea ocupa su sitio desde el principio (texto invisible) y encima se va escribiendo */
-  .linea { position: relative; display: block; }
-  .hueco { visibility: hidden; }
-  .escrito { position: absolute; left: 0; top: 0; white-space: pre; }
-  .escrito.cursor::after { content: ""; display: inline-block; width: 0.55em; height: 0.9em; margin-left: 0.06em; vertical-align: -0.08em; background: currentColor; animation: parpadeo 0.9s steps(1) infinite; }
-  @keyframes parpadeo { 50% { opacity: 0; } }
-  /* sin JavaScript, el texto se ve directamente */
-  :global(html:not(.js)) .hueco { visibility: visible; }
-  .grande .linea { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .llamada:hover .grande .linea:nth-child(1) { transform: translateX(0.4rem); }
-  .llamada:hover .grande .linea:nth-child(2) { transform: translateX(0.8rem); }
-  .llamada:hover .grande .linea:nth-child(3) { transform: translateX(1.2rem); }
-  .flecha { font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; animation: empujar 1.6s ease-in-out infinite; }
-  @keyframes empujar { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(14px); } }
-  .sub { margin: 1.4rem 0 2rem; max-width: 34ch; font-size: 0.92rem; line-height: 1.6; }
-  .texto p { margin: 0 0 0.8rem; max-width: 46ch; font-size: 0.82rem; line-height: 1.7; color: var(--texto-suave); }
+  .texto { max-width: 760px; margin: clamp(3rem, 7vw, 5rem) auto 0; columns: 2; column-gap: 2.5rem; }
+  .texto p { margin: 0 0 0.8rem; font-size: 0.82rem; line-height: 1.75; color: var(--texto-suave); }
 
   .en-casa { margin-top: clamp(4rem, 9vw, 7rem); }
   .en-casa :global(img) { width: 100%; height: auto; }
@@ -130,11 +132,12 @@ const tx = {
   .boton-flotante { display: none; }
 
   @media (max-width: 860px) {
-    .vitrina { grid-template-columns: 1fr; }
-    /* en el móvil la invitación va primero y las piezas caen debajo */
-    .lado { position: static; order: -1; padding-top: 0; }
-    .grande { font-size: clamp(1.6rem, 8.4vw, 2.4rem); }
-    .domino li { justify-self: center !important; }
+    .grande { font-size: clamp(1.4rem, 7vw, 2.2rem); letter-spacing: 0.08em; }
+    .domino li { width: 78%; }
+    .domino li:nth-child(odd) { margin-left: 0; }
+    .domino li:nth-child(even) { margin-left: 22%; }
+    .domino li + li { margin-top: -1.5rem; }
+    .texto { columns: 1; }
     .boton-flotante {
       position: fixed; left: 50%; bottom: 1rem; z-index: 9; transform: translateX(-50%);
       display: block; padding: 0.9rem 1.4rem; border: 0; border-radius: 999px;
@@ -161,7 +164,7 @@ const tx = {
   .volver:hover { border-color: var(--texto); }
   .barra-salir .cerrar { width: 2.2rem; height: 2.2rem; border: 0; background: none; font-size: 1.6rem; font-weight: 200; line-height: 1; cursor: pointer; color: var(--texto); }
   @keyframes entrarDialogo { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .domino li.cae, .flecha { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .domino li.cae { animation: none; } }
 </style>
 
 <script>
@@ -207,6 +210,8 @@ const tx = {
         }
         await new Promise((ok) => setTimeout(ok, 220));
       }
+      // al terminar, el cursor desaparece
+      lineas.forEach((l) => l.querySelector(".escrito")!.classList.remove("cursor"));
     };
     if (sinMovimiento) lineas.forEach((l) => (l.querySelector('.escrito')!.textContent = l.dataset.texto ?? ''));
     else {
