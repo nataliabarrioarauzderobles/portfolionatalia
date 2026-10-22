@@ -1,10 +1,11 @@
 ---
-// PINTURA (inspirada en la vista "LIST" de avea.studio)
-//  · Los cuadros, uno debajo de otro en una columna en el centro.
-//  · A la izquierda, fija, la lista de todos los títulos (el actual en negro; pulsando uno se va a él).
-//  · A los lados del cuadro que está en el centro de la pantalla: su serie y sus medidas y técnica.
-//  · Al pulsar un cuadro se abre como un proyecto de avea: el texto a la izquierda y, a la derecha,
-//    el cuadro y sus mockups, que avanzan de lado al hacer scroll. Al final, "siguiente obra".
+// PINTURA: tres columnas de cuadros que se mueven solas, sin fin (dos en el móvil).
+//  · Una sube, la de al lado baja y la otra sube: se ven muchos cuadros a la vez sin bajar por la página.
+//  · Si "agarras" una columna (rueda del ratón, trackpad o arrastrando con el dedo), esa se queda
+//    a tu mando mientras las demás siguen moviéndose; al soltarla un momento, vuelve a moverse sola.
+//  · Al pulsar un cuadro se abre su información en un panel, debajo de la barra de secciones (que sigue
+//    visible). Dentro, el texto a la izquierda y el cuadro y sus mockups avanzando de lado (como en avea).
+//    Pulsando fuera del panel, con Esc o con "Cerrar" se vuelve a las columnas.
 //  · Filtros arriba: por serie y "solo disponibles".
 import { Image } from 'astro:assets';
 import { series } from '../data/obras';
@@ -16,11 +17,11 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { obra: 'Obra', siguiente: 'Baja para ver la siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', desliza: 'Desliza' },
-  en: { obra: 'Work', siguiente: 'Scroll down for the next work', anterior: 'Previous work', cerrar: 'Close', desliza: 'Swipe' },
+  es: { obra: 'Obra', siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar' },
+  en: { obra: 'Work', siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close' },
 }[idioma];
 
-// En DE-formando la imagen de la lista es el mockup; en el visor, primero el cuadro y después los mockups
+// En DE-formando la imagen de las columnas es el mockup; en el panel, primero el cuadro y después los mockups
 const conMockupPrimero = new Set(['formas']);
 const obras = series.flatMap((serie) =>
   serie.obras.map((obra) => {
@@ -31,58 +32,44 @@ const obras = series.flatMap((serie) =>
   }),
 );
 const total = String(obras.length).padStart(2, '0');
-const tecnica = (s: (typeof obras)[number]['serie']) => (s.tecnica ? t.tecnicas[s.tecnica] : '');
 ---
 
 <section class="pintura" data-pintura>
-  <!-- capa fija: filtros, lista de títulos y datos de la obra del centro -->
-  <div class="capa-fija" aria-hidden="false">
-    <div class="filtros">
-      <div class="series" role="group" aria-label={t.pinturaTitulo}>
-        <button type="button" data-serie="todas" aria-pressed="true">{t.todas}</button>
-        {series.map((s) => <button type="button" data-serie={s.id} aria-pressed="false">{t.series[s.id]}</button>)}
-      </div>
-      <label class="solo-disponibles"><input type="checkbox" data-disponibles /> {t.soloDisponibles}</label>
+  <div class="filtros">
+    <div class="series" role="group" aria-label={t.pinturaTitulo}>
+      <button type="button" data-serie="todas" aria-pressed="true">{t.todas}</button>
+      {series.map((s) => <button type="button" data-serie={s.id} aria-pressed="false">{t.series[s.id]}</button>)}
     </div>
-
-    <ol class="titulos" data-titulos>
-      {obras.map((o) => (
-        <li data-serie={o.serie.id} data-vendida={o.vendida ? '' : undefined}>
-          <button type="button" data-ir={o.id}>{o.titulo}</button>
-        </li>
-      ))}
-    </ol>
-
-    <p class="dato izquierda" data-dato-serie>{t.series[obras[0].serie.id]}</p>
-    <p class="dato derecha" data-dato-ficha>{obras[0].medidas ? `${obras[0].medidas.replace(' x ', ' × ')} cm · ` : ''}{tecnica(obras[0].serie)}</p>
-    <p class="dato extremo" data-dato-numero>01 / {total}</p>
+    <label class="solo-disponibles"><input type="checkbox" data-disponibles /> {t.soloDisponibles}</label>
   </div>
 
-  <!-- la columna de cuadros -->
-  <ul class="columna" data-columna>
+  <!-- las columnas se montan con el script; aquí está la lista de cuadros de la que salen -->
+  <div class="columnas" data-columnas></div>
+  <ul class="fuente" data-fuente hidden>
     {obras.map((o, i) => (
-      <li id={`cuadro-${o.id}`} data-cuadro={o.id} data-serie={o.serie.id} data-vendida={o.vendida ? '' : undefined}
-        data-nombre-serie={t.series[o.serie.id]}
-        data-ficha={`${o.medidas ? `${o.medidas.replace(' x ', ' × ')} cm · ` : ''}${tecnica(o.serie)}`}
-        data-numero={String(i + 1).padStart(2, '0')}>
+      <li class="cuadro" data-serie={o.serie.id} data-vendida={o.vendida ? '' : undefined}>
         <button type="button" class="abrir" data-abrir={`obra-${o.id}`} aria-label={`${t.verObra}: ${o.titulo}`}>
-          <Image src={o.portada} alt={o.titulo} widths={[400, 700, 1000]} sizes="(max-width: 760px) 80vw, 24vw" loading={i < 4 ? 'eager' : 'lazy'} />
-          <span class="ver">{t.verObra}</span>
+          <Image src={o.portada} alt={o.titulo} widths={[360, 600, 900]} sizes="(max-width: 760px) 46vw, 30vw" loading={i < 9 ? 'eager' : 'lazy'} draggable="false" />
         </button>
-        <!-- en el móvil los datos van debajo de cada cuadro -->
-        <p class="pie-movil"><span>{o.titulo}</span><span>{o.vendida ? t.vendida : o.medidas ? `${o.medidas.replace(' x ', ' × ')} cm` : ''}</span></p>
+        <p class="pie"><span>{o.titulo}</span><span>{o.vendida ? t.vendida : o.medidas ? `${o.medidas.replace(' x ', ' × ')} cm` : ''}</span></p>
       </li>
     ))}
   </ul>
 </section>
 
-<!-- EL VISOR DE CADA OBRA, como un proyecto de avea -->
+<!-- velo: tapa las columnas mientras se ve una obra; pulsarlo cierra -->
+<div class="velo" data-velo hidden></div>
+
+<!-- EL PANEL DE CADA OBRA, debajo de la barra de secciones -->
 {obras.map((o, i) => (
   <dialog class="visor" id={`obra-${o.id}`} aria-label={o.titulo} data-visor data-indice={i}>
     <div class="arriba">
       <span>{tx.obra} {String(i + 1).padStart(2, '0')} / {total}</span>
-      <button type="button" data-anterior-obra>↑ {tx.anterior}</button>
-      <button type="button" data-cerrar>{tx.cerrar}</button>
+      <span class="navegar">
+        <button type="button" data-anterior-obra>← {tx.anterior}</button>
+        <button type="button" data-siguiente-obra>{tx.siguiente} →</button>
+      </span>
+      <button type="button" data-cerrar>{tx.cerrar} ×</button>
     </div>
 
     <div class="texto-obra">
@@ -101,64 +88,75 @@ const tecnica = (s: (typeof obras)[number]['serie']) => (s.tecnica ? t.tecnicas[
       )}
     </div>
 
-    <!-- las imágenes avanzan de lado con el scroll -->
-    <div class="pista" data-pista>
-      {o.imagenes.map((img, j) => (
-        <figure>
-          <Image src={img} alt={j === 0 ? o.titulo : `${o.titulo} — mockup`} widths={[700, 1200, 1800]} sizes="(max-width: 760px) 85vw, 50vw" loading="lazy" />
-        </figure>
-      ))}
-      <p class="siguiente" data-siguiente-obra>{tx.siguiente} ↓</p>
+    <!-- el cuadro y sus mockups, que avanzan de lado con la rueda (o deslizando en el móvil) -->
+    <div class="ventana">
+      <div class="pista" data-pista>
+        {o.imagenes.map((img, j) => (
+          <figure>
+            <Image src={img} alt={j === 0 ? o.titulo : `${o.titulo} — mockup`} widths={[700, 1200, 1800]} sizes="(max-width: 760px) 85vw, 50vw" loading="lazy" />
+          </figure>
+        ))}
+      </div>
     </div>
-
     <p class="progreso" data-progreso>0%</p>
   </dialog>
 ))}
 
 <style>
-  .pintura { position: relative; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
+  .pintura { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
 
-  /* CAPA FIJA: se queda en su sitio mientras los cuadros pasan por debajo */
-  .capa-fija { position: sticky; top: 0; height: 100vh; margin-bottom: -100vh; pointer-events: none; z-index: 2; }
-  .capa-fija > * { pointer-events: auto; }
-  .filtros { position: absolute; top: 4.4rem; left: var(--margen); right: var(--margen); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  /* FILTROS */
+  .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; padding: 0.4rem var(--margen) 0.9rem; }
   .series { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; }
-  .series button, .titulos button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; text-align: left; transition: color 0.25s; }
+  .series button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; transition: color 0.25s; }
   .series button:hover, .series button[aria-pressed='true'] { color: var(--texto); }
   .solo-disponibles { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--texto-tenue); cursor: pointer; }
   .solo-disponibles input { accent-color: var(--texto); }
 
-  .titulos { position: absolute; left: var(--margen); top: 50%; transform: translateY(-50%); list-style: none; margin: 0; padding: 0; display: grid; gap: 0.12rem; max-height: 62vh; overflow: hidden; }
-  .titulos li[hidden] { display: none; }
-  .titulos button:hover, .titulos button.actual { color: var(--texto); }
+  /* LAS COLUMNAS: ocupan el resto de la pantalla */
+  .columnas {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2.4vw, 2.4rem);
+    height: calc(100dvh - var(--alto-cabecera, 64px) - 2.6rem); padding: 0 var(--margen);
+    overflow: hidden;
+    /* arriba y abajo se funden con el blanco */
+    mask-image: linear-gradient(180deg, transparent, #000 6%, #000 94%, transparent);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  @media (max-width: 760px) {
+    .columnas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
+    /* en el móvil, título y medidas en dos líneas para que no se corten */
+    .columnas :global(.pie) { flex-direction: column; gap: 0.1rem; }
+  }
+  .columnas :global(.columna) { position: relative; overflow: hidden; touch-action: none; cursor: grab; }
+  .columnas :global(.columna.agarrada) { cursor: grabbing; }
+  .columnas :global(.carril) { display: grid; gap: clamp(1.6rem, 4vh, 3rem); will-change: transform; }
 
-  .dato { position: absolute; top: 50%; transform: translateY(-50%); margin: 0; }
-  .izquierda { right: calc(50% + clamp(140px, 12vw, 200px) + 2rem); text-align: right; }
-  .derecha { left: calc(50% + clamp(140px, 12vw, 200px) + 2rem); }
-  .extremo { right: var(--margen); font-variant-numeric: tabular-nums; }
+  .cuadro { display: grid; gap: 0.5rem; }
+  .cuadro[hidden] { display: none; }
+  .abrir { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; overflow: hidden; }
+  .abrir :global(img) { display: block; width: 100%; height: auto; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); -webkit-user-drag: none; user-select: none; }
+  .abrir:hover :global(img) { transform: scale(1.04); }
+  .pie { display: flex; justify-content: space-between; gap: 0.8rem; margin: 0; }
+  .pie span:last-child { color: var(--texto-tenue); white-space: nowrap; }
 
-  /* LA COLUMNA DE CUADROS */
-  /* más aire entre obras; la primera empieza cerca de arriba (sin tanto blanco al entrar) */
-  .columna { list-style: none; margin: 0 auto; padding: 7.5rem 0 45vh; width: clamp(280px, 24vw, 400px); display: grid; gap: clamp(4rem, 12vh, 8rem); }
-  .columna li[hidden] { display: none; }
-  .abrir { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
-  .abrir :global(img) { display: block; width: 100%; height: auto; transition: filter 0.4s; }
-  .ver { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 0.4rem 0.7rem; background: var(--fondo); color: var(--texto); opacity: 0; transition: opacity 0.3s; }
-  .abrir:hover .ver, .abrir:focus-visible .ver { opacity: 1; }
-  .pie-movil { display: none; }
-
-  /* EL VISOR */
-  .visor { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; border: 0; background: var(--fondo); color: var(--texto); overflow: hidden; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
-  .visor[open] { display: block; animation: abrirVisor 0.5s ease; }
-  .visor::backdrop { background: #fff; }
-  @keyframes abrirVisor { from { opacity: 0; } to { opacity: 1; } }
-  .arriba { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: grid; grid-template-columns: 1fr auto 1fr; padding: 1.1rem var(--margen); }
+  /* VELO Y PANEL: debajo de la barra de secciones, que sigue visible */
+  .velo { position: fixed; inset: var(--alto-cabecera, 64px) 0 0; z-index: 14; background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: aparecer 0.35s ease; }
+  .visor {
+    position: fixed; inset: calc(var(--alto-cabecera, 64px) + 0.8rem) var(--margen) 0.8rem; z-index: 15;
+    width: auto; height: auto; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+    background: var(--fondo); color: var(--texto); overflow: hidden;
+    box-shadow: 0 20px 60px -30px rgba(0, 0, 0, 0.35);
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em;
+  }
+  .visor[open] { display: block; animation: aparecer 0.4s ease; }
+  @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+  .arriba { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; padding: 1rem 1.4rem; }
   .arriba button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; }
   .arriba button:hover { color: var(--texto); }
+  .navegar { display: flex; gap: 1.6rem; }
   .arriba [data-cerrar] { justify-self: end; color: var(--texto); }
 
-  /* el texto queda debajo: al avanzar, las imágenes pasan por encima (como en avea) */
-  .texto-obra { position: absolute; left: var(--margen); top: 50%; transform: translateY(-50%); width: min(30vw, 360px); z-index: 1; }
+  .texto-obra { position: absolute; left: 1.4rem; top: 50%; transform: translateY(-50%); width: min(28vw, 340px); z-index: 1; }
   .texto-obra h3 { font-size: 0.95rem; margin: 0 0 0.3rem; text-transform: uppercase; }
   .serie-obra { margin: 0 0 1.4rem; color: var(--texto-tenue); }
   .descripcion { margin: 0 0 1.4rem; text-transform: none; font-size: 0.82rem; line-height: 1.55; color: var(--texto-suave); }
@@ -168,72 +166,139 @@ const tecnica = (s: (typeof obras)[number]['serie']) => (s.tecnica ? t.tecnicas[
   .enlace { display: inline-block; padding-bottom: 0.2rem; border-bottom: 1px solid var(--texto); }
   .enlace:hover { opacity: 0.6; }
 
-  .pista { position: absolute; z-index: 2; top: 50%; left: 0; display: flex; align-items: center; gap: 1rem; padding-left: max(calc(var(--margen) + 32vw), 380px); height: 64vh; transform: translateY(-50%); will-change: transform; }
+  .ventana { position: absolute; inset: 3.4rem 0 3rem; z-index: 2; overflow: hidden; pointer-events: none; }
+  .pista { position: absolute; top: 0; bottom: 0; left: 0; display: flex; align-items: center; gap: 1rem; padding: 0 1.4rem 0 max(calc(1.4rem + 30vw), 380px); will-change: transform; pointer-events: auto; }
   .pista figure { margin: 0; height: 100%; flex: none; }
   .pista :global(img) { height: 100%; width: auto; display: block; }
-  .siguiente { flex: none; margin: 0 var(--margen) 0 4rem; white-space: nowrap; }
-  .progreso { position: absolute; right: var(--margen); bottom: 1.1rem; margin: 0; font-variant-numeric: tabular-nums; }
+  .progreso { position: absolute; right: 1.4rem; bottom: 1rem; margin: 0; font-variant-numeric: tabular-nums; }
 
-  /* MÓVIL: lista sencilla con los datos debajo de cada cuadro; el visor, apilado */
   @media (max-width: 760px) {
-    .capa-fija { position: static; height: auto; margin: 0; }
-    .filtros { position: static; padding: 1rem var(--margen); }
-    .titulos, .dato { display: none; }
-    .columna { padding: 1rem var(--margen) 3rem; width: 100%; gap: 2.4rem; }
-    .pie-movil { display: flex; justify-content: space-between; gap: 1rem; margin: 0.6rem 0 0; }
-    .pie-movil span:last-child { color: var(--texto-tenue); }
-    .visor { overflow-y: auto; }
-    .texto-obra { position: static; transform: none; width: auto; padding: 4rem var(--margen) 1.5rem; }
-    .pista { position: static; transform: none !important; height: 52vh; padding: 0 var(--margen); overflow-x: auto; scroll-snap-type: x mandatory; }
+    .visor { inset: calc(var(--alto-cabecera, 64px) + 0.5rem) 0.5rem 0.5rem; overflow-y: auto; }
+    .arriba { grid-template-columns: 1fr auto; padding: 0.9rem 1rem; }
+    .navegar { grid-column: 1 / -1; grid-row: 2; justify-content: space-between; }
+    .texto-obra { position: static; transform: none; width: auto; padding: 5.4rem 1rem 1.2rem; }
+    .ventana { position: static; overflow: visible; }
+    .pista { position: static; height: 50vh; padding: 0 1rem; overflow-x: auto; scroll-snap-type: x mandatory; transform: none !important; }
     .pista figure { scroll-snap-align: center; }
-    .siguiente { margin-left: 2rem; }
-    .progreso { position: fixed; }
+    .progreso { display: none; }
   }
 </style>
 
 <script>
-  const seccion = document.querySelector<HTMLElement>('[data-pintura]')!;
-  const cuadros = [...seccion.querySelectorAll<HTMLElement>('[data-cuadro]')];
-  const titulos = [...seccion.querySelectorAll<HTMLButtonElement>('[data-ir]')];
-  const datoSerie = seccion.querySelector<HTMLElement>('[data-dato-serie]')!;
-  const datoFicha = seccion.querySelector<HTMLElement>('[data-dato-ficha]')!;
-  const datoNumero = seccion.querySelector<HTMLElement>('[data-dato-numero]')!;
-  const total = String(cuadros.length).padStart(2, '0');
+  const html = document.documentElement;
+  // la altura de la barra de arriba (para colocar las columnas y el panel justo debajo)
+  const medirCabecera = () => html.style.setProperty('--alto-cabecera', `${document.querySelector<HTMLElement>('.cabecera')?.offsetHeight ?? 64}px`);
+  medirCabecera();
+  window.addEventListener('resize', medirCabecera);
 
-  // ── el cuadro que está en el centro de la pantalla manda en los datos y en la lista ──
-  let actual = '';
-  const marcar = () => {
-    const medio = window.innerHeight / 2;
-    const visible = cuadros.filter((c) => !c.hidden);
-    // el cuadro más cercano al centro de la pantalla
-    let centro = visible[0], mejor = Infinity;
-    visible.forEach((c) => { const r = c.getBoundingClientRect(); const d = Math.abs((r.top + r.bottom) / 2 - medio); if (d < mejor) { mejor = d; centro = c; } });
-    if (!centro || centro.dataset.cuadro === actual) return;
-    actual = centro.dataset.cuadro!;
-    datoSerie.textContent = centro.dataset.nombreSerie ?? '';
-    datoFicha.textContent = centro.dataset.ficha ?? '';
-    datoNumero.textContent = `${centro.dataset.numero} / ${total}`;
-    titulos.forEach((b) => b.classList.toggle('actual', b.dataset.ir === actual));
-    // la lista se desplaza para que el título actual se vea
-    titulos.find((b) => b.dataset.ir === actual)?.scrollIntoView({ block: 'nearest' });
+  const seccion = document.querySelector<HTMLElement>('[data-pintura]')!;
+  const contenedor = seccion.querySelector<HTMLElement>('[data-columnas]')!;
+  const fuente = [...seccion.querySelectorAll<HTMLElement>('[data-fuente] > li')];
+  const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const COPIAS = 3; // cada columna se repite para que el movimiento no tenga fin
+
+  type Columna = { el: HTMLElement; carril: HTMLElement; y: number; vel: number; hasta: number; alto: number };
+  let columnas: Columna[] = [];
+
+  // ── EL PANEL DE CADA OBRA ──
+  const visores = [...document.querySelectorAll<HTMLDialogElement>('[data-visor]')];
+  const velo = document.querySelector<HTMLElement>('[data-velo]')!;
+  const escritorio = matchMedia('(min-width: 761px)');
+  const visorAbierto = () => visores.some((v) => v.open);
+  function abrirVisor(v: HTMLDialogElement | undefined) {
+    if (!v) return;
+    visores.forEach((x) => x !== v && x.open && x.close());
+    // sin "modal": así la barra de secciones de arriba sigue funcionando
+    if (!v.open) v.show();
+    velo.hidden = false;
+    v.dispatchEvent(new Event('abierto'));
+  }
+  const cerrarTodo = () => { visores.forEach((v) => v.open && v.close()); velo.hidden = true; };
+  velo.addEventListener('click', cerrarTodo);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && visorAbierto()) cerrarTodo(); });
+
+  // ── agarrar una columna: rueda o arrastrar; las demás siguen ──
+  const agarre = (c: Columna) => {
+    c.el.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      c.y += e.deltaY;
+      c.hasta = performance.now() + 2500;
+    }, { passive: false });
+    let inicio: { y: number; py: number } | null = null;
+    c.el.addEventListener('pointerdown', (e) => {
+      inicio = { y: c.y, py: e.clientY };
+      contenedor.dataset.arrastrando = '0';
+      c.hasta = Infinity;
+      c.el.classList.add('agarrada');
+    });
+    c.el.addEventListener('pointermove', (e) => {
+      if (!inicio) return;
+      const d = e.clientY - inicio.py;
+      if (Math.abs(d) > 6 && contenedor.dataset.arrastrando !== '1') { contenedor.dataset.arrastrando = '1'; c.el.setPointerCapture(e.pointerId); }
+      c.y = inicio.y - d;
+    });
+    const soltar = () => {
+      if (!inicio) return;
+      inicio = null;
+      c.hasta = performance.now() + 2500; // un momento quieta y vuelve a moverse sola
+      c.el.classList.remove('agarrada');
+      setTimeout(() => (contenedor.dataset.arrastrando = '0'), 0);
+    };
+    c.el.addEventListener('pointerup', soltar);
+    c.el.addEventListener('pointercancel', soltar);
   };
-  let pendiente = false;
-  window.addEventListener('scroll', () => { if (pendiente) return; pendiente = true; requestAnimationFrame(() => { pendiente = false; marcar(); }); }, { passive: true });
-  marcar();
-  titulos.forEach((b) => b.addEventListener('click', () => {
-    document.getElementById(`cuadro-${b.dataset.ir}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }));
+
+  // ── montar las columnas (3 en ordenador, 2 en el móvil) con los cuadros visibles ──
+  const montar = () => {
+    const n = window.innerWidth <= 760 ? 2 : 3;
+    const visibles = fuente.filter((li) => !li.hidden);
+    contenedor.innerHTML = '';
+    columnas = Array.from({ length: n }, (_, k) => {
+      const el = document.createElement('div');
+      el.className = 'columna';
+      const carril = document.createElement('div');
+      carril.className = 'carril';
+      const mios = visibles.filter((_, i) => i % n === k);
+      for (let c = 0; c < COPIAS; c++) mios.forEach((li) => {
+        const copia = li.cloneNode(true) as HTMLElement;
+        if (c > 0) copia.setAttribute('aria-hidden', 'true');
+        carril.appendChild(copia);
+      });
+      el.appendChild(carril);
+      contenedor.appendChild(el);
+      // una sube y la siguiente baja; velocidades algo distintas para que no vayan a la par
+      return { el, carril, y: Math.random() * 400, vel: (k % 2 ? -1 : 1) * (22 + k * 4), hasta: 0, alto: 0 };
+    });
+    const medir = () => columnas.forEach((c) => (c.alto = c.carril.scrollHeight / COPIAS));
+    requestAnimationFrame(medir);
+    // las imágenes cambian la altura al cargar
+    contenedor.querySelectorAll('img').forEach((img) => img.addEventListener('load', medir, { once: true }));
+    columnas.forEach(agarre);
+    contenedor.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((b) => b.addEventListener('click', (e) => {
+      if (contenedor.dataset.arrastrando === '1') { e.preventDefault(); return; }
+      abrirVisor(document.getElementById(b.dataset.abrir!) as HTMLDialogElement);
+    }));
+  };
+
+  let anterior = performance.now();
+  const bucle = (ahora: number) => {
+    const dt = Math.min(0.05, (ahora - anterior) / 1000);
+    anterior = ahora;
+    columnas.forEach((c) => {
+      if (!sinMovimiento && ahora > c.hasta && !visorAbierto()) c.y += c.vel * dt;
+      if (c.alto > 0) c.y = ((c.y % c.alto) + c.alto) % c.alto;
+      c.carril.style.transform = `translate3d(0, ${-c.y}px, 0)`;
+    });
+    requestAnimationFrame(bucle);
+  };
 
   // ── filtros ──
   const botonesSerie = [...seccion.querySelectorAll<HTMLButtonElement>('[data-serie]')].filter((b) => b.tagName === 'BUTTON');
   const disponibles = seccion.querySelector<HTMLInputElement>('[data-disponibles]')!;
   let serie = 'todas';
   const filtrar = () => {
-    const vale = (el: HTMLElement) => (serie === 'todas' || el.dataset.serie === serie) && !(disponibles.checked && el.hasAttribute('data-vendida'));
-    cuadros.forEach((c) => (c.hidden = !vale(c)));
-    seccion.querySelectorAll<HTMLElement>('[data-titulos] li').forEach((li) => (li.hidden = !vale(li)));
-    actual = '';
-    marcar();
+    fuente.forEach((li) => (li.hidden = !((serie === 'todas' || li.dataset.serie === serie) && !(disponibles.checked && li.hasAttribute('data-vendida')))));
+    montar();
   };
   botonesSerie.forEach((b) => b.addEventListener('click', () => {
     serie = b.dataset.serie!;
@@ -242,27 +307,15 @@ const tecnica = (s: (typeof obras)[number]['serie']) => (s.tecnica ? t.tecnicas[
   }));
   disponibles.addEventListener('change', filtrar);
 
-  // ── EL VISOR: las imágenes avanzan de lado con la rueda o el trackpad ──
-  const visores = [...document.querySelectorAll<HTMLDialogElement>('[data-visor]')];
-  const escritorio = matchMedia('(min-width: 761px)');
-  const abrirVisor = (v: HTMLDialogElement | undefined) => {
-    if (!v) return;
-    visores.forEach((x) => x !== v && x.open && x.close());
-    if (!v.open) v.showModal();
-    v.dispatchEvent(new Event('abierto'));
-    document.documentElement.style.overflow = 'hidden';
-  };
-  document.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((b) => b.addEventListener('click', () => abrirVisor(document.getElementById(b.dataset.abrir!) as HTMLDialogElement)));
-
   visores.forEach((v, i) => {
     const pista = v.querySelector<HTMLElement>('[data-pista]')!;
     const progreso = v.querySelector<HTMLElement>('[data-progreso]')!;
-    let x = 0, objetivo = 0, empuje = 0, animando = false;
-    const maximo = () => Math.max(0, pista.scrollWidth - window.innerWidth);
+    let x = 0, objetivo = 0, animando = false;
+    const maximo = () => Math.max(0, pista.scrollWidth - v.clientWidth);
     const pintar = () => {
       x += (objetivo - x) * 0.12;
       if (Math.abs(objetivo - x) < 0.5) x = objetivo;
-      pista.style.transform = `translate3d(${-x}px, -50%, 0)`;
+      pista.style.transform = `translate3d(${-x}px, 0, 0)`;
       progreso.textContent = `${Math.round((x / Math.max(1, maximo())) * 100)}%`;
       if (x !== objetivo) requestAnimationFrame(pintar); else animando = false;
     };
@@ -272,23 +325,24 @@ const tecnica = (s: (typeof obras)[number]['serie']) => (s.tecnica ? t.tecnicas[
       e.preventDefault();
       const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
       objetivo = Math.max(0, Math.min(maximo(), objetivo + d));
-      // al llegar al final, seguir bajando lleva a la siguiente obra (y al principio, subir a la anterior)
-      if (objetivo >= maximo() && d > 0) { empuje += d; if (empuje > 500) { empuje = 0; abrirVisor(visores[(i + 1) % visores.length]); } }
-      else if (objetivo <= 0 && d < 0) { empuje += d; if (empuje < -500) { empuje = 0; abrirVisor(visores[(i - 1 + visores.length) % visores.length]); } }
-      else empuje = 0;
       mover();
     }, { passive: false });
-    v.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { objetivo = Math.min(maximo(), objetivo + window.innerWidth * 0.5); mover(); }
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { objetivo = Math.max(0, objetivo - window.innerWidth * 0.5); mover(); }
-    });
-    v.addEventListener('abierto', () => { x = objetivo = empuje = 0; pista.style.transform = ''; progreso.textContent = '0%'; if (escritorio.matches) pista.style.transform = 'translate3d(0, -50%, 0)'; });
+    v.addEventListener('abierto', () => { x = objetivo = 0; pista.style.transform = ''; progreso.textContent = '0%'; });
     v.querySelector('[data-siguiente-obra]')!.addEventListener('click', () => abrirVisor(visores[(i + 1) % visores.length]));
     v.querySelector('[data-anterior-obra]')!.addEventListener('click', () => abrirVisor(visores[(i - 1 + visores.length) % visores.length]));
-    v.querySelector('[data-cerrar]')!.addEventListener('click', () => v.close());
-    v.addEventListener('close', () => { if (!visores.some((x) => x.open)) document.documentElement.style.overflow = ''; });
+    v.querySelector('[data-cerrar]')!.addEventListener('click', cerrarTodo);
   });
 
-  // si se llega con un enlace a una obra (p. ej. desde el anillo de la home), se abre directamente
+  montar();
+  requestAnimationFrame(bucle);
+  let ancho = window.innerWidth;
+  window.addEventListener('resize', () => {
+    // al pasar de móvil a ordenador (o al revés) cambia el número de columnas
+    if ((ancho <= 760) !== (window.innerWidth <= 760)) montar();
+    else columnas.forEach((c) => (c.alto = c.carril.scrollHeight / COPIAS));
+    ancho = window.innerWidth;
+  });
+
+  // si se llega con un enlace a una obra (p. ej. desde la home), se abre directamente
   if (location.hash.startsWith('#obra-')) setTimeout(() => abrirVisor(document.getElementById(location.hash.slice(1)) as HTMLDialogElement), 300);
 </script>
