@@ -83,17 +83,17 @@ const tx = {
 <style>
   .vitrina { margin-top: clamp(1.5rem, 4vw, 3rem); }
 
-  /* LA INVITACIÓN: centrada, en mayúsculas finas y espaciadas */
-  .invitacion { display: grid; justify-items: center; text-align: center; padding: clamp(1rem, 6vh, 4rem) 0 clamp(2rem, 6vh, 4rem); }
-  .etiqueta { color: var(--texto-suave); margin: 0 0 1.4rem; }
+  /* LA INVITACIÓN: centrada, en mayúsculas con Archivo, sobria y con mucho aire (como avea.studio) */
+  .invitacion { display: grid; justify-items: center; text-align: center; padding: clamp(2rem, 10vh, 6rem) 0 clamp(2.5rem, 8vh, 5rem); }
+  .etiqueta { color: var(--texto-suave); margin: 0 0 1.6rem; }
   .llamada { padding: 0; border: 0; background: none; cursor: pointer; color: var(--texto); }
   .grande {
     display: grid; justify-items: center;
-    font-family: var(--fuente); font-weight: 200; font-size: clamp(1.8rem, 4.2vw, 3.6rem);
-    line-height: 1.15; letter-spacing: 0.12em; text-transform: uppercase;
-    transition: letter-spacing 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-weight: 400; font-size: clamp(1.25rem, 2.3vw, 2rem);
+    line-height: 1.2; letter-spacing: 0; text-transform: uppercase;
+    transition: opacity 0.3s ease;
   }
-  .llamada:hover .grande { letter-spacing: 0.16em; }
+  .llamada:hover .grande { opacity: 0.55; }
   /* cada línea ocupa su sitio desde el principio (texto invisible) y encima se va escribiendo */
   .linea { position: relative; display: block; }
   .hueco { visibility: hidden; }
@@ -103,7 +103,7 @@ const tx = {
   @keyframes parpadeo { 50% { opacity: 0; } }
   /* sin JavaScript, el texto se ve directamente */
   :global(html:not(.js)) .hueco { visibility: visible; }
-  .sub { margin: 1.6rem 0 1.8rem; max-width: 40ch; font-size: 0.92rem; line-height: 1.6; color: var(--texto-suave); }
+  .sub { margin: 1.4rem 0 1.8rem; max-width: 40ch; font-size: 0.86rem; line-height: 1.6; color: var(--texto-suave); }
 
   /* DOMINÓ: las piezas caen en cadena, de arriba abajo, alternando a un lado y a otro */
   .domino { list-style: none; margin: 0 auto; padding: 0; max-width: 1000px; perspective: 1200px; }
@@ -132,7 +132,7 @@ const tx = {
   .boton-flotante { display: none; }
 
   @media (max-width: 860px) {
-    .grande { font-size: clamp(1.4rem, 7vw, 2.2rem); letter-spacing: 0.08em; }
+    .grande { font-size: clamp(1.15rem, 5.6vw, 1.6rem); }
     .domino li { width: 78%; }
     .domino li:nth-child(odd) { margin-left: 0; }
     .domino li:nth-child(even) { margin-left: 22%; }
