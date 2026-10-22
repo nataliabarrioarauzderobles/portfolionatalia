@@ -1,13 +1,13 @@
 ---
-// "DISEÑA TU PIEZA": un estudio de color para las piezas de ojos y labios.
-//  · La pieza se ve sobre blanco, con una sombra suave.
-//  · Paletas cerradas, sacadas de tus obras: al elegir una, la pieza se colorea entera con ella.
-//    Después se puede repintar zona a zona con los colores de la paleta (o uno propio).
-//  · Acabado liso o en degradado, detalles (lunares, anillos y ondas) y una silueta propia a mano alzada.
-//  · Ficha de la pieza y envío del diseño por WhatsApp.
-import { paletasPieza } from '../data/proyectos';
+// "CREA TU PIEZA": diseño personalizado en tres pasos, pensado para que se entienda a la primera.
+//  0. Presentación: "Ahora puedes hacer tu propio diseño" y los 3 pasos.
+//  1. Escoge un modelo (tus dibujos, o dibuja tu propia silueta).
+//  2. Píntalo: tocas un color y después la zona. Sin recuadros: la pieza sola sobre blanco.
+//  3. Tu pieza: un prototipo 3D en madera (como las piezas reales) que se puede girar,
+//     y el envío por WhatsApp con la medida y tu idea.
+import { coloresPieza } from '../data/proyectos';
 import type { Idioma } from '../i18n/textos';
-import { contacto, enlaceWhatsApp } from '../utils/enlaces';
+import { contacto } from '../utils/enlaces';
 import { imagen } from '../utils/imagenes';
 import { modelosNuevos } from '../utils/formas-pieza';
 
@@ -16,283 +16,271 @@ const { idioma } = Astro.props;
 
 const tx = {
   es: {
-    etiqueta: 'Estudio de color',
-    titulo: 'Diseña tu pieza',
-    intro: 'Piezas de madera pintadas a mano. Elige una forma y una paleta; después ajusta cada zona, el acabado y los detalles. Te envío presupuesto con tu diseño.',
-    paso1: 'Forma', paso2: 'Paleta', paso3: 'Pincel', paso4: 'Acabado', paso5: 'Detalles', paso7: 'Medida', paso8: 'Notas (opcional)',
-    silueta: 'Tu silueta', siluetaAyuda: 'Dibuja el contorno de tu pieza. Cierra bien las formas y después píntalas.',
-    pintar: 'Pintar', dibujar: 'Dibujar', detalles: 'Detalles', deshacer: 'Deshacer', reiniciar: 'Reiniciar', mezclar: 'Mezclar colores',
-    liso: 'Liso', degradado: 'Degradado', otro: 'Otro',
-    direcciones: { h: 'Horizontal', v: 'Vertical', r: 'Circular' },
-    tiposDetalle: { lunar: 'Lunar', anillo: 'Anillo', onda: 'Onda' },
-    tamanoDetalle: 'Tamaño',
-    ayudaDetalles: 'Pulsa sobre la pieza para colocar el detalle.',
-    ayudaPintar: 'Pasa por encima de la pieza y pulsa una zona para pintarla.',
-    ficha: 'Tu pieza', placeholder: 'Para qué espacio es, colores que te gustan…',
-    enviar: 'Pedir presupuesto por WhatsApp', descargar: 'Descargar imagen',
-    ayudaEnvio: 'En el móvil se comparte la imagen directamente; en el ordenador se descarga para adjuntarla.',
-    saludo: 'Hola Natalia, he diseñado mi pieza en tu web:', modelo: 'Forma', paleta: 'Paleta', colores: 'Colores', conDetalles: 'Detalles',
-    tamano: 'Medida', idea: 'Notas', adjunto: 'Te envío la imagen de mi diseño.', sinColores: 'sin pintar', enDegradado: 'en degradado', acabado: 'Acabado',
+    etiqueta: 'Diseño personalizado',
+    titulo: 'Ahora puedes crear tu propia pieza',
+    intro: 'Piezas de madera pintadas a mano, como las que ves en esta página. Diséñala tú en tres pasos y te la hago.',
+    pasos: [
+      { titulo: 'Escoge un modelo', texto: 'Ojos, labios… o dibuja tu propia forma.' },
+      { titulo: 'Píntala', texto: 'Toca un color y después la zona que quieras pintar.' },
+      { titulo: 'Mándame tu idea', texto: 'Mira cómo quedaría en madera y envíamela por WhatsApp.' },
+    ],
+    empezar: 'Empezar',
+    modelo: 'Modelo', color: 'Color', pieza: 'Tu pieza',
+    silueta: 'Dibuja la tuya',
+    ayudaPintar: 'Toca un color y después una zona del dibujo.',
+    ayudaDibujar: 'Dibuja el contorno con el dedo o el ratón. Cierra bien las formas y después píntalas.',
+    sorprendeme: 'Sorpréndeme', deshacer: 'Deshacer', reiniciar: 'Empezar de nuevo',
+    verPieza: 'Ver mi pieza en madera',
+    asiQuedaria: 'Así quedaría tu pieza',
+    girar: 'Gírala con el ratón o con el dedo.',
+    cargando: 'Preparando tu pieza…',
+    medida: 'Medida', idea: 'Tu idea (opcional)', placeholder: 'Para qué espacio es, si es un regalo…',
+    enviar: 'Enviar mi diseño por WhatsApp', volver: 'Volver a pintar', descargar: 'Descargar imagen',
+    ayudaEnvio: 'En el móvil se comparte la imagen; en el ordenador se descarga para que la adjuntes en WhatsApp.',
+    saludo: 'Hola Natalia, he diseñado mi pieza en tu web:', colores: 'Colores', sinColores: 'sin pintar',
+    adjunto: 'Te envío la imagen de mi pieza.',
   },
   en: {
-    etiqueta: 'Colour studio',
-    titulo: 'Design your piece',
-    intro: 'Hand-painted wooden pieces. Choose a shape and a palette, then adjust each area, the finish and the details. I will send you a quote for your design.',
-    paso1: 'Shape', paso2: 'Palette', paso3: 'Brush', paso4: 'Finish', paso5: 'Details', paso7: 'Size', paso8: 'Notes (optional)',
-    silueta: 'Your silhouette', siluetaAyuda: 'Draw the outline of your piece. Close the shapes well, then paint them.',
-    pintar: 'Paint', dibujar: 'Draw', detalles: 'Details', deshacer: 'Undo', reiniciar: 'Reset', mezclar: 'Shuffle colours',
-    liso: 'Solid', degradado: 'Gradient', otro: 'Other',
-    direcciones: { h: 'Horizontal', v: 'Vertical', r: 'Radial' },
-    tiposDetalle: { lunar: 'Dot', anillo: 'Ring', onda: 'Wave' },
-    tamanoDetalle: 'Size',
-    ayudaDetalles: 'Click on the piece to place the detail.',
-    ayudaPintar: 'Move over the piece and click an area to paint it.',
-    ficha: 'Your piece', placeholder: 'The space it is for, colours you like…',
-    enviar: 'Ask for a quote on WhatsApp', descargar: 'Download image',
-    ayudaEnvio: 'On mobile the image is shared directly; on a computer it is downloaded so you can attach it.',
-    saludo: 'Hi Natalia, I designed my piece on your website:', modelo: 'Shape', paleta: 'Palette', colores: 'Colours', conDetalles: 'Details',
-    tamano: 'Size', idea: 'Notes', adjunto: 'I am sending you the image of my design.', sinColores: 'not painted', enDegradado: 'gradient', acabado: 'Finish',
+    etiqueta: 'Custom design',
+    titulo: 'Now you can create your own piece',
+    intro: 'Hand-painted wooden pieces, like the ones on this page. Design yours in three steps and I will make it.',
+    pasos: [
+      { titulo: 'Choose a model', texto: 'Eyes, lips… or draw your own shape.' },
+      { titulo: 'Paint it', texto: 'Tap a colour, then the area you want to paint.' },
+      { titulo: 'Send me your idea', texto: 'See how it would look in wood and send it to me on WhatsApp.' },
+    ],
+    empezar: 'Start',
+    modelo: 'Model', color: 'Colour', pieza: 'Your piece',
+    silueta: 'Draw your own',
+    ayudaPintar: 'Tap a colour, then an area of the drawing.',
+    ayudaDibujar: 'Draw the outline with your finger or mouse. Close the shapes, then paint them.',
+    sorprendeme: 'Surprise me', deshacer: 'Undo', reiniciar: 'Start again',
+    verPieza: 'See my piece in wood',
+    asiQuedaria: 'This is how your piece would look',
+    girar: 'Turn it with your mouse or finger.',
+    cargando: 'Preparing your piece…',
+    medida: 'Size', idea: 'Your idea (optional)', placeholder: 'The space it is for, if it is a gift…',
+    enviar: 'Send my design on WhatsApp', volver: 'Back to painting', descargar: 'Download image',
+    ayudaEnvio: 'On mobile the image is shared; on a computer it is downloaded so you can attach it on WhatsApp.',
+    saludo: 'Hi Natalia, I designed my piece on your website:', colores: 'Colours', sinColores: 'not painted',
+    adjunto: 'I am sending you the image of my piece.',
   },
 }[idioma];
 
 const dibujos = [
+  { id: 'ojo-pestanas', archivo: 'diseno/personaliza/ojo-pestanas.png', nombre: { es: 'Ojo de pestañas', en: 'Lash eye' } },
   { id: 'ojo-ondas', archivo: 'diseno/personaliza/ojo-ondas.png', nombre: { es: 'Ojo de ondas', en: 'Wave eye' } },
   { id: 'labios-sonrisa', archivo: 'diseno/personaliza/labios-sonrisa.png', nombre: { es: 'Labios', en: 'Lips' } },
   { id: 'ojo-rayos', archivo: 'diseno/personaliza/ojo-rayos.png', nombre: { es: 'Ojo de rayos', en: 'Ray eye' } },
-  { id: 'ojo-pestanas', archivo: 'diseno/personaliza/ojo-pestanas.png', nombre: { es: 'Ojo de pestañas', en: 'Lash eye' } },
 ];
 const modelos = [
   ...dibujos.map((m) => ({ id: m.id, src: imagen(m.archivo).src, nombre: m.nombre[idioma] })),
   ...modelosNuevos.map((m) => ({ id: m.id, src: m.src, nombre: m.nombre[idioma] })),
 ];
-const paletas = paletasPieza.map((p) => ({ id: p.id, nombre: p.nombre[idioma], colores: p.colores }));
-const medidas = [30, 50, 80, 120];
-const iconosDetalle: Record<string, string> = {
-  lunar: '<circle cx="12" cy="12" r="5.5" fill="currentColor"/>',
-  anillo: '<circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="1.2"/>',
-  onda: '<path d="M2 12c2.5-5 5-5 7.5 0s5 5 7.5 0 4.5-4 5-2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
-};
+const colores = coloresPieza.map((c) => ({ hex: c.hex, nombre: c.nombre[idioma] }));
+const medidas = [30, 50, 80];
 ---
 
-<section class="personaliza" id="disena-tu-pieza" data-personaliza
-  data-numero={contacto.whatsapp}
-  data-textos={JSON.stringify(tx)}
-  data-paletas={JSON.stringify(paletas)}>
+<section class="personaliza" data-personaliza data-numero={contacto.whatsapp} data-textos={JSON.stringify(tx)} data-colores={JSON.stringify(colores)}>
 
-  <div class="estudio">
-    <!-- ESCENA: la pieza sobre blanco -->
-    <div class="escena">
-      <canvas width="1200" height="1000" data-lienzo aria-label={tx.titulo}></canvas>
-      <div class="herramientas mono">
-        <div class="modos" role="group">
-          <button type="button" data-modo="pintar" aria-pressed="true">{tx.pintar}</button>
-          <button type="button" data-modo="detalles" aria-pressed="false">{tx.detalles}</button>
-          <button type="button" data-modo="dibujar" aria-pressed="false">{tx.dibujar}</button>
-        </div>
-        <span class="espacio"></span>
-        <button type="button" data-mezclar>{tx.mezclar}</button>
-        <button type="button" data-deshacer>{tx.deshacer}</button>
-        <button type="button" data-reiniciar>{tx.reiniciar}</button>
-      </div>
-      <p class="mono ayuda" data-ayuda>{tx.ayudaPintar}</p>
+  <!-- 0. PRESENTACIÓN -->
+  <div class="etapa presentacion" data-etapa="presentacion">
+    <p class="mono etiqueta">{tx.etiqueta}</p>
+    <h2>{tx.titulo}</h2>
+    <p class="intro">{tx.intro}</p>
+    <ol class="tres-pasos">
+      {tx.pasos.map((p, i) => (
+        <li style={`--i:${i}`}>
+          <span class="mono">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{p.titulo}</h3>
+          <p>{p.texto}</p>
+        </li>
+      ))}
+    </ol>
+    <button type="button" class="boton boton-principal" data-ir="editor">{tx.empezar} →</button>
+  </div>
+
+  <!-- 1 y 2. MODELO Y COLOR -->
+  <div class="etapa editor" data-etapa="editor" hidden>
+    <ol class="progreso mono" aria-hidden="true">
+      <li class="hecho">01 {tx.modelo}</li><li class="hecho">02 {tx.color}</li><li>03 {tx.pieza}</li>
+    </ol>
+
+    <ul class="modelos" role="group" aria-label={tx.modelo}>
+      {modelos.map((m, i) => (
+        <li>
+          <button type="button" data-modelo={m.id} data-src={m.src} data-nombre={m.nombre} aria-pressed={i === 0 ? 'true' : 'false'}>
+            <img src={m.src} alt="" width="120" height="90" loading="lazy" />
+            <span>{m.nombre}</span>
+          </button>
+        </li>
+      ))}
+      <li>
+        <button type="button" data-modelo="silueta" data-nombre={tx.silueta} aria-pressed="false">
+          <svg viewBox="0 0 40 30" aria-hidden="true"><path d="M7 21c2-9 8-14 14-13s10 6 9 10-6 5-11 3-8-1-12 0" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 2.2" /></svg>
+          <span>{tx.silueta}</span>
+        </button>
+      </li>
+    </ul>
+
+    <!-- el dibujo, sin recuadro -->
+    <canvas width="1200" height="900" data-lienzo aria-label={tx.pieza}></canvas>
+    <p class="ayuda" data-ayuda>{tx.ayudaPintar}</p>
+
+    <!-- colores: muestras grandes, fáciles de tocar -->
+    <div class="colores" role="group" aria-label={tx.color}>
+      {colores.map((c, i) => (
+        <button type="button" class="muestra" data-color={c.hex} data-nombre={c.nombre} style={`--c:${c.hex}`} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={c.nombre} title={c.nombre}></button>
+      ))}
+    </div>
+    <p class="nombre-color mono" data-nombre-color>{colores[0].nombre}</p>
+
+    <div class="acciones-editor mono">
+      <button type="button" data-sorprendeme>✦ {tx.sorprendeme}</button>
+      <button type="button" data-deshacer>{tx.deshacer}</button>
+      <button type="button" data-reiniciar>{tx.reiniciar}</button>
     </div>
 
-    <!-- PANEL -->
-    <div class="panel">
-      <header class="intro">
-        <span class="mono etiqueta">{tx.etiqueta}</span>
-        <h2>{tx.titulo}</h2>
-        <p>{tx.intro}</p>
-      </header>
+    <button type="button" class="boton boton-principal ver-pieza" data-ir="pieza">{tx.verPieza} →</button>
+  </div>
 
-      <div class="paso">
-        <p class="mono numero"><span>01</span>{tx.paso1}</p>
-        <ul class="modelos">
-          {modelos.map((m, i) => (
-            <li>
-              <button type="button" data-modelo={m.id} data-src={m.src} data-nombre={m.nombre} aria-pressed={i === 0 ? 'true' : 'false'} title={m.nombre}>
-                <img src={m.src} alt={m.nombre} loading="lazy" width="120" height="90" />
-              </button>
-            </li>
-          ))}
-          <li>
-            <button type="button" data-modelo="silueta" data-nombre={tx.silueta} aria-pressed="false" title={tx.silueta}>
-              <svg viewBox="0 0 40 30" aria-hidden="true"><path d="M8 22c2-9 8-14 14-13s10 6 9 10-6 5-11 3-8-1-12 0" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" /></svg>
-            </button>
-          </li>
-        </ul>
-        <p class="mono nombre-modelo" data-nombre-modelo></p>
+  <!-- 3. TU PIEZA EN 3D Y ENVÍO -->
+  <div class="etapa pieza" data-etapa="pieza" hidden>
+    <ol class="progreso mono" aria-hidden="true">
+      <li class="hecho">01 {tx.modelo}</li><li class="hecho">02 {tx.color}</li><li class="hecho">03 {tx.pieza}</li>
+    </ol>
+    <div class="pieza-cuerpo">
+      <div class="vista-3d">
+        <div class="escena-3d" data-escena3d><p class="cargando mono" data-cargando>{tx.cargando}</p></div>
+        <p class="ayuda">{tx.girar}</p>
       </div>
-
-      <div class="paso">
-        <p class="mono numero"><span>02</span>{tx.paso2}</p>
-        <ul class="paletas">
-          {paletas.map((p, i) => (
-            <li>
-              <button type="button" data-paleta={p.id} aria-pressed={i === 0 ? 'true' : 'false'}>
-                <span class="tira-color">{p.colores.map((c) => <i style={`background:${c}`}></i>)}</span>
-                <span class="mono">{p.nombre}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div class="paso">
-        <p class="mono numero"><span>03</span>{tx.paso3}</p>
-        <div class="pincel" data-pincel>
-          <!-- los colores de la paleta elegida se rellenan desde el script -->
-          <label class="otro" title={tx.otro}><input type="color" value="#e58cb0" data-otro /><span class="mono">{tx.otro}</span></label>
-        </div>
-      </div>
-
-      <div class="fila-pasos">
-        <div class="paso">
-          <p class="mono numero"><span>04</span>{tx.paso4}</p>
-          <div class="segmentos mono" role="group">
-            <button type="button" data-relleno="liso" aria-pressed="true">{tx.liso}</button>
-            <button type="button" data-relleno="degradado" aria-pressed="false">{tx.degradado}</button>
-          </div>
-          <div class="segmentos mono direcciones" data-degradado hidden role="group">
-            {(['h', 'v', 'r'] as const).map((d, i) => (
-              <button type="button" data-direccion={d} aria-pressed={i === 0 ? 'true' : 'false'}>{tx.direcciones[d]}</button>
-            ))}
-          </div>
-        </div>
-        <div class="paso">
-          <p class="mono numero"><span>05</span>{tx.paso5}</p>
-          <div class="detalles" role="group">
-            {Object.entries(tx.tiposDetalle).map(([id, nombre], i) => (
-              <button type="button" data-detalle={id} aria-pressed={i === 0 ? 'true' : 'false'} title={nombre}>
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" set:html={iconosDetalle[id]} />
-              </button>
-            ))}
-            <input type="range" min="12" max="80" step="2" value="30" data-tamano-detalle aria-label={tx.tamanoDetalle} />
-          </div>
-        </div>
-      </div>
-
-      <div class="paso">
-        <p class="mono numero"><span>06</span>{tx.paso7}</p>
-        <div class="segmentos mono" role="group">
+      <div class="envio">
+        <h3>{tx.asiQuedaria}</h3>
+        <p class="mono etiqueta-campo">{tx.medida}</p>
+        <div class="medidas" role="group" aria-label={tx.medida}>
           {medidas.map((m, i) => <button type="button" data-medida={m} aria-pressed={i === 1 ? 'true' : 'false'}>{m} cm</button>)}
         </div>
+        <label class="campo">
+          <span class="mono etiqueta-campo">{tx.idea}</span>
+          <textarea rows="2" placeholder={tx.placeholder} data-idea></textarea>
+        </label>
+        <a class="boton boton-principal" href={`https://wa.me/${contacto.whatsapp}`} target="_blank" rel="noopener" data-enviar>{tx.enviar} →</a>
+        <div class="acciones-pieza mono">
+          <button type="button" data-ir="editor">← {tx.volver}</button>
+          <button type="button" data-descargar>{tx.descargar}</button>
+        </div>
+        <p class="ayuda">{tx.ayudaEnvio}</p>
       </div>
-      <div class="paso">
-        <p class="mono numero"><span>07</span>{tx.paso8}</p>
-        <textarea rows="2" placeholder={tx.placeholder} data-idea></textarea>
-      </div>
-
-      <!-- ficha de la pieza -->
-      <dl class="ficha mono" data-ficha></dl>
-
-      <div class="acciones">
-        <a class="boton boton-principal" href={enlaceWhatsApp(tx.saludo)} target="_blank" rel="noopener" data-enviar>{tx.enviar} →</a>
-        <button type="button" class="boton" data-descargar>{tx.descargar}</button>
-      </div>
-      <p class="mono ayuda">{tx.ayudaEnvio}</p>
     </div>
   </div>
 </section>
 
 <style>
-  .estudio { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr); gap: clamp(1.5rem, 4vw, 4.5rem); align-items: start; }
-  @media (max-width: 900px) { .estudio { grid-template-columns: 1fr; } }
+  .personaliza { max-width: 1100px; margin: 0 auto; }
+  .etapa { animation: aparecerEtapa 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .etapa[hidden] { display: none; }
+  @keyframes aparecerEtapa { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .etiqueta { color: var(--texto-suave); margin: 0 0 0.9rem; }
 
-  /* ESCENA */
-  .escena { position: sticky; top: 3.8rem; }
-  @media (max-width: 900px) { .escena { position: relative; top: 0; } }
-  canvas { display: block; width: 100%; height: auto; aspect-ratio: 6 / 5; touch-action: none; }
-  .herramientas { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 1.1rem; margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px solid var(--linea); }
-  .herramientas button { padding: 0.2rem 0; border: 0; border-bottom: 1px solid transparent; background: none; font: inherit; color: var(--texto-tenue); cursor: pointer; transition: color 0.2s, border-color 0.2s; }
-  .herramientas button:hover { color: var(--texto); }
-  .modos { display: flex; gap: 1.1rem; }
-  .modos button[aria-pressed='true'] { color: var(--texto); border-color: var(--texto); }
-  .espacio { flex: 1; }
-  .ayuda { color: var(--texto-tenue); margin: 0.6rem 0 0; text-transform: none; letter-spacing: 0.02em; }
+  /* 0. PRESENTACIÓN */
+  .presentacion { max-width: 760px; margin: clamp(1rem, 6vh, 4rem) auto 0; text-align: center; }
+  .presentacion h2 { font-family: var(--fuente-titulos); font-weight: 400; font-size: clamp(1.8rem, 4vw, 3rem); letter-spacing: -0.02em; line-height: 1.05; margin: 0 0 1rem; }
+  .intro { margin: 0 auto 3rem; max-width: 46ch; color: var(--texto-suave); font-size: 0.92rem; line-height: 1.7; }
+  .tres-pasos { list-style: none; margin: 0 0 3rem; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 3vw, 2.5rem); text-align: left; }
+  .tres-pasos li { border-top: 1px solid var(--texto); padding-top: 1rem; animation: aparecerEtapa 0.6s backwards; animation-delay: calc(150ms + var(--i) * 120ms); }
+  .tres-pasos .mono { color: var(--texto-tenue); }
+  .tres-pasos h3 { font-family: var(--fuente-titulos); font-weight: 400; font-size: 1.15rem; margin: 0.7rem 0 0.4rem; }
+  .tres-pasos p { margin: 0; font-size: 0.84rem; line-height: 1.65; color: var(--texto-suave); }
+  @media (max-width: 700px) { .tres-pasos { grid-template-columns: 1fr; gap: 1.4rem; } }
 
-  /* PANEL */
-  .intro { margin-bottom: 1.8rem; }
-  .intro .etiqueta { display: block; color: var(--texto-suave); margin-bottom: 0.7rem; }
-  .intro h2 { font-family: var(--fuente-titulos); font-weight: 400; font-size: clamp(1.6rem, 2.6vw, 2.2rem); letter-spacing: -0.02em; margin: 0 0 0.8rem; }
-  .intro p { margin: 0; font-size: 0.86rem; line-height: 1.7; color: var(--texto-suave); max-width: 44ch; }
+  /* progreso 01 · 02 · 03 */
+  .progreso { list-style: none; display: flex; justify-content: center; gap: 1.6rem; margin: 0 0 1.6rem; padding: 0; color: var(--texto-tenue); }
+  .progreso li.hecho { color: var(--texto); }
 
-  .paso { padding: 1.1rem 0 1.2rem; border-top: 1px solid var(--linea); display: grid; gap: 0.8rem; align-content: start; }
-  .fila-pasos { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.5rem; }
-  .numero { margin: 0; color: var(--texto); }
-  .numero span { color: var(--texto-tenue); margin-right: 0.7rem; }
-
-  /* formas: miniaturas de línea, sin cajas */
-  .modelos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem 0.8rem; }
-  .modelos button { display: block; width: 100%; padding: 0.3rem 0 0.4rem; border: 0; border-bottom: 1px solid transparent; background: none; cursor: pointer; color: var(--texto-suave); opacity: 0.55; transition: opacity 0.25s, border-color 0.25s; }
+  /* 1. MODELOS: miniaturas de línea, en fila (se deslizan en el móvil) */
+  .modelos { list-style: none; margin: 0 0 0.5rem; padding: 0 0 0.4rem; display: flex; gap: 0.6rem; justify-content: center; overflow-x: auto; scrollbar-width: none; }
+  .modelos::-webkit-scrollbar { display: none; }
+  .modelos li { flex: none; }
+  .modelos button { display: grid; justify-items: center; gap: 0.35rem; width: 92px; padding: 0.4rem 0.2rem 0.5rem; border: 0; border-bottom: 1px solid transparent; background: none; cursor: pointer; color: var(--texto-suave); opacity: 0.5; transition: opacity 0.25s, border-color 0.25s; }
   .modelos button:hover { opacity: 1; }
-  .modelos button[aria-pressed='true'] { opacity: 1; border-color: var(--texto); }
-  .modelos img, .modelos svg { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: contain; }
-  .nombre-modelo { margin: 0; color: var(--texto-suave); }
+  .modelos button[aria-pressed='true'] { opacity: 1; color: var(--texto); border-color: var(--texto); }
+  .modelos img, .modelos svg { width: 72px; height: 54px; object-fit: contain; }
+  .modelos span { font-size: 0.7rem; white-space: nowrap; }
 
-  /* paletas: cada una es una tira de color con su nombre */
-  .paletas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem 1rem; }
-  .paletas button { display: grid; gap: 0.45rem; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--texto-suave); }
-  .tira-color { display: flex; height: 26px; outline: 1px solid transparent; outline-offset: 3px; transition: outline-color 0.2s; }
-  .tira-color i { flex: 1; box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.08); }
-  .paletas button:hover .tira-color { outline-color: var(--linea); }
-  .paletas button[aria-pressed='true'] { color: var(--texto); }
-  .paletas button[aria-pressed='true'] .tira-color { outline-color: var(--texto); }
+  /* 2. EL DIBUJO: sin recuadro */
+  canvas { display: block; width: min(100%, 760px); height: auto; aspect-ratio: 4 / 3; margin: 0 auto; touch-action: none; }
+  .ayuda { margin: 0.4rem 0 0; text-align: center; font-size: 0.78rem; color: var(--texto-tenue); }
 
-  /* pincel: los colores de la paleta, como pastillas */
-  .pincel { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
-  .pincel :global(.tono) { width: 34px; height: 34px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); outline: 1px solid transparent; outline-offset: 3px; transition: outline-color 0.2s, transform 0.2s; }
-  .pincel :global(.tono:hover) { transform: translateY(-2px); }
-  .pincel :global(.tono[aria-pressed='true']) { outline-color: var(--texto); }
-  .otro { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; margin-left: 0.4rem; cursor: pointer; color: var(--texto-suave); }
-  .otro::before { content: ''; width: 34px; height: 34px; border-radius: 50%; background: conic-gradient(#c8352e, #e9c33b, #3f8f5a, #2fb3b0, #2e5fa8, #7a4fa0, #e58cb0, #c8352e); opacity: 0.85; }
-  .otro input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  /* COLORES: círculos grandes */
+  .colores { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; margin: 1.6rem auto 0; max-width: 620px; }
+  .muestra {
+    width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+    background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+    outline: 1.5px solid transparent; outline-offset: 3px;
+    transition: transform 0.2s ease, outline-color 0.2s;
+  }
+  .muestra:hover { transform: scale(1.1); }
+  .muestra[aria-pressed='true'] { outline-color: var(--texto); transform: scale(1.1); }
+  .nombre-color { text-align: center; margin: 0.8rem 0 0; color: var(--texto-suave); }
+  @media (max-width: 700px) {
+    /* en el móvil, una fila que se desliza con el dedo */
+    .colores { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding: 0.5rem 0.4rem; margin-top: 1rem; scrollbar-width: none; }
+    .colores::-webkit-scrollbar { display: none; }
+    .muestra { flex: none; width: 46px; height: 46px; }
+  }
 
-  .segmentos { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-  .segmentos button { padding: 0.4rem 0.75rem; border: 1px solid var(--linea); border-radius: 999px; background: none; font: inherit; color: var(--texto-suave); cursor: pointer; transition: border-color 0.2s, color 0.2s; }
-  .segmentos button:hover { color: var(--texto); }
-  .segmentos button[aria-pressed='true'] { border-color: var(--texto); color: var(--texto); }
+  .acciones-editor, .acciones-pieza { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.4rem; margin-top: 1.4rem; }
+  .acciones-editor button, .acciones-pieza button { padding: 0.2rem 0; border: 0; border-bottom: 1px solid transparent; background: none; font: inherit; color: var(--texto-suave); cursor: pointer; }
+  .acciones-editor button:hover, .acciones-pieza button:hover { color: var(--texto); border-color: var(--texto); }
+  .ver-pieza { display: block; margin: 2rem auto 0; }
 
-  .detalles { display: flex; align-items: center; gap: 0.35rem; }
-  .detalles button { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--linea); border-radius: 50%; background: none; color: var(--texto-suave); cursor: pointer; }
-  .detalles button[aria-pressed='true'] { border-color: var(--texto); color: var(--texto); }
-  .detalles input { flex: 1; min-width: 60px; margin-left: 0.4rem; accent-color: var(--texto); }
-
-
-  textarea { width: 100%; padding: 0.4rem 0; font: inherit; font-size: 0.86rem; resize: vertical; background: transparent; color: var(--texto); border: 0; border-bottom: 1px solid var(--linea); }
+  /* 3. TU PIEZA */
+  .pieza-cuerpo { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+  @media (max-width: 800px) { .pieza-cuerpo { grid-template-columns: 1fr; } }
+  .escena-3d { position: relative; width: 100%; aspect-ratio: 4 / 3; cursor: grab; touch-action: none; }
+  .escena-3d:active { cursor: grabbing; }
+  .escena-3d :global(canvas) { display: block; width: 100%; height: 100%; }
+  .cargando { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--texto-tenue); }
+  .envio h3 { font-family: var(--fuente-titulos); font-weight: 400; font-size: clamp(1.4rem, 2.6vw, 2rem); letter-spacing: -0.02em; margin: 0 0 1.6rem; }
+  .etiqueta-campo { display: block; color: var(--texto-suave); margin: 0 0 0.6rem; }
+  .medidas { display: flex; gap: 0.4rem; margin-bottom: 1.4rem; }
+  .medidas button { padding: 0.5rem 0.9rem; border: 1px solid var(--linea); border-radius: 999px; background: none; font: inherit; font-size: 0.84rem; color: var(--texto-suave); cursor: pointer; }
+  .medidas button[aria-pressed='true'] { border-color: var(--texto); color: var(--texto); }
+  .campo { display: block; margin-bottom: 1.6rem; }
+  textarea { width: 100%; padding: 0.5rem 0; font: inherit; font-size: 0.88rem; resize: vertical; background: transparent; color: var(--texto); border: 0; border-bottom: 1px solid var(--linea); }
   textarea:focus { outline: none; border-color: var(--texto); }
-
-  /* ficha técnica de la pieza */
-  .ficha { display: grid; grid-template-columns: auto 1fr; gap: 0.45rem 1.4rem; margin: 0.4rem 0 1.4rem; padding: 1rem 1.1rem; background: var(--fondo-suave); }
-  .ficha :global(dt) { color: var(--texto-tenue); }
-  .ficha :global(dd) { margin: 0; color: var(--texto); text-transform: none; letter-spacing: 0.02em; }
-  .acciones { display: flex; flex-wrap: wrap; gap: 0.7rem; }
-
-  @media (max-width: 480px) { .fila-pasos { grid-template-columns: 1fr; } .paletas { grid-template-columns: 1fr 1fr; } }
+  .envio .acciones-pieza { justify-content: flex-start; }
+  .envio .ayuda { text-align: left; }
 </style>
 
 <script>
   // ─────────────────────────────────────────────────────────────
-  // ESTUDIO DE COLOR
-  //  · capa de líneas = dibujo de la forma + trazos a mano + detalles; cada zona cerrada recibe un número
-  //  · los rellenos se guardan como "semilla" (un punto de la zona) + índice del color en la paleta,
-  //    así al cambiar de paleta la pieza conserva su composición con los colores nuevos
-  //  · la escena dibuja la pieza sobre blanco con una sombra suave
+  // EL DIBUJO PARA COLOREAR
+  //  · capa de líneas = dibujo del modelo (+ trazos a mano en "Dibuja la tuya")
+  //  · cada zona cerrada de la capa de líneas recibe un número
+  //  · los colores se guardan como "semilla" (el punto donde se tocó) + color
   // ─────────────────────────────────────────────────────────────
   type RGB = [number, number, number];
-  type Relleno = { x: number; y: number; i1: number; c1?: string; i2?: number; dir?: 'h' | 'v' | 'r' };
-  type Detalle = { tipo: string; x: number; y: number; r: number };
-  type Accion = { tipo: 'relleno' | 'trazo' | 'detalle' | 'lote'; rellenos: number; antes?: Relleno[] };
-  type Paleta = { id: string; nombre: string; colores: string[] };
+  type Relleno = { x: number; y: number; c: string };
+  type Accion = { tipo: 'relleno' | 'trazo' | 'lote'; antes?: Relleno[] };
 
   const ANCHO = 1200, ALTO = 900, UMBRAL = 150, GROSOR = 5;
-  const ESC_ANCHO = 1200, ESC_ALTO = 1000;
-  const ESCALA = 0.86, OX = (ESC_ANCHO - ANCHO * ESCALA) / 2, OY = (ESC_ALTO - ALTO * ESCALA) / 2 - 36;
-  const MADERA = '#f3eee4'; // zona sin pintar: madera imprimada
+  const SIN_PINTAR = '#f4efe6'; // madera imprimada
+  // combinaciones para "Sorpréndeme", inspiradas en las piezas reales:
+  // la zona más grande (el blanco del ojo) en blanco, el borde de color, el iris y la pupila oscura
+  const COMBINACIONES = [
+    ['#ffffff', '#f2c94c', '#2e5aa8', '#1c1b1a'],
+    ['#ffffff', '#2bb3c0', '#3fa9e0', '#1c1b1a'],
+    ['#ffffff', '#3fa9e0', '#f2c94c', '#1f2d4f'],
+    ['#ffffff', '#7b52ab', '#8fd1c2', '#1c1b1a'],
+    ['#ffffff', '#d2402f', '#1c1b1a', '#f2c94c'],
+    ['#ffffff', '#eeb4b7', '#3e8e5e', '#1c1b1a'],
+    ['#ffffff', '#e9853b', '#2bb3c0', '#1c1b1a'],
+  ];
 
   document.querySelectorAll<HTMLElement>('[data-personaliza]').forEach((raiz) => {
     const tx = JSON.parse(raiz.dataset.textos!);
-    const paletas: Paleta[] = JSON.parse(raiz.dataset.paletas!);
+    const paleta: { hex: string; nombre: string }[] = JSON.parse(raiz.dataset.colores!);
     const lienzo = raiz.querySelector<HTMLCanvasElement>('[data-lienzo]')!;
     const ctx = lienzo.getContext('2d')!;
     const ayuda = raiz.querySelector<HTMLElement>('[data-ayuda]')!;
@@ -308,45 +296,22 @@ const iconosDetalle: Record<string, string> = {
     let base: HTMLImageElement | null = null;
     let modelo = { id: '', nombre: '' };
     let trazos: [number, number][][] = [];
-    let detalles: Detalle[] = [];
     let rellenos: Relleno[] = [];
     let historial: Accion[] = [];
-    let modo: 'pintar' | 'dibujar' | 'detalles' = 'pintar';
-    let tipoRelleno: 'liso' | 'degradado' = 'liso';
-    let paleta = paletas[0];
-    let indice = 0;               // color del pincel (índice en la paleta)
-    let propio: string | null = null; // color propio elegido con "Otro"
-    let direccion: 'h' | 'v' | 'r' = 'h';
-    let tipoDetalle = 'lunar';
-    let radioDetalle = 30;
+    let dibujando = false;   // solo en "Dibuja la tuya"
+    let color = paleta[0].hex;
     let medida = 50;
     let puntero: [number, number] | null = null;
 
-    // zonas
     let zonas = new Int32Array(ANCHO * ALTO);
     let zonaFondo = -1;
-    let caja: Int32Array = new Int32Array(0);
-    let infoZonas: { semilla: [number, number]; area: number }[] = [];
+    let areas: number[] = [];
+    let semillas: [number, number][] = [];
 
     const hexARgb = (hex: string): RGB => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as RGB;
-    const colorDe = (i: number) => paleta.colores[((i % paleta.colores.length) + paleta.colores.length) % paleta.colores.length];
-    const c1De = (r: Relleno) => r.c1 ?? colorDe(r.i1);
+    const nombreDe = (hex: string) => paleta.find((c) => c.hex.toLowerCase() === hex.toLowerCase())?.nombre ?? hex;
 
-    // ── capa de líneas ──
-    function dibujarDetalle(c: CanvasRenderingContext2D, d: Detalle) {
-      const { x, y, r } = d;
-      c.beginPath();
-      if (d.tipo === 'lunar') c.arc(x, y, r, 0, Math.PI * 2);
-      if (d.tipo === 'anillo') { c.arc(x, y, r, 0, Math.PI * 2); c.moveTo(x + r * 0.5, y); c.arc(x, y, r * 0.5, 0, Math.PI * 2); }
-      if (d.tipo === 'onda') {
-        for (let i = 0; i <= 40; i++) {
-          const px = x - r * 1.6 + (i / 40) * r * 3.2, py = y + Math.sin((i / 40) * Math.PI * 4) * r * 0.35;
-          i ? c.lineTo(px, py) : c.moveTo(px, py);
-        }
-      }
-      c.stroke();
-    }
-
+    // ── capa de líneas y zonas ──
     function reconstruirLineas() {
       cLineas.fillStyle = '#fff';
       cLineas.fillRect(0, 0, ANCHO, ALTO);
@@ -360,44 +325,33 @@ const iconosDetalle: Record<string, string> = {
         if (t.length === 1) cLineas.lineTo(t[0][0] + 0.1, t[0][1]);
         cLineas.stroke();
       }
-      cLineas.lineWidth = GROSOR;
-      detalles.forEach((d) => dibujarDetalle(cLineas, d));
       lineasPx = cLineas.getImageData(0, 0, ANCHO, ALTO).data;
       calcularZonas();
     }
 
-    // Numera las zonas cerradas; guarda su caja, su área y un punto dentro
     function calcularZonas() {
-      const px = lineasPx;
-      const N = ANCHO * ALTO;
+      const px = lineasPx, N = ANCHO * ALTO;
       zonas = new Int32Array(N).fill(-2);
-      for (let i = 0; i < N; i++) {
-        if (0.3 * px[i * 4] + 0.59 * px[i * 4 + 1] + 0.11 * px[i * 4 + 2] < UMBRAL) zonas[i] = -1;
-      }
-      const cajas: number[] = [];
-      infoZonas = [];
+      for (let i = 0; i < N; i++) if (0.3 * px[i * 4] + 0.59 * px[i * 4 + 1] + 0.11 * px[i * 4 + 2] < UMBRAL) zonas[i] = -1;
       const pila = new Int32Array(N);
+      areas = []; semillas = [];
       let n = 0;
       for (let inicio = 0; inicio < N; inicio++) {
         if (zonas[inicio] !== -2) continue;
-        let tope = 0, x0 = ANCHO, y0 = ALTO, x1 = 0, y1 = 0, area = 0;
-        pila[tope++] = inicio;
-        zonas[inicio] = n;
+        let tope = 0, area = 0;
+        pila[tope++] = inicio; zonas[inicio] = n;
         while (tope) {
-          const p = pila[--tope];
-          area++;
-          const x = p % ANCHO, y = (p - x) / ANCHO;
-          if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+          const p = pila[--tope]; area++;
+          const x = p % ANCHO;
           if (x > 0 && zonas[p - 1] === -2) { zonas[p - 1] = n; pila[tope++] = p - 1; }
           if (x < ANCHO - 1 && zonas[p + 1] === -2) { zonas[p + 1] = n; pila[tope++] = p + 1; }
           if (p >= ANCHO && zonas[p - ANCHO] === -2) { zonas[p - ANCHO] = n; pila[tope++] = p - ANCHO; }
           if (p < N - ANCHO && zonas[p + ANCHO] === -2) { zonas[p + ANCHO] = n; pila[tope++] = p + ANCHO; }
         }
-        cajas.push(x0, y0, x1, y1);
-        infoZonas.push({ semilla: [inicio % ANCHO + 0.5, Math.floor(inicio / ANCHO) + 0.5], area });
+        areas.push(area);
+        semillas.push([(inicio % ANCHO) + 0.5, Math.floor(inicio / ANCHO) + 0.5]);
         n++;
       }
-      caja = Int32Array.from(cajas);
       zonaFondo = zonas[0]; // la zona que toca la esquina es el fondo: no se pinta
     }
 
@@ -416,192 +370,92 @@ const iconosDetalle: Record<string, string> = {
       return z;
     }
 
-    const rellenoActual = (x: number, y: number): Relleno => {
-      const r: Relleno = { x, y, i1: indice };
-      if (propio) r.c1 = propio;
-      if (tipoRelleno === 'degradado') { r.i2 = indice + 1; r.dir = direccion; }
-      return r;
-    };
-
-    // Colorea toda la pieza con la paleta: las zonas grandes primero, repartiendo los colores
-    function colorearConPaleta(mezclar = false) {
-      const orden = infoZonas
-        .map((z, i) => ({ ...z, i }))
-        .filter((z) => z.i !== zonaFondo && z.area > 120)
-        .sort((a, b) => b.area - a.area);
-      const n = paleta.colores.length;
-      const desplazamiento = mezclar ? Math.floor(Math.random() * n) : 0;
-      const salto = mezclar ? [1, 2, 3][Math.floor(Math.random() * 3)] : 1;
-      const antes = rellenos.slice();
-      rellenos = orden.map((z, k) => ({ x: z.semilla[0], y: z.semilla[1], i1: (desplazamiento + k * salto) % n }));
-      historial.push({ tipo: 'lote', rellenos: 0, antes });
+    // colores por zona (el último relleno de cada zona manda)
+    function coloresPorZona(vista?: Relleno) {
+      const porZona = new Map<number, string>();
+      for (const r of vista ? [...rellenos, vista] : rellenos) {
+        const z = zonaEn(r.x, r.y);
+        if (z >= 0 && z !== zonaFondo) porZona.set(z, r.c);
+      }
+      return porZona;
     }
 
-    // ── composición de la pieza (con transparencia fuera de su silueta) ──
+    // la pieza: colores + líneas, con el fondo transparente
     function componerPieza(vista?: Relleno) {
-      const lista = vista ? [...rellenos, vista] : rellenos;
-      const porZona = new Map<number, { a: RGB; b?: RGB; dir?: string }>();
-      for (const r of lista) {
-        const z = zonaEn(r.x, r.y);
-        if (z < 0 || z === zonaFondo) continue;
-        porZona.set(z, { a: hexARgb(c1De(r)), b: r.i2 !== undefined ? hexARgb(colorDe(r.i2)) : undefined, dir: r.dir });
-      }
-      const madera = hexARgb(MADERA);
+      const porZona = coloresPorZona(vista);
+      const rgb = new Map<number, RGB>();
+      porZona.forEach((c, z) => rgb.set(z, hexARgb(c)));
+      const madera = hexARgb(SIN_PINTAR);
       const d = datosPieza.data, l = lineasPx;
       for (let i = 0; i < ANCHO * ALTO; i++) {
         const z = zonas[i];
         const luz = (0.3 * l[i * 4] + 0.59 * l[i * 4 + 1] + 0.11 * l[i * 4 + 2]) / 255;
-        let R: number, G: number, B: number, A = 255;
         if (z === zonaFondo) {
-          // fuera de la pieza: transparente, salvo el borde suavizado de la línea
-          R = G = B = 20; A = Math.round((1 - luz) * 255);
+          d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = 20; d[i * 4 + 3] = Math.round((1 - luz) * 255);
         } else {
-          const f = z >= 0 ? porZona.get(z) : undefined;
-          let c: RGB = madera;
-          if (f) {
-            if (!f.b) c = f.a;
-            else {
-              const x = i % ANCHO, y = (i - x) / ANCHO;
-              const x0 = caja[z * 4], y0 = caja[z * 4 + 1], x1 = caja[z * 4 + 2], y1 = caja[z * 4 + 3];
-              let t: number;
-              if (f.dir === 'v') t = (y - y0) / Math.max(1, y1 - y0);
-              else if (f.dir === 'r') {
-                const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-                t = Math.min(1, Math.hypot((x - cx) / Math.max(1, (x1 - x0) / 2), (y - cy) / Math.max(1, (y1 - y0) / 2)));
-              } else t = (x - x0) / Math.max(1, x1 - x0);
-              c = [f.a[0] + (f.b[0] - f.a[0]) * t, f.a[1] + (f.b[1] - f.a[1]) * t, f.a[2] + (f.b[2] - f.a[2]) * t];
-            }
-          }
-          // la línea negra "multiplica" el color (queda encima)
+          const c = (z >= 0 && rgb.get(z)) || madera;
           const k = Math.max(luz, 0.08);
-          R = c[0] * k; G = c[1] * k; B = c[2] * k;
+          d[i * 4] = c[0] * k; d[i * 4 + 1] = c[1] * k; d[i * 4 + 2] = c[2] * k; d[i * 4 + 3] = 255;
         }
-        d[i * 4] = R; d[i * 4 + 1] = G; d[i * 4 + 2] = B; d[i * 4 + 3] = A;
       }
       cPieza.putImageData(datosPieza, 0, 0);
     }
 
-    // ── escena: la pieza sobre blanco ──
-    function pintarEscena() {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, ESC_ANCHO, ESC_ALTO);
-      // la pieza, con una sombra suave
-      ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.12)';
-      ctx.shadowBlur = 30;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 16;
-      ctx.drawImage(capaPieza, OX, OY, ANCHO * ESCALA, ALTO * ESCALA);
-      ctx.restore();
-      // medida, como en una ficha de exposición
-      ctx.fillStyle = 'rgba(0,0,0,0.4)';
-      ctx.font = '22px "Geist Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.fillText(`${modelo.nombre.toUpperCase()} — ${medida} CM`, 48, ESC_ALTO - 44);
-      // fantasma del detalle que se va a colocar
-      if (modo === 'detalles' && puntero) {
-        ctx.save();
-        ctx.setTransform(ESCALA, 0, 0, ESCALA, OX, OY);
-        ctx.globalAlpha = 0.45;
-        ctx.strokeStyle = '#111';
-        ctx.lineWidth = GROSOR;
-        ctx.lineCap = ctx.lineJoin = 'round';
-        dibujarDetalle(ctx, { tipo: tipoDetalle, x: puntero[0], y: puntero[1], r: radioDetalle });
-        ctx.restore();
-      }
-    }
-
-    function componer(vista?: Relleno) {
+    function pintar(vista?: Relleno) {
       componerPieza(vista);
-      pintarEscena();
-      actualizarFicha();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, ANCHO, ALTO);
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.10)';
+      ctx.shadowBlur = 26;
+      ctx.shadowOffsetY = 12;
+      ctx.drawImage(capaPieza, 0, 0);
+      ctx.restore();
     }
     let pendiente = false;
-    function componerPronto() {
+    function pintarPronto() {
       if (pendiente) return;
       pendiente = true;
       requestAnimationFrame(() => {
         pendiente = false;
         const z = puntero ? zonaEn(puntero[0], puntero[1]) : -1;
-        const vista = modo === 'pintar' && puntero && z >= 0 && z !== zonaFondo ? rellenoActual(puntero[0], puntero[1]) : undefined;
-        componer(vista);
+        pintar(!dibujando && puntero && z >= 0 && z !== zonaFondo ? { x: puntero[0], y: puntero[1], c: color } : undefined);
       });
     }
 
-    // ── controles del pincel ──
-    const pincel = raiz.querySelector<HTMLElement>('[data-pincel]')!;
-    const otro = raiz.querySelector<HTMLInputElement>('[data-otro]')!;
-    function pintarPincel() {
-      pincel.querySelectorAll('.tono').forEach((b) => b.remove());
-      paleta.colores.forEach((c, i) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'tono';
-        b.style.setProperty('--c', c);
-        b.setAttribute('aria-label', c);
-        b.setAttribute('aria-pressed', String(!propio && i === indice));
-        b.addEventListener('click', () => { indice = i; propio = null; pintarPincel(); if (modo === 'dibujar') cambiarModo('pintar'); else actualizarCursor(); });
-        pincel.insertBefore(b, pincel.querySelector('.otro'));
-      });
-    }
-    otro.addEventListener('input', () => { propio = otro.value; pintarPincel(); actualizarCursor(); });
-
-    function actualizarCursor() {
-      const c = propio ?? colorDe(indice);
-      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26'><circle cx='13' cy='13' r='8' fill='${c}' stroke='white' stroke-width='2'/><circle cx='13' cy='13' r='11' fill='none' stroke='%23111' stroke-width='1'/></svg>`.replace(/#/g, '%23').replace(/%2323/g, '%23');
-      lienzo.style.cursor = modo === 'pintar' ? `url("data:image/svg+xml,${svg}") 13 13, pointer` : modo === 'dibujar' ? 'crosshair' : 'copy';
-      ayuda.textContent = modo === 'detalles' ? tx.ayudaDetalles : modo === 'dibujar' ? tx.siluetaAyuda : tx.ayudaPintar;
-    }
-
-    function cambiarModo(nuevo: typeof modo) {
-      modo = nuevo;
-      raiz.querySelectorAll<HTMLElement>('[data-modo]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.modo === nuevo)));
-      actualizarCursor();
-      componerPronto();
+    function cursor() {
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26'><circle cx='13' cy='13' r='8' fill='${color}' stroke='white' stroke-width='2'/><circle cx='13' cy='13' r='11' fill='none' stroke='%23111' stroke-width='1'/></svg>`.replace(/#/g, '%23').replace(/%2323/g, '%23');
+      lienzo.style.cursor = dibujando ? 'crosshair' : `url("data:image/svg+xml,${svg}") 13 13, pointer`;
+      ayuda.textContent = dibujando ? tx.ayudaDibujar : tx.ayudaPintar;
     }
 
     function cargarModelo(boton: HTMLButtonElement) {
       raiz.querySelectorAll('[data-modelo]').forEach((b) => b.setAttribute('aria-pressed', String(b === boton)));
       modelo = { id: boton.dataset.modelo!, nombre: boton.dataset.nombre! };
-      raiz.querySelector('[data-nombre-modelo]')!.textContent = modelo.nombre;
-      trazos = []; detalles = []; rellenos = []; historial = [];
-      if (modelo.id === 'silueta') {
-        base = null;
-        reconstruirLineas();
-        cambiarModo('dibujar');
-        return;
-      }
+      trazos = []; rellenos = []; historial = [];
+      dibujando = modelo.id === 'silueta';
+      cursor();
+      if (dibujando) { base = null; reconstruirLineas(); pintar(); return; }
       const img = new Image();
-      img.onload = () => { base = img; reconstruirLineas(); colorearConPaleta(); historial = []; cambiarModo('pintar'); };
+      img.onload = () => { base = img; reconstruirLineas(); pintar(); };
       img.src = boton.dataset.src!;
     }
 
-    // ── interacción con la escena ──
+    // ── tocar y dibujar ──
     const posicion = (e: PointerEvent): [number, number] => {
       const r = lienzo.getBoundingClientRect();
-      const sx = ((e.clientX - r.left) / r.width) * ESC_ANCHO, sy = ((e.clientY - r.top) / r.height) * ESC_ALTO;
-      return [(sx - OX) / ESCALA, (sy - OY) / ESCALA];
+      return [((e.clientX - r.left) / r.width) * ANCHO, ((e.clientY - r.top) / r.height) * ALTO];
     };
     let trazoActual: [number, number][] | null = null;
-
     lienzo.addEventListener('pointerdown', (e) => {
       const [x, y] = posicion(e);
-      if (modo === 'pintar') {
-        const z = zonaEn(x, y);
+      // en "Dibuja la tuya", si se toca dentro de una zona ya cerrada se pinta; si no, se dibuja
+      const z = zonaEn(x, y);
+      if (!dibujando || (z >= 0 && z !== zonaFondo && trazos.length > 0)) {
         if (z < 0 || z === zonaFondo) return;
-        rellenos.push(rellenoActual(x, y));
-        historial.push({ tipo: 'relleno', rellenos: 1 });
-        return componerPronto();
-      }
-      if (modo === 'detalles') {
-        detalles.push({ tipo: tipoDetalle, x, y, r: radioDetalle });
-        reconstruirLineas();
-        let n = 0;
-        if (tipoDetalle === 'lunar') { rellenos.push(rellenoActual(x, y)); n = 1; }
-        if (tipoDetalle === 'anillo') { rellenos.push(rellenoActual(x + radioDetalle * 0.75, y)); n = 1; }
-        historial.push({ tipo: 'detalle', rellenos: n });
-        return componerPronto();
+        rellenos.push({ x, y, c: color });
+        historial.push({ tipo: 'relleno' });
+        return pintarPronto();
       }
       lienzo.setPointerCapture(e.pointerId);
       trazoActual = [[x, y]];
@@ -611,144 +465,142 @@ const iconosDetalle: Record<string, string> = {
       puntero = e.pointerType === 'mouse' ? posicion(e) : null;
       if (trazoActual) {
         trazoActual.push(posicion(e));
-        ctx.save();
-        ctx.setTransform(ESCALA, 0, 0, ESCALA, OX, OY);
         ctx.strokeStyle = '#111';
         ctx.lineWidth = GROSOR + 1;
         ctx.lineCap = 'round';
         const t = trazoActual, a = t[t.length - 2], b = t[t.length - 1];
         ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
-        ctx.restore();
         return;
       }
-      componerPronto();
+      pintarPronto();
     });
-    lienzo.addEventListener('pointerleave', () => { puntero = null; componerPronto(); });
+    lienzo.addEventListener('pointerleave', () => { puntero = null; pintarPronto(); });
     const terminarTrazo = () => {
       if (!trazoActual) return;
       trazoActual = null;
-      historial.push({ tipo: 'trazo', rellenos: 0 });
+      historial.push({ tipo: 'trazo' });
       reconstruirLineas();
-      componerPronto();
+      pintarPronto();
     };
     lienzo.addEventListener('pointerup', terminarTrazo);
     lienzo.addEventListener('pointercancel', terminarTrazo);
 
     // ── controles ──
     raiz.querySelectorAll<HTMLButtonElement>('[data-modelo]').forEach((b) => b.addEventListener('click', () => cargarModelo(b)));
-    raiz.querySelectorAll<HTMLButtonElement>('[data-modo]').forEach((b) => b.addEventListener('click', () => cambiarModo(b.dataset.modo as typeof modo)));
-
-    raiz.querySelectorAll<HTMLButtonElement>('[data-paleta]').forEach((b) =>
+    const nombreColor = raiz.querySelector<HTMLElement>('[data-nombre-color]')!;
+    raiz.querySelectorAll<HTMLButtonElement>('[data-color]').forEach((b) =>
       b.addEventListener('click', () => {
-        paleta = paletas.find((p) => p.id === b.dataset.paleta)!;
-        raiz.querySelectorAll('[data-paleta]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-        indice = Math.min(indice, paleta.colores.length - 1);
-        propio = null;
-        // si aún no se ha pintado nada, la pieza se colorea entera con la paleta nueva;
-        // si ya hay colores, se mantiene la composición y cambian los tonos
-        if (!rellenos.length) colorearConPaleta();
-        pintarPincel();
-        actualizarCursor();
-        componerPronto();
+        color = b.dataset.color!;
+        raiz.querySelectorAll('[data-color]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        nombreColor.textContent = b.dataset.nombre!;
+        cursor();
       }),
     );
-    raiz.querySelectorAll<HTMLButtonElement>('[data-relleno]').forEach((b) =>
-      b.addEventListener('click', () => {
-        tipoRelleno = b.dataset.relleno as typeof tipoRelleno;
-        raiz.querySelectorAll('[data-relleno]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-        raiz.querySelectorAll<HTMLElement>('[data-degradado]').forEach((x) => (x.hidden = tipoRelleno !== 'degradado'));
-        if (modo === 'dibujar') cambiarModo('pintar');
-      }),
-    );
-    raiz.querySelectorAll<HTMLButtonElement>('[data-direccion]').forEach((b) =>
-      b.addEventListener('click', () => {
-        direccion = b.dataset.direccion as typeof direccion;
-        raiz.querySelectorAll('[data-direccion]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      }),
-    );
-    raiz.querySelectorAll<HTMLButtonElement>('[data-detalle]').forEach((b) =>
-      b.addEventListener('click', () => {
-        tipoDetalle = b.dataset.detalle!;
-        raiz.querySelectorAll('[data-detalle]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-        cambiarModo('detalles');
-      }),
-    );
-    raiz.querySelector<HTMLInputElement>('[data-tamano-detalle]')!.addEventListener('input', (e) => {
-      radioDetalle = Number((e.target as HTMLInputElement).value);
-      if (modo !== 'detalles') cambiarModo('detalles');
+    raiz.querySelector('[data-sorprendeme]')!.addEventListener('click', () => {
+      const combo = COMBINACIONES[Math.floor(Math.random() * COMBINACIONES.length)];
+      const orden = areas.map((a, i) => ({ a, i })).filter((z) => z.i !== zonaFondo && z.a > 120).sort((p, q) => q.a - p.a);
+      historial.push({ tipo: 'lote', antes: rellenos.slice() });
+      const [blanco, principal, iris, oscuro] = combo;
+      // qué color va en cada zona, de la más grande a la más pequeña
+      const colorPara = (k: number) => modelo.id.includes('labios')
+        ? (k === 0 ? principal : k === 1 ? oscuro : blanco)              // labios, boca y dientes
+        : ([blanco, principal, iris, oscuro][k] ?? principal);           // ojo, borde, iris y pupila
+      rellenos = orden.map((z, k) => ({ x: semillas[z.i][0], y: semillas[z.i][1], c: colorPara(k) }));
+      pintarPronto();
     });
-    raiz.querySelectorAll<HTMLButtonElement>('[data-medida]').forEach((b) =>
-      b.addEventListener('click', () => {
-        medida = Number(b.dataset.medida);
-        raiz.querySelectorAll('[data-medida]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-        componerPronto();
-      }),
-    );
-
-    raiz.querySelector('[data-mezclar]')!.addEventListener('click', () => { colorearConPaleta(true); componerPronto(); });
     raiz.querySelector('[data-deshacer]')!.addEventListener('click', () => {
       const a = historial.pop();
       if (!a) return;
       if (a.tipo === 'lote') rellenos = a.antes ?? [];
-      else rellenos.splice(rellenos.length - a.rellenos, a.rellenos);
-      if (a.tipo === 'trazo') trazos.pop();
-      if (a.tipo === 'detalle') detalles.pop();
-      if (a.tipo === 'trazo' || a.tipo === 'detalle') reconstruirLineas();
-      componerPronto();
+      else if (a.tipo === 'relleno') rellenos.pop();
+      else { trazos.pop(); reconstruirLineas(); }
+      pintarPronto();
     });
     raiz.querySelector('[data-reiniciar]')!.addEventListener('click', () => {
       const actual = raiz.querySelector<HTMLButtonElement>('[data-modelo][aria-pressed="true"]');
       if (actual) cargarModelo(actual);
     });
 
-    // ── ficha, mensaje y envío ──
+    // ── etapas ──
+    let prototipo: { imagen: () => string; destruir: () => void } | null = null;
+    const escena3d = raiz.querySelector<HTMLElement>('[data-escena3d]')!;
+    const cargando = raiz.querySelector<HTMLElement>('[data-cargando]')!;
+
+    // color de los cantos: el más repetido justo por dentro del contorno de la pieza
+    function colorDelCanto(): string {
+      const porZona = coloresPorZona();
+      let x0 = ANCHO, y0 = ALTO, x1 = 0, y1 = 0;
+      for (let i = 0; i < ANCHO * ALTO; i += 7) if (zonas[i] !== zonaFondo) { const x = i % ANCHO, y = (i - x) / ANCHO; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+      const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      const cuenta = new Map<string, number>();
+      for (let i = ANCHO; i < ANCHO * (ALTO - 1); i += 3) {
+        if (zonas[i] !== -1 || (zonas[i - 1] !== zonaFondo && zonas[i + 1] !== zonaFondo && zonas[i - ANCHO] !== zonaFondo && zonas[i + ANCHO] !== zonaFondo)) continue;
+        const x = i % ANCHO, y = (i - x) / ANCHO;
+        const dx = cx - x, dy = cy - y, l = Math.hypot(dx, dy) || 1;
+        for (let paso = 6; paso < 30; paso += 3) {
+          const z = zonas[Math.round(y + (dy / l) * paso) * ANCHO + Math.round(x + (dx / l) * paso)];
+          if (z >= 0 && z !== zonaFondo) { const c = porZona.get(z) ?? SIN_PINTAR; cuenta.set(c, (cuenta.get(c) ?? 0) + 1); break; }
+        }
+      }
+      let mejor = SIN_PINTAR, n = 0;
+      cuenta.forEach((v, c) => { if (v > n) { n = v; mejor = c; } });
+      return mejor;
+    }
+
+    async function verPieza() {
+      componerPieza();
+      prototipo?.destruir();
+      cargando.hidden = false;
+      const dentro = new Uint8Array(ANCHO * ALTO);
+      for (let i = 0; i < ANCHO * ALTO; i++) dentro[i] = zonas[i] !== zonaFondo ? 1 : 0;
+      const imagenPieza = Object.assign(document.createElement('canvas'), { width: ANCHO, height: ALTO });
+      imagenPieza.getContext('2d')!.drawImage(capaPieza, 0, 0);
+      // la librería 3D solo se descarga cuando hace falta
+      const { mostrarPieza3D } = await import('../utils/pieza3d');
+      cargando.hidden = true;
+      prototipo = mostrarPieza3D(escena3d, { imagen: imagenPieza, dentro, ancho: ANCHO, alto: ALTO, colorCanto: colorDelCanto() });
+      actualizarEnvio();
+    }
+
+    function irA(etapa: string) {
+      raiz.querySelectorAll<HTMLElement>('[data-etapa]').forEach((e) => (e.hidden = e.dataset.etapa !== etapa));
+      raiz.closest('dialog')?.scrollTo({ top: 0, behavior: 'smooth' });
+      if (etapa === 'editor' && !modelo.id) cargarModelo(raiz.querySelector<HTMLButtonElement>('[data-modelo]')!);
+      if (etapa === 'pieza') verPieza();
+    }
+    raiz.querySelectorAll<HTMLButtonElement>('[data-ir]').forEach((b) => b.addEventListener('click', () => irA(b.dataset.ir!)));
+    // al cerrar el diálogo se vuelve a la presentación
+    raiz.closest('dialog')?.addEventListener('close', () => { prototipo?.destruir(); prototipo = null; irA('presentacion'); });
+
+    // ── envío ──
     const idea = raiz.querySelector<HTMLTextAreaElement>('[data-idea]')!;
     const enviar = raiz.querySelector<HTMLAnchorElement>('[data-enviar]')!;
-    const ficha = raiz.querySelector<HTMLElement>('[data-ficha]')!;
-
-    function coloresUsados() {
-      const usados = new Set<string>();
-      rellenos.forEach((r) => { usados.add(c1De(r).toUpperCase()); if (r.i2 !== undefined) usados.add(colorDe(r.i2).toUpperCase()); });
-      return [...usados];
-    }
+    raiz.querySelectorAll<HTMLButtonElement>('[data-medida]').forEach((b) =>
+      b.addEventListener('click', () => {
+        medida = Number(b.dataset.medida);
+        raiz.querySelectorAll('[data-medida]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        actualizarEnvio();
+      }),
+    );
     function mensaje() {
-      const usados = coloresUsados();
-      const tipos = [...new Set(detalles.map((d) => tx.tiposDetalle[d.tipo]))];
+      const usados = [...new Set([...coloresPorZona().values()])].map(nombreDe);
       const lineas = [
         tx.saludo,
         `• ${tx.modelo}: ${modelo.nombre}`,
-        `• ${tx.paleta}: ${paleta.nombre}`,
         `• ${tx.colores}: ${usados.length ? usados.join(', ') : tx.sinColores}`,
-        `• ${tx.acabado}: ${tipoRelleno === 'degradado' ? tx.degradado : tx.liso}`,
+        `• ${tx.medida}: ${medida} cm`,
       ];
-      if (tipos.length) lineas.push(`• ${tx.conDetalles}: ${tipos.join(', ')}`);
-      lineas.push(`• ${tx.tamano}: ${medida} cm`);
-      if (idea.value.trim()) lineas.push(`• ${tx.idea}: ${idea.value.trim()}`);
+      if (idea.value.trim()) lineas.push(`• ${tx.idea.replace(/ \(.*\)$/, '')}: ${idea.value.trim()}`);
       lineas.push('', tx.adjunto);
       return lineas.join('\n');
     }
-    function actualizarFicha() {
-      const filas: [string, string][] = [
-        [tx.modelo, modelo.nombre],
-        [tx.paleta, paleta.nombre],
-        [tx.acabado, tipoRelleno === 'degradado' ? tx.degradado : tx.liso],
-        [tx.tamano, `${medida} cm`],
-      ];
-      if (detalles.length) filas.push([tx.conDetalles, String(detalles.length)]);
-      ficha.innerHTML = '';
-      filas.forEach(([k, v]) => {
-        const dt = document.createElement('dt'); dt.textContent = k;
-        const dd = document.createElement('dd'); dd.textContent = v;
-        ficha.append(dt, dd);
-      });
-      enviar.href = `https://wa.me/${raiz.dataset.numero}?text=${encodeURIComponent(mensaje())}`;
-    }
-    idea.addEventListener('input', actualizarFicha);
+    function actualizarEnvio() { enviar.href = `https://wa.me/${raiz.dataset.numero}?text=${encodeURIComponent(mensaje())}`; }
+    idea.addEventListener('input', actualizarEnvio);
 
-    // la imagen que se envía es la escena sin la vista previa ni el fantasma del detalle
-    const imagenDiseno = () => {
-      const p = puntero; puntero = null; componer(); puntero = p;
-      return new Promise<Blob>((ok) => lienzo.toBlob((b) => ok(b!), 'image/png'));
+    // la imagen que se envía es el prototipo 3D (o el dibujo, si aún no se ha visto en 3D)
+    const imagenDiseno = async () => {
+      const url = prototipo ? prototipo.imagen() : lienzo.toDataURL('image/png');
+      return (await fetch(url)).blob();
     };
     const descargar = async () => {
       const url = URL.createObjectURL(await imagenDiseno());
@@ -756,7 +608,6 @@ const iconosDetalle: Record<string, string> = {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     };
     raiz.querySelector('[data-descargar]')!.addEventListener('click', descargar);
-
     const prueba = new File([''], 'prueba.png', { type: 'image/png' });
     const puedeCompartir = !!navigator.canShare?.({ files: [prueba] }) && matchMedia('(pointer: coarse)').matches;
     enviar.addEventListener('click', async (e) => {
@@ -766,8 +617,6 @@ const iconosDetalle: Record<string, string> = {
       try { await navigator.share({ files: [archivo], text: mensaje() }); } catch { /* cancelado */ }
     });
 
-    pintarPincel();
-    actualizarCursor();
-    cargarModelo(raiz.querySelector<HTMLButtonElement>('[data-modelo]')!);
+    cursor();
   });
 </script>

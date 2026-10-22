@@ -85,13 +85,21 @@ export const modelosPieza = [
   { id: 'labios', imagen: 'diseno/ojo-y-labios/labios-rojos.jpg', nombre: { es: 'Labios', en: 'Lips' } },
 ];
 
-// PALETAS DEL CONFIGURADOR: combinaciones cerradas, sacadas de tus obras y proyectos.
-// Al elegir una paleta la pieza se colorea entera con ella; después se puede cambiar zona a zona.
-export const paletasPieza = [
-  { id: 'deformando', nombre: { es: 'DE-formando', en: 'DE-formando' }, colores: ['#7a2e2a', '#c8893b', '#8e9b7e', '#ede3d1', '#4b4744'] },
-  { id: 'lucilla', nombre: { es: 'Lucilla', en: 'Lucilla' }, colores: ['#1f9d55', '#1f3f8f', '#7a1f2b', '#f2c230', '#f4efe6'] },
-  { id: 'mediterraneo', nombre: { es: 'Mediterráneo', en: 'Mediterranean' }, colores: ['#2e5fa8', '#2fb3b0', '#d9c7aa', '#b65a3c', '#fbfaf7'] },
-  { id: 'cabezona', nombre: { es: 'La Cabezona', en: 'La Cabezona' }, colores: ['#e2483d', '#f0a8c0', '#f3c63f', '#3aa17e', '#2b4c9b'] },
-  { id: 'nocturno', nombre: { es: 'Nocturno', en: 'Nocturne' }, colores: ['#1f2a44', '#5b3a78', '#b6a3cf', '#c9c3b6', '#1e1c1a'] },
-  { id: 'tierra', nombre: { es: 'Tierra', en: 'Earth' }, colores: ['#b65a3c', '#d9a83a', '#8a8b4e', '#d9c7aa', '#5a3a2a'] },
+// COLORES DEL CONFIGURADOR "Crea tu pieza": tonos limpios, como los de las piezas reales
+export const coloresPieza = [
+  { hex: '#ffffff', nombre: { es: 'Blanco', en: 'White' } },
+  { hex: '#1c1b1a', nombre: { es: 'Negro', en: 'Black' } },
+  { hex: '#d2402f', nombre: { es: 'Rojo', en: 'Red' } },
+  { hex: '#eeb4b7', nombre: { es: 'Rosa palo', en: 'Blush pink' } },
+  { hex: '#e9853b', nombre: { es: 'Naranja', en: 'Orange' } },
+  { hex: '#f2c94c', nombre: { es: 'Amarillo', en: 'Yellow' } },
+  { hex: '#3e8e5e', nombre: { es: 'Verde', en: 'Green' } },
+  { hex: '#8fd1c2', nombre: { es: 'Verde agua', en: 'Mint' } },
+  { hex: '#2bb3c0', nombre: { es: 'Turquesa', en: 'Turquoise' } },
+  { hex: '#3fa9e0', nombre: { es: 'Azul cielo', en: 'Sky blue' } },
+  { hex: '#2e5aa8', nombre: { es: 'Azul', en: 'Blue' } },
+  { hex: '#1f2d4f', nombre: { es: 'Azul noche', en: 'Navy' } },
+  { hex: '#b9a2d8', nombre: { es: 'Lila', en: 'Lilac' } },
+  { hex: '#7b52ab', nombre: { es: 'Morado', en: 'Purple' } },
+  { hex: '#d8c3a0', nombre: { es: 'Arena', en: 'Sand' } },
 ];

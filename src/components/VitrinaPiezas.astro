@@ -1,8 +1,9 @@
 ---
-// VITRINA DE LAS PIEZAS DECORATIVAS (ojos y labios), lo primero de la página de Diseño:
-//  1. Un ojo de ejemplo que flota: al pulsarlo se abre el configurador a pantalla completa.
-//  2. Las piezas ya diseñadas, que aparecen una tras otra.
-//  3. Cómo quedan en casa.
+// PIEZAS DECORATIVAS (ojos y labios), lo primero de la página de Diseño:
+//  · A la izquierda, las piezas ya hechas, de arriba abajo: caen una tras otra como fichas de dominó.
+//  · A la derecha (fija mientras bajas), una invitación grande a crear tu propio diseño.
+//  · Al pulsarla se abre "Crea tu pieza" (Personaliza.astro) a pantalla completa.
+//  · Debajo, cómo quedan en casa.
 import { Image } from 'astro:assets';
 import Personaliza from './Personaliza.astro';
 import { modelosPieza, textoPiezas } from '../data/proyectos';
@@ -13,49 +14,59 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { etiqueta: 'Piezas decorativas', titulo: 'Ojos y labios para habitar tu espacio', cta: 'Personaliza tu pieza', piezas: 'Piezas diseñadas', volver: 'Volver a Diseño', casa: 'En casa — Caras de Mobiliario, Madrid, 2024' },
-  en: { etiqueta: 'Decorative pieces', titulo: 'Eyes and lips to live with', cta: 'Design your piece', piezas: 'Finished pieces', volver: 'Back to Design', casa: 'At home — Caras de Mobiliario, Madrid, 2024' },
+  es: {
+    etiqueta: 'Piezas decorativas',
+    llamada: ['Pincha aquí', 'y crea tu', 'propio diseño'],
+    sub: 'Elige un modelo, píntalo a tu gusto y mira cómo quedaría en madera.',
+    boton: 'Crear mi pieza',
+    volver: 'Volver a Diseño',
+    casa: 'En casa — Caras de Mobiliario, Madrid, 2024',
+  },
+  en: {
+    etiqueta: 'Decorative pieces',
+    llamada: ['Click here', 'and create your', 'own design'],
+    sub: 'Choose a model, paint it your way and see how it would look in wood.',
+    boton: 'Create my piece',
+    volver: 'Back to Design',
+    casa: 'At home — Caras de Mobiliario, Madrid, 2024',
+  },
 }[idioma];
 ---
 
 <section class="vitrina contenedor" id="piezas">
-  <div class="presenta">
-    <button type="button" class="ejemplo" data-abrir-personaliza aria-label={tx.cta}>
-      <span class="flota">
-        <Image src={imagen('diseno/ojo-y-labios/ojo-pestanas-azules.jpg')} alt="" widths={[500, 900]} sizes="(max-width: 860px) 80vw, 45vw" loading="eager" />
-      </span>
-      <span class="cta mono">{tx.cta} →</span>
-    </button>
+  <!-- las piezas reales, en cascada -->
+  <ul class="domino">
+    {modelosPieza.map((m, i) => (
+      <li style={`--i:${i}`} data-ficha>
+        <Image src={imagen(m.imagen)} alt={m.nombre[idioma]} widths={[400, 800]} sizes="(max-width: 860px) 80vw, 40vw" loading={i < 2 ? 'eager' : 'lazy'} />
+      </li>
+    ))}
+  </ul>
 
-    <div class="texto" data-aparece>
+  <!-- la invitación -->
+  <div class="lado">
+    <button type="button" class="llamada" data-abrir-personaliza>
       <span class="mono etiqueta">{tx.etiqueta}</span>
-      <h2>{tx.titulo}</h2>
+      <span class="grande">{tx.llamada.map((l) => <span>{l}</span>)}</span>
+      <span class="flecha" aria-hidden="true">→</span>
+    </button>
+    <p class="sub">{tx.sub}</p>
+    <div class="texto">
       {textoPiezas[idioma].map((p) => <p>{p}</p>)}
-      <button type="button" class="boton boton-principal" data-abrir-personaliza>{tx.cta} →</button>
     </div>
   </div>
-
-  <div class="terminadas">
-    <p class="mono etiqueta">{tx.piezas}</p>
-    <ul>
-      {modelosPieza.map((m, i) => (
-        <li data-aparece style={`--retraso:${i * 120}ms; --fase:${i * -1.3}s`}>
-          <Image src={imagen(m.imagen)} alt={m.nombre[idioma]} widths={[300, 600]} sizes="(max-width: 860px) 45vw, 18vw" loading="lazy" />
-          <span class="mono">{m.nombre[idioma]}</span>
-        </li>
-      ))}
-    </ul>
-  </div>
-
-  <figure class="en-casa" data-aparece>
-    <Image src={imagen('diseno/ojo-y-labios/piezas-estanteria.jpg')} alt={tx.casa} widths={[800, 1400, 2000]} sizes="(max-width: 860px) 100vw, 80vw" loading="lazy" />
-    <figcaption class="mono">{tx.casa}</figcaption>
-  </figure>
 </section>
 
-<!-- CONFIGURADOR A PANTALLA COMPLETA -->
-<dialog class="dialogo-personaliza" id="dialogo-personaliza" aria-label={tx.cta}>
-  <!-- barra fija para salir en cualquier momento (también pulsando fuera del panel o con Esc) -->
+<figure class="en-casa contenedor" data-aparece>
+  <Image src={imagen('diseno/ojo-y-labios/piezas-estanteria.jpg')} alt={tx.casa} widths={[800, 1400, 2000]} sizes="(max-width: 860px) 100vw, 80vw" loading="lazy" />
+  <figcaption class="mono">{tx.casa}</figcaption>
+</figure>
+
+<!-- en el móvil, un botón fijo abajo mientras se ven las piezas -->
+<button type="button" class="boton-flotante" data-abrir-personaliza data-flotante>{tx.boton} →</button>
+
+<!-- CREA TU PIEZA, a pantalla completa -->
+<dialog class="dialogo-personaliza" id="dialogo-personaliza" aria-label={tx.boton}>
   <div class="barra-salir">
     <button type="button" class="volver mono" data-cerrar-personaliza>← {tx.volver}</button>
     <button type="button" class="cerrar" data-cerrar-personaliza aria-label={t.cerrar}>×</button>
@@ -66,89 +77,101 @@ const tx = {
 </dialog>
 
 <style>
-  .vitrina { margin-top: clamp(2rem, 5vw, 4rem); }
-
-  .presenta {
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-    gap: clamp(2rem, 6vw, 6rem);
-    align-items: center;
-    min-height: min(78vh, 760px);
-  }
-  @media (max-width: 860px) { .presenta { grid-template-columns: 1fr; min-height: 0; } }
-
-  /* El ojo de ejemplo: flota suavemente y al pasar por encima invita a personalizarlo */
-  .ejemplo { position: relative; display: grid; justify-items: center; gap: 1.2rem; padding: 0; border: 0; background: none; cursor: pointer; }
-  .flota { display: block; animation: flotar 6s ease-in-out infinite; }
-  .flota img { width: min(100%, 560px); height: auto; mix-blend-mode: multiply; transition: transform 0.6s ease; }
-  .ejemplo:hover .flota img { transform: scale(1.04) rotate(-2deg); }
-  .cta { color: var(--texto-suave); border-bottom: 1px solid var(--linea); padding-bottom: 0.3rem; transition: color 0.3s, border-color 0.3s; }
-  .ejemplo:hover .cta { color: var(--texto); border-color: var(--texto); }
-  @keyframes flotar {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-14px) rotate(1.5deg); }
+  .vitrina {
+    margin-top: clamp(1.5rem, 4vw, 3rem);
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 6rem); align-items: start;
   }
 
-  .texto { max-width: 460px; }
-  .texto .etiqueta { display: block; margin-bottom: 1rem; }
-  .texto h2 { font-family: var(--fuente-titulos); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; letter-spacing: -0.015em; margin-bottom: 1.4rem; }
-  .texto p { margin: 0 0 1rem; color: var(--texto-suave); font-size: 0.9rem; line-height: 1.75; }
-  .texto .boton { margin-top: 1rem; }
-
-  /* Piezas diseñadas: aparecen una tras otra y se mecen suavemente */
-  .terminadas { margin-top: clamp(4rem, 9vw, 7rem); }
-  .terminadas .etiqueta { margin-bottom: 1.4rem; }
-  .terminadas ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(1rem, 2.5vw, 2rem); align-items: end; }
-  @media (max-width: 860px) { .terminadas ul { grid-template-columns: repeat(2, 1fr); } }
-  .terminadas li { display: grid; gap: 0.6rem; }
-  .terminadas li.visible img { animation: mecer 7s ease-in-out infinite; animation-delay: var(--fase, 0s); }
-  .terminadas img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; mix-blend-mode: multiply; }
-  .terminadas .mono { color: var(--texto-suave); }
-  @keyframes mecer {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-8px) rotate(-1.5deg); }
+  /* DOMINÓ: las piezas, una debajo de otra, cayendo en cadena */
+  .domino { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(0.5rem, 2vw, 1.4rem); perspective: 1200px; }
+  .domino li { transform-origin: 50% 0%; }
+  .domino li:nth-child(odd) { justify-self: start; }
+  .domino li:nth-child(even) { justify-self: end; }
+  .domino :global(img) { display: block; width: min(100%, 440px); height: auto; mix-blend-mode: multiply; }
+  :global(.js) .domino li:not(.cae) { opacity: 0; }
+  .domino li.cae { animation: caer 0.9s cubic-bezier(0.3, 1.35, 0.5, 1) backwards; animation-delay: calc(var(--i) * 160ms); }
+  @keyframes caer {
+    0% { opacity: 0; transform: translateY(-40px) rotateX(-75deg); }
+    60% { opacity: 1; }
+    100% { opacity: 1; transform: none; }
   }
 
-  .en-casa { margin: clamp(4rem, 9vw, 7rem) auto 0; max-width: 1100px; }
-  .en-casa img { width: 100%; height: auto; }
+  /* LA INVITACIÓN: fija mientras bajas por las piezas */
+  .lado { position: sticky; top: 8rem; padding-top: clamp(1rem, 8vh, 5rem); }
+  .llamada { display: grid; gap: 1rem; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: var(--texto); }
+  .etiqueta { color: var(--texto-suave); }
+  .grande { display: grid; font-family: var(--fuente-titulos); font-weight: 400; font-size: clamp(2.2rem, 5vw, 4.4rem); line-height: 0.98; letter-spacing: -0.03em; text-transform: uppercase; }
+  .grande span { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .llamada:hover .grande span:nth-child(1) { transform: translateX(0.4rem); }
+  .llamada:hover .grande span:nth-child(2) { transform: translateX(0.8rem); }
+  .llamada:hover .grande span:nth-child(3) { transform: translateX(1.2rem); }
+  .flecha { font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; animation: empujar 1.6s ease-in-out infinite; }
+  @keyframes empujar { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(14px); } }
+  .sub { margin: 1.4rem 0 2rem; max-width: 34ch; font-size: 0.92rem; line-height: 1.6; }
+  .texto p { margin: 0 0 0.8rem; max-width: 46ch; font-size: 0.82rem; line-height: 1.7; color: var(--texto-suave); }
+
+  .en-casa { margin-top: clamp(4rem, 9vw, 7rem); }
+  .en-casa :global(img) { width: 100%; height: auto; }
   .en-casa figcaption { margin-top: 0.8rem; color: var(--texto-suave); }
 
-  /* Diálogo del configurador: un panel grande sobre la página difuminada; pulsando fuera se cierra */
+  .boton-flotante { display: none; }
+
+  @media (max-width: 860px) {
+    .vitrina { grid-template-columns: 1fr; }
+    /* en el móvil la invitación va primero y las piezas caen debajo */
+    .lado { position: static; order: -1; padding-top: 0; }
+    .grande { font-size: clamp(2.2rem, 11vw, 3.2rem); }
+    .domino li { justify-self: center !important; }
+    .boton-flotante {
+      position: fixed; left: 50%; bottom: 1rem; z-index: 9; transform: translateX(-50%);
+      display: block; padding: 0.9rem 1.4rem; border: 0; border-radius: 999px;
+      background: var(--texto); color: var(--fondo); font: inherit; font-size: 0.9rem; cursor: pointer;
+      box-shadow: 0 10px 26px -10px rgba(0,0,0,0.5);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .boton-flotante.oculto { opacity: 0; pointer-events: none; transform: translate(-50%, 20px); }
+  }
+
+  /* Diálogo: a pantalla completa, limpio, sobre blanco */
   .dialogo-personaliza {
-    width: min(1380px, calc(100vw - 4rem)); max-width: none; height: calc(100dvh - 4rem); max-height: none;
-    margin: auto; padding: 0 0 2.5rem; border: 0; border-radius: 4px;
+    width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0 0 3rem; border: 0;
     background: var(--fondo); overflow-y: auto;
-    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.35);
   }
   .dialogo-personaliza[open] { animation: entrarDialogo 0.45s ease; }
-  .dialogo-personaliza::backdrop { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .dialogo-personaliza::backdrop { background: #fff; }
   .barra-salir {
     position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center;
-    padding: 0.9rem var(--margen); margin-bottom: 0.5rem;
+    padding: 0.9rem var(--margen);
     background: color-mix(in srgb, var(--fondo) 94%, transparent); backdrop-filter: blur(6px);
   }
   .volver { padding: 0.45rem 0.9rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--fondo); cursor: pointer; color: var(--texto); transition: border-color 0.2s; }
   .volver:hover { border-color: var(--texto); }
   .barra-salir .cerrar { width: 2.2rem; height: 2.2rem; border: 0; background: none; font-size: 1.6rem; font-weight: 200; line-height: 1; cursor: pointer; color: var(--texto); }
-  /* en el móvil ocupa toda la pantalla */
-  @media (max-width: 700px) {
-    .dialogo-personaliza { width: 100vw; height: 100dvh; border-radius: 0; }
-  }  @keyframes entrarDialogo { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .flota, .terminadas li.visible img { animation: none; } }
+  @keyframes entrarDialogo { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .domino li.cae, .flecha { animation: none; } }
 </style>
 
 <script>
+  // las piezas caen en cadena cuando la lista entra en pantalla
+  const fichas = [...document.querySelectorAll<HTMLElement>('[data-ficha]')];
+  const observador = new IntersectionObserver((entradas) => {
+    if (entradas.some((e) => e.isIntersecting)) { fichas.forEach((f) => f.classList.add('cae')); observador.disconnect(); }
+  }, { threshold: 0.05 });
+  if (fichas[0]) observador.observe(fichas[0]);
+
+  // el botón flotante del móvil se esconde al llegar a los proyectos
+  const flotante = document.querySelector<HTMLElement>('[data-flotante]');
+  const proyectos = document.getElementById('proyectos');
+  if (flotante && proyectos) {
+    new IntersectionObserver(([e]) => flotante.classList.toggle('oculto', e.isIntersecting || e.boundingClientRect.top < 0), {}).observe(proyectos);
+  }
+
   const dialogo = document.getElementById('dialogo-personaliza') as HTMLDialogElement | null;
   if (dialogo) {
     const abrir = () => { dialogo.showModal(); document.documentElement.style.overflow = 'hidden'; };
     document.querySelectorAll('[data-abrir-personaliza]').forEach((b) => b.addEventListener('click', abrir));
     dialogo.querySelectorAll('[data-cerrar-personaliza]').forEach((b) => b.addEventListener('click', () => dialogo.close()));
-    // pulsar fuera del panel (sobre la página difuminada) también cierra
-    // (solo si el clic empezó y acabó fuera, para no cerrarlo al soltar un arrastre)
-    const fuera = (e: MouseEvent) => { const r = dialogo.getBoundingClientRect(); return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom; };
-    let empezoFuera = false;
-    dialogo.addEventListener('pointerdown', (e) => { empezoFuera = fuera(e); });
-    dialogo.addEventListener('click', (e) => { if (empezoFuera && fuera(e)) dialogo.close(); });
     dialogo.addEventListener('close', () => { document.documentElement.style.overflow = ''; });
   }
 </script>
