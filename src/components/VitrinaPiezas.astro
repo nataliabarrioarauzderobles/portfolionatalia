@@ -47,7 +47,10 @@ const tx = {
   <div class="lado">
     <button type="button" class="llamada" data-abrir-personaliza>
       <span class="mono etiqueta">{tx.etiqueta}</span>
-      <span class="grande">{tx.llamada.map((l) => <span>{l}</span>)}</span>
+      <!-- el texto se escribe solo al entrar; mientras, cada línea guarda su sitio -->
+      <span class="grande" aria-label={tx.llamada.join(" ")} data-escribir>
+        {tx.llamada.map((l) => <span class="linea" data-texto={l}><span class="hueco" aria-hidden="true">{l}</span><span class="escrito" aria-hidden="true"></span></span>)}
+      </span>
       <span class="flecha" aria-hidden="true">→</span>
     </button>
     <p class="sub">{tx.sub}</p>
@@ -101,11 +104,20 @@ const tx = {
   .lado { position: sticky; top: 8rem; padding-top: clamp(1rem, 8vh, 5rem); }
   .llamada { display: grid; gap: 1rem; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: var(--texto); }
   .etiqueta { color: var(--texto-suave); }
-  .grande { display: grid; font-family: var(--fuente-titulos); font-weight: 400; font-size: clamp(2.2rem, 5vw, 4.4rem); line-height: 0.98; letter-spacing: -0.03em; text-transform: uppercase; }
-  .grande span { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .llamada:hover .grande span:nth-child(1) { transform: translateX(0.4rem); }
-  .llamada:hover .grande span:nth-child(2) { transform: translateX(0.8rem); }
-  .llamada:hover .grande span:nth-child(3) { transform: translateX(1.2rem); }
+  /* letra monoespaciada en mayúsculas, como las etiquetas de la web */
+  .grande { display: grid; font-family: var(--fuente-mono); font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.1rem); line-height: 1.12; letter-spacing: -0.02em; text-transform: uppercase; }
+  /* cada línea ocupa su sitio desde el principio (texto invisible) y encima se va escribiendo */
+  .linea { position: relative; display: block; }
+  .hueco { visibility: hidden; }
+  .escrito { position: absolute; left: 0; top: 0; white-space: pre; }
+  .escrito.cursor::after { content: ""; display: inline-block; width: 0.55em; height: 0.9em; margin-left: 0.06em; vertical-align: -0.08em; background: currentColor; animation: parpadeo 0.9s steps(1) infinite; }
+  @keyframes parpadeo { 50% { opacity: 0; } }
+  /* sin JavaScript, el texto se ve directamente */
+  :global(html:not(.js)) .hueco { visibility: visible; }
+  .grande .linea { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .llamada:hover .grande .linea:nth-child(1) { transform: translateX(0.4rem); }
+  .llamada:hover .grande .linea:nth-child(2) { transform: translateX(0.8rem); }
+  .llamada:hover .grande .linea:nth-child(3) { transform: translateX(1.2rem); }
   .flecha { font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; animation: empujar 1.6s ease-in-out infinite; }
   @keyframes empujar { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(14px); } }
   .sub { margin: 1.4rem 0 2rem; max-width: 34ch; font-size: 0.92rem; line-height: 1.6; }
@@ -121,7 +133,7 @@ const tx = {
     .vitrina { grid-template-columns: 1fr; }
     /* en el móvil la invitación va primero y las piezas caen debajo */
     .lado { position: static; order: -1; padding-top: 0; }
-    .grande { font-size: clamp(2.2rem, 11vw, 3.2rem); }
+    .grande { font-size: clamp(1.6rem, 8.4vw, 2.4rem); }
     .domino li { justify-self: center !important; }
     .boton-flotante {
       position: fixed; left: 50%; bottom: 1rem; z-index: 9; transform: translateX(-50%);
@@ -173,5 +185,33 @@ const tx = {
     document.querySelectorAll('[data-abrir-personaliza]').forEach((b) => b.addEventListener('click', abrir));
     dialogo.querySelectorAll('[data-cerrar-personaliza]').forEach((b) => b.addEventListener('click', () => dialogo.close()));
     dialogo.addEventListener('close', () => { document.documentElement.style.overflow = ''; });
+  }
+</script>
+
+<script>
+  // MÁQUINA DE ESCRIBIR: "Pincha aquí y crea tu propio diseño" se escribe letra a letra al entrar en la sección
+  const bloque = document.querySelector<HTMLElement>('[data-escribir]');
+  if (bloque) {
+    const lineas = [...bloque.querySelectorAll<HTMLElement>('.linea')];
+    const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const escribir = async () => {
+      for (let n = 0; n < lineas.length; n++) {
+        const destino = lineas[n].querySelector<HTMLElement>('.escrito')!;
+        const texto = lineas[n].dataset.texto ?? '';
+        lineas.forEach((l) => l.querySelector('.escrito')!.classList.remove('cursor'));
+        destino.classList.add('cursor');
+        for (let i = 1; i <= texto.length; i++) {
+          destino.textContent = texto.slice(0, i);
+          // un ritmo irregular, como alguien escribiendo
+          await new Promise((ok) => setTimeout(ok, 45 + Math.random() * 70));
+        }
+        await new Promise((ok) => setTimeout(ok, 220));
+      }
+    };
+    if (sinMovimiento) lineas.forEach((l) => (l.querySelector('.escrito')!.textContent = l.dataset.texto ?? ''));
+    else {
+      const vigia = new IntersectionObserver((e) => { if (e[0].isIntersecting) { vigia.disconnect(); setTimeout(escribir, 350); } }, { threshold: 0.4 });
+      vigia.observe(bloque);
+    }
   }
 </script>

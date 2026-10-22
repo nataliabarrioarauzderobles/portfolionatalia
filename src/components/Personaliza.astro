@@ -9,7 +9,6 @@ import { coloresPieza } from '../data/proyectos';
 import type { Idioma } from '../i18n/textos';
 import { contacto } from '../utils/enlaces';
 import { imagen } from '../utils/imagenes';
-import { modelosNuevos } from '../utils/formas-pieza';
 
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
@@ -67,16 +66,19 @@ const tx = {
   },
 }[idioma];
 
+// tus dibujos (src/assets/diseno/personaliza, preparados a 1200 × 900 con la línea engordada)
 const dibujos = [
   { id: 'ojo-pestanas', archivo: 'diseno/personaliza/ojo-pestanas.png', nombre: { es: 'Ojo de pestañas', en: 'Lash eye' } },
   { id: 'ojo-ondas', archivo: 'diseno/personaliza/ojo-ondas.png', nombre: { es: 'Ojo de ondas', en: 'Wave eye' } },
   { id: 'labios-sonrisa', archivo: 'diseno/personaliza/labios-sonrisa.png', nombre: { es: 'Labios', en: 'Lips' } },
   { id: 'ojo-rayos', archivo: 'diseno/personaliza/ojo-rayos.png', nombre: { es: 'Ojo de rayos', en: 'Ray eye' } },
+  { id: 'ojo-ventanas', archivo: 'diseno/personaliza/ojo-ventanas.png', nombre: { es: 'Ojo de ventanas', en: 'Window eye' } },
+  { id: 'ojo-petalos', archivo: 'diseno/personaliza/ojo-petalos.png', nombre: { es: 'Ojo de pétalos', en: 'Petal eye' } },
+  { id: 'ojo-nube', archivo: 'diseno/personaliza/ojo-nube.png', nombre: { es: 'Ojo de nube', en: 'Cloud eye' } },
+  { id: 'ojo-laberinto', archivo: 'diseno/personaliza/ojo-laberinto.png', nombre: { es: 'Ojo laberinto', en: 'Maze eye' } },
+  { id: 'labios', archivo: 'diseno/personaliza/labios.png', nombre: { es: 'Labios cerrados', en: 'Closed lips' } },
 ];
-const modelos = [
-  ...dibujos.map((m) => ({ id: m.id, src: imagen(m.archivo).src, nombre: m.nombre[idioma] })),
-  ...modelosNuevos.map((m) => ({ id: m.id, src: m.src, nombre: m.nombre[idioma] })),
-];
+const modelos = dibujos.map((m) => ({ id: m.id, src: imagen(m.archivo).src, nombre: m.nombre[idioma] }));
 const colores = coloresPieza.map((c) => ({ hex: c.hex, nombre: c.nombre[idioma] }));
 const medidas = [30, 50, 80];
 ---
@@ -502,7 +504,9 @@ const medidas = [30, 50, 80];
       historial.push({ tipo: 'lote', antes: rellenos.slice() });
       const [blanco, principal, iris, oscuro] = combo;
       // qué color va en cada zona, de la más grande a la más pequeña
-      const colorPara = (k: number) => modelo.id.includes('labios')
+      const colorPara = (k: number) => modelo.id === 'labios'
+        ? principal                                                       // labios cerrados: los dos labios de color
+        : modelo.id.includes('labios')
         ? (k === 0 ? principal : k === 1 ? oscuro : blanco)              // labios, boca y dientes
         : ([blanco, principal, iris, oscuro][k] ?? principal);           // ojo, borde, iris y pupila
       rellenos = orden.map((z, k) => ({ x: semillas[z.i][0], y: semillas[z.i][1], c: colorPara(k) }));
