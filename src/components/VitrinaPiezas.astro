@@ -9,6 +9,7 @@ import Personaliza from './Personaliza.astro';
 import { modelosPieza, textoPiezas } from '../data/proyectos';
 import { textos, type Idioma } from '../i18n/textos';
 import { imagen } from '../utils/imagenes';
+import { url } from '../utils/enlaces';
 
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
@@ -20,6 +21,7 @@ const tx = {
     sub: 'Elige un modelo, píntalo a tu gusto y mira cómo quedaría en madera.',
     boton: 'Crear mi pieza',
     volver: 'Volver a Diseño',
+    enUso: 'Las piezas, en uso',
     casa: 'En casa — Caras de Mobiliario, Madrid, 2024',
   },
   en: {
@@ -28,6 +30,7 @@ const tx = {
     sub: 'Choose a model, paint it your way and see how it would look in wood.',
     boton: 'Create my piece',
     volver: 'Back to Design',
+    enUso: 'The pieces, in use',
     casa: 'At home — Caras de Mobiliario, Madrid, 2024',
   },
 }[idioma];
@@ -56,8 +59,13 @@ const tx = {
     ))}
   </ul>
 
-  <div class="texto">
-    {textoPiezas[idioma].map((p) => <p>{p}</p>)}
+  <!-- las piezas en uso: vídeo cuadrado a la izquierda y el texto de la colección al lado -->
+  <div class="en-uso">
+    <video class="video-uso" src={url("diseno/ojos-en-uso.mp4")} poster={url("diseno/ojos-en-uso.jpg")} autoplay muted loop playsinline preload="metadata" aria-label={tx.enUso}></video>
+    <div class="texto">
+      <p class="etiqueta">{tx.enUso}</p>
+      {textoPiezas[idioma].map((p) => <p>{p}</p>)}
+    </div>
   </div>
 </section>
 
@@ -122,8 +130,12 @@ const tx = {
     100% { opacity: 1; transform: none; }
   }
 
-  .texto { max-width: 760px; margin: clamp(3rem, 7vw, 5rem) auto 0; columns: 2; column-gap: 2.5rem; }
-  .texto p { margin: 0 0 0.8rem; font-size: 0.82rem; line-height: 1.75; color: var(--texto-suave); }
+  /* LAS PIEZAS EN USO: vídeo cuadrado y texto, como una doble página */
+  .en-uso { max-width: 1000px; margin: clamp(4rem, 9vw, 7rem) auto 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: end; }
+  .video-uso { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--fondo-suave); }
+  .texto { max-width: 40ch; }
+  .texto .etiqueta { margin: 0 0 1.2rem; color: var(--texto-tenue); }
+  .texto p { margin: 0 0 0.8rem; font-size: 0.84rem; line-height: 1.6; color: var(--texto-suave); }
 
   .en-casa { margin-top: clamp(4rem, 9vw, 7rem); }
   .en-casa :global(img) { width: 100%; height: auto; }
@@ -136,7 +148,7 @@ const tx = {
     /* en el móvil, de dos en dos; la última centrada */
     .domino { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.6rem; }
     .domino li:last-child:nth-child(odd) { grid-column: 1 / -1; width: 50%; justify-self: center; }
-    .texto { columns: 1; }
+    .en-uso { grid-template-columns: 1fr; }
     .boton-flotante {
       position: fixed; left: 50%; bottom: 1rem; z-index: 9; transform: translateX(-50%);
       display: block; padding: 0.9rem 1.4rem; border: 0; border-radius: 999px;
