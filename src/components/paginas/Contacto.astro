@@ -1,11 +1,8 @@
 ---
-// CONTACTO: una composición editorial sobria (inspirada en avea.studio)
-//  · En el centro, UNA sola foto, pequeña: tú trabajando, con tu obra (no un carrusel de fotos tuyas).
-//  · En el texto, algunas palabras (pintura, forma, materia, gesto) van subrayadas: al pasar el cursor
-//    —o al tocarlas en el móvil— la foto del centro cambia a otra en la que estás pintando o con tu obra.
-//    Así las fotos hablan de tu trabajo, y solo se ve una cada vez.
-//  · Arriba a la izquierda, "Sobre mí" y el primer párrafo; arriba a la derecha, tus datos.
-//  · Abajo a la derecha, el segundo párrafo; abajo a la izquierda, WhatsApp y CV. En el móvil, todo apilado.
+// CONTACTO: primero cómo escribirte; después, en pequeño, quién eres (inspirado en avea.studio)
+//  · Arriba, las formas de contacto como un índice: una línea cada una, en letra grande, con su etiqueta.
+//  · Debajo, "Sobre mí": una sola foto pequeña y tranquila (no un carrusel) y los dos párrafos en columnas.
+//  · En el móvil, todo apilado.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import LogoAnimado from '../LogoAnimado.astro';
@@ -16,66 +13,51 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 
-// las fotos de trabajo (en blanco y negro): la primera es la que se ve al entrar
-const foto = (n: string) => imagen(`sobre-mi/fotos/foto-${n}.jpg`);
-const fotos = { inicio: foto('03'), pintura: foto('05'), forma: foto('02'), materia: foto('06'), gesto: foto('07') };
+// la foto de "Sobre mí": una sola, pequeña
+const foto = imagen('sobre-mi/fotos/foto-01.jpg');
+
+// las formas de contacto, una por línea
+const lineas = [
+  { etiqueta: t.email, texto: contacto.email, enlace: `mailto:${contacto.email}` },
+  { etiqueta: t.instagram, texto: `@${contacto.instagram}`, enlace: `https://instagram.com/${contacto.instagram}`, fuera: true },
+  { etiqueta: 'WhatsApp', texto: t.escribemeWhatsApp, enlace: enlaceWhatsApp(t.mensajeContacto), fuera: true },
+  { etiqueta: t.telefono, texto: contacto.telefono, enlace: `tel:${contacto.telefono.replace(/\s/g, '')}` },
+];
 
 // Texto del cuadernillo (CUADERNILLO_VENEZUELA); el inglés es traducción.
-// Entre corchetes, las palabras que cambian la foto: [palabra|clave de la foto]
 const sobreMi = {
   es: [
-    'Soy artista visual y diseñadora, y mi práctica se desarrolla principalmente a través de la [pintura|pintura]. Investigo la relación entre [forma|forma], [materia|materia] y [gesto|gesto], explorando cómo una imagen puede transformarse, perder sus límites y adquirir nuevas formas de presencia.',
+    'Soy artista visual y diseñadora, y mi práctica se desarrolla principalmente a través de la pintura. Investigo la relación entre forma, materia y gesto, explorando cómo una imagen puede transformarse, perder sus límites y adquirir nuevas formas de presencia.',
     'Mi trabajo parte de la abstracción para acercarse a lo humano, creando composiciones en las que la figura aparece, se transforma y finalmente se deshace. A través de la pintura busco generar un diálogo entre lo reconocible y lo ambiguo, entre lo que toma forma y lo que está en proceso de desaparecer.',
   ],
   en: [
-    'I am a visual artist and designer, and my practice is mainly developed through [painting|pintura]. I research the relationship between [form|forma], [matter|materia] and [gesture|gesto], exploring how an image can transform, lose its limits and take on new forms of presence.',
+    'I am a visual artist and designer, and my practice is mainly developed through painting. I research the relationship between form, matter and gesture, exploring how an image can transform, lose its limits and take on new forms of presence.',
     'My work starts from abstraction to come closer to the human, creating compositions in which the figure appears, transforms and finally comes undone. Through painting I seek a dialogue between the recognisable and the ambiguous, between what takes shape and what is in the process of disappearing.',
   ],
 }[idioma];
-// separa el texto en trozos normales y palabras que cambian la foto
-const trozos = (texto: string) =>
-  texto.split(/(\[[^\]]+\])/).map((parte) => {
-    const m = parte.match(/^\[([^|]+)\|([^\]]+)\]$/);
-    return m ? { palabra: m[1], clave: m[2] } : { texto: parte };
-  });
-const quitarMarcas = (texto: string) => texto.replace(/\[([^|]+)\|[^\]]+\]/g, '$1');
 ---
 
 <Base idioma={idioma} pagina="contacto" titulo={t.contactoTitulo}>
-  <section class="escena" data-escena>
-    <!-- arriba a la izquierda: sobre mí, con las palabras que cambian la foto -->
-    <div class="bloque sobre">
-      <h1 class="etiqueta">{t.sobreMi}</h1>
-      <p class="texto" lang={idioma}>
-        {trozos(sobreMi[0]).map((t) => ('palabra' in t
-          ? <button type="button" class="palabra" data-clave={t.clave}>{t.palabra}</button>
-          : t.texto))}
-      </p>
-    </div>
-
-    <!-- arriba a la derecha: datos -->
-    <dl class="bloque datos">
-      <div><dt>{t.email}</dt><dd><a href={`mailto:${contacto.email}`}>{contacto.email}</a></dd></div>
-      <div><dt>{t.instagram}</dt><dd><a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener">@{contacto.instagram}</a></dd></div>
-      <div><dt>{t.telefono}</dt><dd><a href={`tel:${contacto.telefono.replace(/\s/g, '')}`}>{contacto.telefono}</a></dd></div>
-    </dl>
-
-    <!-- en el centro: una sola foto, que cambia con las palabras del texto -->
-    <figure class="foto" data-foto>
-      {Object.entries(fotos).map(([clave, img]) => (
-        <Image src={img} alt={clave === 'inicio' ? contacto.nombre : ''} widths={[320, 640]} sizes="(max-width: 760px) 60vw, 240px"
-          loading={clave === 'inicio' ? 'eager' : 'lazy'} class:list={{ activa: clave === 'inicio' }} data-clave={clave} />
+  <section class="contacto">
+    <h1 class="etiqueta">{t.contactoTitulo}</h1>
+    <ul class="lineas">
+      {lineas.map((l) => (
+        <li>
+          <span class="etiqueta">{l.etiqueta}</span>
+          <a href={l.enlace} target={l.fuera ? '_blank' : undefined} rel={l.fuera ? 'noopener' : undefined}>{l.texto}</a>
+          <span class="flecha" aria-hidden="true">→</span>
+        </li>
       ))}
+    </ul>
+  </section>
+
+  <section class="sobre-mi">
+    <h2 class="etiqueta">{t.sobreMi}</h2>
+    <figure class="foto">
+      <Image src={foto} alt={contacto.nombre} widths={[300, 600]} sizes="(max-width: 760px) 40vw, 180px" loading="lazy" />
     </figure>
-
-    <!-- abajo a la izquierda: escribir y CV -->
-    <div class="bloque acciones">
-      <a href={enlaceWhatsApp(t.mensajeContacto)} target="_blank" rel="noopener">{t.escribemeWhatsApp} →</a>
-      <a href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV} →</a>
-    </div>
-
-    <!-- abajo a la derecha: el segundo párrafo -->
-    <p class="bloque texto segundo" lang={idioma}>{quitarMarcas(sobreMi[1])}</p>
+    {sobreMi.map((p) => <p class="texto" lang={idioma}>{p}</p>)}
+    <a class="cv" href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV} →</a>
   </section>
 
   <!-- cierre de la página: el personaje se dibuja como una firma -->
@@ -85,70 +67,51 @@ const quitarMarcas = (texto: string) => texto.replace(/\[([^|]+)\|[^\]]+\]/g, '$
 </Base>
 
 <style>
-  /* LA ESCENA: ocupa la pantalla; la foto en el centro y los textos en las esquinas */
-  .escena {
-    min-height: calc(100svh - 62px);
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    grid-template-rows: 1fr auto 1fr;
-    grid-template-areas: "sobre . datos" ". foto ." "acciones . segundo";
-    gap: clamp(1.5rem, 4vh, 3rem) var(--margen);
-    padding: clamp(1.5rem, 4vh, 3rem) var(--margen);
-    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em;
-  }
-  .bloque { max-width: 36ch; }
-  .sobre { grid-area: sobre; align-self: end; }
-  .datos { grid-area: datos; align-self: end; justify-self: end; margin: 0; display: grid; gap: 0.7rem; text-align: right; }
-  .acciones { grid-area: acciones; align-self: start; display: grid; gap: 0.5rem; justify-items: start; }
-  .segundo { grid-area: segundo; align-self: start; justify-self: end; }
+  .contacto, .sobre-mi { padding: 0 var(--margen); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
+  .etiqueta { margin: 0; color: var(--texto-tenue); font-size: 0.72rem; font-weight: 400; }
 
-  .etiqueta { margin: 0 0 1rem; color: var(--texto-tenue); font-size: inherit; }
+  /* LAS FORMAS DE CONTACTO: un índice, una línea cada una */
+  .contacto { padding-top: clamp(1.5rem, 5vh, 3.5rem); }
+  .contacto > .etiqueta { margin-bottom: 1rem; }
+  .lineas { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linea); }
+  .lineas li {
+    position: relative; display: grid; grid-template-columns: minmax(7rem, 1fr) 3fr auto; align-items: baseline; gap: 1rem;
+    padding: clamp(0.9rem, 2.2vh, 1.4rem) 0; border-bottom: 1px solid var(--linea);
+  }
+  .lineas a {
+    color: var(--texto); text-transform: none; font-size: clamp(1.1rem, 2.6vw, 2.3rem); line-height: 1.1; letter-spacing: -0.01em;
+    overflow-wrap: anywhere; transition: opacity 0.25s;
+  }
+  /* toda la línea se puede pulsar */
+  .lineas a::after { content: ''; position: absolute; inset: 0; }
+  .flecha { font-size: clamp(1rem, 2vw, 1.6rem); color: var(--texto-tenue); transition: transform 0.3s ease, color 0.3s; }
+  .lineas li:hover a { opacity: 0.6; }
+  .lineas li:hover .flecha { transform: translateX(0.4rem); color: var(--texto); }
+
+  /* SOBRE MÍ: foto pequeña y dos columnas de texto */
+  .sobre-mi {
+    display: grid; grid-template-columns: minmax(7rem, 1fr) 180px repeat(2, minmax(0, 1.4fr)); gap: 1.2rem clamp(1.2rem, 3vw, 2.5rem);
+    align-items: start; margin-top: clamp(4rem, 12vh, 8rem);
+  }
+  .foto { margin: 0; }
+  .foto :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
   .texto { margin: 0; text-transform: none; font-size: 0.84rem; line-height: 1.6; color: var(--texto-suave); }
-  .datos dt { color: var(--texto-tenue); }
-  .datos dd { margin: 0; text-transform: none; word-break: break-word; }
-  .datos a, .acciones a { color: var(--texto); transition: opacity 0.2s; }
-  .datos a:hover, .acciones a:hover { opacity: 0.55; }
-  .acciones a { padding-bottom: 0.15rem; border-bottom: 1px solid var(--texto); }
+  .cv { grid-column: 3; color: var(--texto); padding-bottom: 0.15rem; border-bottom: 1px solid var(--texto); justify-self: start; transition: opacity 0.2s; }
+  .cv:hover { opacity: 0.55; }
 
-  /* las palabras que cambian la foto: subrayado fino */
-  .palabra {
-    padding: 0; border: 0; background: none; font: inherit; color: var(--texto); cursor: pointer;
-    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--texto-tenue);
-    transition: text-decoration-color 0.2s;
+  @media (max-width: 900px) {
+    .sobre-mi { grid-template-columns: 140px minmax(0, 1fr); }
+    .sobre-mi .etiqueta { grid-column: 1 / -1; }
+    .foto { grid-row: span 3; }
+    .cv { grid-column: 2; }
   }
-  .palabra:hover, .palabra:focus-visible, .palabra.activa { text-decoration-color: var(--texto); }
-
-  /* LA FOTO: una sola, pequeña; las demás esperan detrás y aparecen con un fundido */
-  .foto { grid-area: foto; position: relative; margin: 0; width: clamp(170px, 17vw, 240px); aspect-ratio: 4 / 5; }
-  .foto :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease; }
-  .foto :global(img.activa) { opacity: 1; }
-
-  /* MÓVIL: todo apilado */
-  @media (max-width: 760px) {
-    .escena { grid-template-columns: 1fr; grid-template-rows: none; grid-template-areas: "sobre" "foto" "segundo" "datos" "acciones"; min-height: 0; }
-    .foto { justify-self: center; width: 62vw; }
-    .datos, .segundo { justify-self: start; text-align: left; }
+  @media (max-width: 560px) {
+    .lineas li { grid-template-columns: minmax(0, 1fr) auto; gap: 0.3rem 1rem; }
+    .lineas .etiqueta { grid-column: 1 / -1; }
+    .sobre-mi { grid-template-columns: 1fr; }
+    .foto { grid-row: auto; width: 46%; }
+    .cv { grid-column: 1; }
   }
 
   .firma-animada { margin: clamp(3rem, 8vw, 6rem) 0 0; }
 </style>
-
-<script>
-  // al pasar el cursor por una palabra (o tocarla), la foto del centro cambia; al salir, vuelve la de inicio
-  const escena = document.querySelector<HTMLElement>('[data-escena]');
-  if (escena) {
-    const fotos = [...escena.querySelectorAll<HTMLElement>('[data-foto] [data-clave]')];
-    const palabras = [...escena.querySelectorAll<HTMLButtonElement>('.palabra')];
-    const mostrar = (clave: string) => {
-      fotos.forEach((f) => f.classList.toggle('activa', f.dataset.clave === clave));
-      palabras.forEach((p) => p.classList.toggle('activa', p.dataset.clave === clave));
-    };
-    const conRaton = matchMedia('(hover: hover)');
-    palabras.forEach((p) => {
-      p.addEventListener('mouseenter', () => { if (conRaton.matches) mostrar(p.dataset.clave!); });
-      p.addEventListener('mouseleave', () => { if (conRaton.matches) mostrar('inicio'); });
-      // en el móvil: tocar una palabra deja su foto; tocarla otra vez vuelve a la de inicio
-      p.addEventListener('click', () => mostrar(p.classList.contains('activa') && !conRaton.matches ? 'inicio' : p.dataset.clave!));
-    });
-  }
-</script>

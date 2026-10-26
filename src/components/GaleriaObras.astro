@@ -1,7 +1,7 @@
 ---
 // PINTURA: una galería pensada para vender, que entre por los ojos.
-//  · Arriba, una obra destacada en grande: el cuadro colgado en una casa (mockup), con título, medidas,
-//    "Disponible" y un botón "Me interesa".
+//  · Arriba, una entrada corta que invita a comprar sin imagen: "obra original, pieza única",
+//    cuántas obras hay disponibles, preguntar por WhatsApp y encargar otra medida.
 //  · Debajo, una cuadrícula ordenada: todas las imágenes del mismo tamaño, primero las disponibles.
 //    Al pasar el cursor, la foto cambia del cuadro en una casa al cuadro solo (se ven las dos sin abrir nada).
 //  · Al pulsar una obra se abre su información en un panel, debajo de la barra de secciones (que sigue visible).
@@ -17,8 +17,8 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { obra: 'Obra', siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', destacada: 'Obra destacada', disponible: 'Disponible', interesa: 'Me interesa', ver: 'Ver obra' },
-  en: { obra: 'Work', siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', destacada: 'Featured work', disponible: 'Available', interesa: 'I am interested', ver: 'View work' },
+  es: { obra: 'Obra', siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', disponible: 'Disponible', original: 'Obra original.', unica: 'Cada cuadro es una pieza única, pintada a mano.', disponibles: (n: number) => `${n} obras disponibles`, preguntar: 'Pregunta por cualquier obra', encargo: '¿Otra medida? Hazme un encargo', mensaje: 'Hola Natalia, he visto tus cuadros en la web y me gustaría saber más.' },
+  en: { obra: 'Work', siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', disponible: 'Available', original: 'Original work.', unica: 'Every painting is a one-off piece, painted by hand.', disponibles: (n: number) => `${n} works available`, preguntar: 'Ask about any work', encargo: 'Another size? Commission one', mensaje: "Hi Natalia, I've seen your paintings on your website and I'd like to know more." },
 }[idioma];
 
 // En DE-formando la imagen de la galería es el mockup; en el panel, primero el cuadro y después los mockups
@@ -35,29 +35,21 @@ const obras = series.flatMap((serie) =>
 );
 // en la galería, primero las disponibles (manteniendo el orden de series) y al final las vendidas
 const galeria = [...obras.filter((o) => !o.vendida), ...obras.filter((o) => o.vendida)];
-const destacada = galeria[0];
+const numDisponibles = obras.filter((o) => !o.vendida).length;
 const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, o.serie.tecnica && t.tecnicas[o.serie.tecnica]].filter(Boolean).join(' · ');
 const total = String(obras.length).padStart(2, '0');
 ---
 
 <section class="pintura" data-pintura>
-  <!-- LA OBRA DESTACADA -->
-  <article class="destacada">
-    <button type="button" class="foto-destacada" data-abrir={`obra-${destacada.id}`} aria-label={`${t.verObra}: ${destacada.titulo}`}>
-      <Image src={destacada.portada} alt={destacada.titulo} widths={[800, 1300, 1900]} sizes="(max-width: 760px) 100vw, 62vw" loading="eager" />
-    </button>
-    <div class="texto-destacada">
-      <p class="etiqueta">{tx.destacada}</p>
-      <h2>{destacada.titulo}</h2>
-      <p class="serie-destacada">{t.series[destacada.serie.id]}{destacada.serie.año ? `, ${destacada.serie.año}` : ''}</p>
-      <p class="ficha-destacada">{ficha(destacada)}</p>
-      <p class="estado"><span class="punto" aria-hidden="true"></span>{tx.disponible}</p>
-      <div class="botones-destacada">
-        <a class="boton boton-principal" href={enlaceWhatsApp(t.mensajeObra(destacada.titulo, destacada.medidas))} target="_blank" rel="noopener">{tx.interesa} →</a>
-        <button type="button" class="boton" data-abrir={`obra-${destacada.id}`}>{tx.ver}</button>
-      </div>
-    </div>
-  </article>
+  <!-- LA ENTRADA: invita a comprar, sin imagen -->
+  <header class="entrada">
+    <p class="frase"><strong>{tx.original}</strong> {tx.unica}</p>
+    <ul class="ventajas">
+      <li class="estado"><span class="punto" aria-hidden="true"></span>{tx.disponibles(numDisponibles)}</li>
+      <li><a href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.preguntar} →</a></li>
+      <li><a href={rutaIdioma(idioma, 'encargos')}>{tx.encargo} →</a></li>
+    </ul>
+  </header>
 
   <!-- FILTROS -->
   <div class="filtros">
@@ -136,16 +128,13 @@ const total = String(obras.length).padStart(2, '0');
 <style>
   .pintura { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
 
-  /* LA OBRA DESTACADA */
-  .destacada { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: end; padding: 0.6rem var(--margen) clamp(3rem, 7vw, 5rem); }
-  .foto-destacada { display: block; padding: 0; border: 0; background: none; cursor: pointer; overflow: hidden; }
-  .foto-destacada :global(img) { display: block; width: 100%; height: auto; max-height: 72vh; object-fit: cover; transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .foto-destacada:hover :global(img) { transform: scale(1.03); }
-  .texto-destacada .etiqueta { margin: 0 0 1rem; color: var(--texto-tenue); font-size: inherit; }
-  .texto-destacada h2 { margin: 0 0 0.4rem; font-size: clamp(1.4rem, 2.6vw, 2.2rem); line-height: 1.05; text-transform: uppercase; letter-spacing: -0.01em; }
-  .serie-destacada { margin: 0 0 1.4rem; color: var(--texto-tenue); }
-  .ficha-destacada { margin: 0 0 0.6rem; }
-  .botones-destacada { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.6rem; }
+  /* LA ENTRADA */
+  .entrada { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.5rem clamp(1.5rem, 4vw, 4rem); align-items: end; padding: clamp(1.5rem, 5vh, 3.5rem) var(--margen) clamp(2rem, 5vh, 3rem); }
+  .frase { margin: 0; max-width: 24ch; text-transform: none; font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.1; letter-spacing: -0.015em; color: var(--texto-tenue); }
+  .frase strong { font-weight: inherit; color: var(--texto); }
+  .ventajas { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; justify-self: end; }
+  .ventajas a { color: var(--texto); border-bottom: 1px solid var(--texto); padding-bottom: 0.1rem; transition: opacity 0.2s; }
+  .ventajas a:hover { opacity: 0.55; }
 
   .estado { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; }
   .punto { width: 7px; height: 7px; border-radius: 50%; background: #3e8e5e; }
@@ -176,7 +165,8 @@ const total = String(obras.length).padStart(2, '0');
 
   @media (max-width: 1000px) { .galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 760px) {
-    .destacada { grid-template-columns: 1fr; }
+    .entrada { grid-template-columns: 1fr; }
+    .ventajas { justify-self: start; }
     .galeria { gap: 2rem 0.8rem; }
     .pie { grid-template-columns: 1fr; }
     .pie .estado { grid-column: 1; grid-row: auto; justify-self: start; }
@@ -294,7 +284,7 @@ const total = String(obras.length).padStart(2, '0');
     v.querySelector('[data-cerrar]')!.addEventListener('click', cerrarTodo);
   });
 
-  // botones de la galería y de la obra destacada
+  // botones de la galería
   seccion.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((b) => b.addEventListener('click', () => abrirVisor(document.getElementById(b.dataset.abrir!) as HTMLDialogElement)));
 
   // si se llega con un enlace a una obra (p. ej. desde la home), se abre directamente
