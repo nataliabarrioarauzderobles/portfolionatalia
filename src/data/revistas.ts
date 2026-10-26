@@ -1,5 +1,5 @@
-// CADA PROYECTO DE DISEÑO COMO UNA REVISTA (formato A, como la de Lucilla que maquetó Natalia)
-// · Lucilla: son las páginas de su PDF (LUCILLAWEB), tal cual.
+// CADA PROYECTO DE DISEÑO COMO UNA REVISTA (formato A, como la de Lusilla que maquetó Natalia)
+// · Lusilla: son las páginas de su PDF (LUCILLAWEB), tal cual.
 // · El resto sigue el mismo estilo, con estos tipos de página:
 //    portada  → foto a sangre con el nombre del proyecto en mayúsculas muy espaciadas
 //    texto    → página blanca solo con el texto del proyecto (de proyectos.ts), sin títulos
@@ -9,7 +9,7 @@
 //    negra    → página negra con una o dos imágenes (dibujos)
 //    par      → dos imágenes, una encima de otra, sobre blanco
 //    contra   → contraportada blanca: nombre y año, una imagen pequeña y tu nombre espaciado
-//    hoja     → una página ya maquetada, como imagen (la usan las páginas de Lucilla)
+//    hoja     → una página ya maquetada, como imagen (la usan las páginas de Lusilla)
 // "vistas" (opcional) dice qué páginas se ven juntas en el ordenador (empezando a contar en 0).
 
 export type Pagina =

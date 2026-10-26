@@ -1,26 +1,15 @@
 ---
-// DISEÑO
-//  1. Vitrina de las piezas decorativas (ojos y labios) con el configurador "Personaliza tu pieza".
-//  2. Proyectos: cada uno es una revista que se abre desde su portada.
+// DISEÑO: los proyectos de diseño, cada uno como una revista que se abre desde su portada.
+// (Las piezas de ojos y labios y el configurador están en su propia sección: "Crea tu pieza".)
 import Base from '../../layouts/Base.astro';
-import VitrinaPiezas from '../VitrinaPiezas.astro';
 import ProyectosIndice from '../ProyectosIndice.astro';
 import { textos, type Idioma } from '../../i18n/textos';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
-const enlaces = idioma === 'es'
-  ? [['#piezas', 'Piezas decorativas'], ['#proyectos', 'Proyectos']]
-  : [['#piezas', 'Decorative pieces'], ['#proyectos', 'Projects']];
 ---
 
 <Base idioma={idioma} pagina="diseno" titulo={t.disenoTitulo}>
-  <div class="contenedor subcabecera">
-    <h1 class="titulo-pagina">{t.disenoTitulo}</h1>
-    <nav class="indice" aria-label={t.disenoTitulo}>
-      {enlaces.map(([href, texto]) => <a href={href}>{texto}</a>)}
-    </nav>
-  </div>
-  <VitrinaPiezas idioma={idioma} />
+  <h1 class="solo-lector">{t.disenoTitulo}</h1>
   <ProyectosIndice idioma={idioma} />
 </Base>

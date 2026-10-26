@@ -4,7 +4,7 @@
 // Al pulsar una portada se abre la revista: en ordenador a doble página, en el móvil página a página.
 //  · Pasar página: flechas de abajo, teclado, pulsando la mitad izquierda/derecha de la revista o deslizando.
 //  · Cerrar: pulsando fuera de la revista, con la × o con Esc.
-//  · "Proyectos" (menú) para saltar a otra revista. Formato A, como la revista de Lucilla.
+//  · "Proyectos" (menú) para saltar a otra revista. Formato A, como la revista de Lusilla.
 import PaginaRevista from './PaginaRevista.astro';
 import { proyectos } from '../data/proyectos';
 import { revistas } from '../data/revistas';
@@ -82,7 +82,7 @@ const lista = proyectos.filter((p) => revistas[p.id]).map((p, i) => ({ proyecto:
 ))}
 
 <style>
-  .indice-proyectos { margin-top: clamp(6rem, 14vw, 11rem); margin-bottom: clamp(4rem, 10vw, 7rem); scroll-margin-top: 5rem; }
+  .indice-proyectos { margin-top: clamp(1.5rem, 4vw, 3rem); margin-bottom: clamp(4rem, 10vw, 7rem); scroll-margin-top: 5rem; }
   .etiqueta { color: var(--texto-suave); margin-bottom: clamp(2rem, 5vw, 3.5rem); }
 
   /* ÍNDICE: todas las portadas iguales */

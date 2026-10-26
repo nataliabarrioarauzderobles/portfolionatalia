@@ -1,0 +1,14 @@
+---
+// CREA TU PIEZA: las piezas decorativas de ojos y labios y el configurador para diseñar la tuya.
+import Base from '../../layouts/Base.astro';
+import VitrinaPiezas from '../VitrinaPiezas.astro';
+import { textos, type Idioma } from '../../i18n/textos';
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+const t = textos[idioma];
+---
+
+<Base idioma={idioma} pagina="crea-tu-pieza" titulo={t.piezaTitulo}>
+  <h1 class="solo-lector">{t.piezaTitulo}</h1>
+  <VitrinaPiezas idioma={idioma} />
+</Base>
