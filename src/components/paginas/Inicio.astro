@@ -52,6 +52,8 @@ const trazos = [
     overflow: clip; /* los trazos entran desde fuera sin crear scroll horizontal */
   }
   .retrato { position: relative; margin: 0; height: min(44vh, 400px); max-width: 80vw; }
+  /* en el móvil, el retrato un poco más pequeño */
+  @media (max-width: 760px) { .retrato { height: min(34vh, 290px); max-width: 64vw; } }
   .capa { position: absolute; display: block; }
   /* la foto queda en segundo plano: tenue y algo desaturada */
   .base { inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(0.5); }

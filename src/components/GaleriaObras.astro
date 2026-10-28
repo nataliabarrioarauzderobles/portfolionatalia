@@ -38,6 +38,8 @@ const galeria = [...obras.filter((o) => !o.vendida), ...obras.filter((o) => o.ve
 const numDisponibles = obras.filter((o) => !o.vendida).length;
 const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, o.serie.tecnica && t.tecnicas[o.serie.tecnica]].filter(Boolean).join(' · ');
 const total = String(obras.length).padStart(2, '0');
+// precio en euros con separador de miles también en 4 cifras (2.000 €, €2,000)
+const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0, useGrouping: 'always' } as Intl.NumberFormatOptions).format(n);
 ---
 
 <section class="pintura" data-pintura>
@@ -73,7 +75,7 @@ const total = String(obras.length).padStart(2, '0');
           <p class="datos">{ficha(o)}</p>
           {o.vendida
             ? <p class="estado vendida">{t.vendida}</p>
-            : <p class="estado"><span class="punto" aria-hidden="true"></span>{tx.disponible}</p>}
+            : <p class="estado"><span class="punto" aria-hidden="true"></span>{o.precio ? euros(o.precio) : tx.disponible}</p>}
         </div>
       </li>
     ))}
@@ -102,7 +104,9 @@ const total = String(obras.length).padStart(2, '0');
       <dl>
         {o.medidas && (<><dt>{t.medidas}</dt><dd>{o.medidas.replace(' x ', ' × ')} cm</dd></>)}
         {o.serie.tecnica && (<><dt>{t.tecnica}</dt><dd>{t.tecnicas[o.serie.tecnica]}</dd></>)}
-        {o.vendida && (<><dt>{t.estado}</dt><dd>{t.vendida}</dd></>)}
+        {o.vendida
+          ? (<><dt>{t.estado}</dt><dd>{t.vendida}</dd></>)
+          : (<><dt>{t.precio}</dt><dd>{o.precio ? euros(o.precio) : t.consultarPrecio}</dd></>)}
       </dl>
       {o.vendida ? (
         <a class="enlace" href={rutaIdioma(idioma, 'encargos')}>{t.encargarParecida} →</a>

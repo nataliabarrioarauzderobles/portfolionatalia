@@ -28,7 +28,7 @@ export const textos = {
       sueltas: 'Obras sueltas',
     },
     tecnicas: {
-      oleo: 'Óleo sobre lienzo',
+      oleo: 'Óleo sobre madera',
       mixta: 'Técnica mixta',
       acrilico: 'Acrílico sobre lienzo',
     },
@@ -92,7 +92,7 @@ export const textos = {
       sueltas: 'Individual works',
     },
     tecnicas: {
-      oleo: 'Oil on canvas',
+      oleo: 'Oil on wood',
       mixta: 'Mixed media',
       acrilico: 'Acrylic on canvas',
     },
