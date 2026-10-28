@@ -23,18 +23,28 @@ const tx = {
 
 // En DE-formando la imagen de la galería es el mockup; en el panel, primero el cuadro y después los mockups
 const conMockupPrimero = new Set(['formas']);
+// …salvo estas, que se ven primero como cuadro solo y, al pasar el cursor, en la casa
+const pinturaPrimero = new Set(['arquitectura-del-abrazo', 'distorsion-de-la-forma', 'mascara', 'masa']);
+// vendidas que se enseñan pronto en la galería (después de las primeras disponibles), no al final
+const vendidasDestacadas = new Set(['arquitectura-del-abrazo', 'distorsion-de-la-forma', 'mascara', 'masa', 'open-i', 'open-ii']);
 const obras = series.flatMap((serie) =>
   serie.obras.map((obra) => {
     const imagenes = imagenesDe(`pintura/${serie.id}/${obra.id}`);
     const mockup = imagenes.find((img) => img.src.includes('-mockup'));
-    const portada = conMockupPrimero.has(serie.id) && mockup ? mockup : imagenes[0];
+    const portada = conMockupPrimero.has(serie.id) && !pinturaPrimero.has(obra.id) && mockup ? mockup : imagenes[0];
     // la segunda imagen (al pasar el cursor): el cuadro solo si la portada es la casa, o la casa si no
     const segunda = portada === imagenes[0] ? mockup : imagenes[0];
     return { ...obra, serie, imagenes, portada, segunda };
   }),
 );
-// en la galería, primero las disponibles (manteniendo el orden de series) y al final las vendidas
-const galeria = [...obras.filter((o) => !o.vendida), ...obras.filter((o) => o.vendida)];
+// en la galería: seis disponibles, después las vendidas destacadas, el resto de disponibles y al final las demás vendidas
+const disponibles = obras.filter((o) => !o.vendida);
+const galeria = [
+  ...disponibles.slice(0, 6),
+  ...obras.filter((o) => vendidasDestacadas.has(o.id)),
+  ...disponibles.slice(6),
+  ...obras.filter((o) => o.vendida && !vendidasDestacadas.has(o.id)),
+];
 const numDisponibles = obras.filter((o) => !o.vendida).length;
 const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, o.serie.tecnica && t.tecnicas[o.serie.tecnica]].filter(Boolean).join(' · ');
 const total = String(obras.length).padStart(2, '0');
@@ -74,7 +84,7 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
           <p class="titulo">{o.titulo}</p>
           <p class="datos">{ficha(o)}</p>
           {o.vendida
-            ? <p class="estado vendida">{t.vendida}</p>
+            ? <p class="estado vendida"><span class="punto roja" aria-hidden="true"></span>{t.vendida}</p>
             : <p class="estado"><span class="punto" aria-hidden="true"></span>{o.precio ? euros(o.precio) : tx.disponible}</p>}
         </div>
       </li>
@@ -143,6 +153,7 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   .estado { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; }
   .punto { width: 7px; height: 7px; border-radius: 50%; background: #3e8e5e; }
   .vendida { color: var(--texto-tenue); }
+  .punto.roja { background: #c2362b; }
 
   /* FILTROS */
   .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; margin: 0 var(--margen) 1.6rem; padding-top: 1.1rem; border-top: 1px solid var(--linea); }
