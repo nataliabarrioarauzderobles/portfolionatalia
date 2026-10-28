@@ -35,7 +35,7 @@ const año = revista.año ?? proyecto.año;
   )}
 
   {pagina.tipo === 'texto' && (
-    <div class="texto" lang={idioma}>
+    <div class:list={["texto", { centrado: pagina.centrado }]} lang={idioma}>
       {parrafos.map((p) => <p>{p}</p>)}
     </div>
   )}
@@ -87,6 +87,8 @@ const año = revista.año ?? proyecto.año;
   /* TEXTO: solo el texto, en una columna estrecha, como en la revista de Lusilla */
   .texto { position: absolute; left: 24%; top: 24%; width: 52%; font-size: 2.15cqw; line-height: 1.38; color: #222; }
   .texto p { margin: 0 0 1.4em; }
+  .texto.centrado { left: 50%; top: 50%; width: 58%; transform: translate(-50%, -50%); text-align: center; }
+  .texto.centrado p:last-child { margin-bottom: 0; }
 
   /* IMAGEN PEQUEÑA, centrada sobre blanco */
   .pequena { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); width: 28%; height: auto; }

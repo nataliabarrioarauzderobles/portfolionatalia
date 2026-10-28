@@ -2,7 +2,7 @@
 // · Lusilla: son las páginas de su PDF (LUCILLAWEB), tal cual.
 // · El resto sigue el mismo estilo, con estos tipos de página:
 //    portada  → foto a sangre con el nombre del proyecto en mayúsculas muy espaciadas (encajar: dibujo entero, más pequeño, sobre blanco)
-//    texto    → página blanca solo con el texto del proyecto (de proyectos.ts), sin títulos
+//    texto    → página blanca solo con el texto del proyecto (de proyectos.ts), sin títulos (centrado: en el centro de la página)
 //    imagen   → una foto a sangre
 //    doble    → una foto que ocupa las dos páginas abiertas (encajar: entera, sobre blanco)
 //    pequena  → una imagen pequeña centrada sobre blanco
@@ -14,7 +14,7 @@
 
 export type Pagina =
   | { tipo: 'portada'; imagen: string; oscuro?: boolean; encajar?: boolean }
-  | { tipo: 'texto' }
+  | { tipo: 'texto'; centrado?: boolean }
   | { tipo: 'imagen'; imagen: string }
   | { tipo: 'doble'; imagen: string; encajar?: boolean }
   | { tipo: 'pequena'; imagen: string }
@@ -72,7 +72,7 @@ export const revistas: Record<string, Revista> = {
     // portada: el dibujo del diseño 03; después, cada diseño (render) junto a su prototipo (foto)
     paginas: [
       { tipo: 'portada', imagen: d('wannabes/03-diseno'), oscuro: true, encajar: true },
-      { tipo: 'texto' },
+      { tipo: 'texto', centrado: true },
       { tipo: 'imagen', imagen: d('wannabes/01-render') },
       { tipo: 'imagen', imagen: d('wannabes/01-modelo') },
       { tipo: 'imagen', imagen: d('wannabes/02-render') },

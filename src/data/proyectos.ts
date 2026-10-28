@@ -49,8 +49,8 @@ export const proyectos: Proyecto[] = [
     titulo: { es: 'Wannabes', en: 'Wannabes' },
     portada: 'diseno/wannabes/03-diseno.jpg',
     texto: {
-      es: 'Diseños de camiseta para la marca Wannabes a partir de mis dibujos de rostros a línea. Cada diseño se muestra en render junto a su prototipo, con la prenda puesta.',
-      en: 'T-shirt designs for the Wannabes brand, based on my line-drawn faces. Each design is shown as a render next to its prototype, worn.',
+      es: 'Para la marca Wannabes llevé a la camiseta mis dibujos de rostros a línea: caras que se cruzan, se superponen y se confunden unas con otras.\n\nDiseñé tres piezas. Una cara de color en el pecho, pequeña, casi como una firma. Un grupo de rostros en blanco que ocupa toda la espalda de una camiseta negra. Y una columna de caras diminutas en una manga larga, que de lejos parece un estampado y de cerca es una multitud.\n\nCada diseño aparece aquí dos veces: primero como lámina, y al lado su prototipo, la prenda real puesta.',
+      en: 'For the Wannabes brand I took my line-drawn faces onto the T-shirt: faces that cross, overlap and blur into one another.\n\nI designed three pieces. A small colour face on the chest, almost like a signature. A group of white faces covering the whole back of a black T-shirt. And a column of tiny faces on a long-sleeve top, which from afar looks like a print and up close is a crowd.\n\nEach design appears here twice: first as a plate, and next to it its prototype, the real garment worn.',
     },
   },
   {
