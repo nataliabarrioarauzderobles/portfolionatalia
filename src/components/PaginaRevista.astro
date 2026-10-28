@@ -29,7 +29,7 @@ const año = revista.año ?? proyecto.año;
 
   {pagina.tipo === 'portada' && (
     <>
-      <Image class="a-sangre" src={imagen(pagina.imagen)} alt={titulo} widths={anchos} sizes={sizes} loading="eager" />
+      <Image class:list={["a-sangre", { "portada-encajada": pagina.encajar }]} src={imagen(pagina.imagen)} alt={titulo} widths={anchos} sizes={sizes} loading="eager" />
       <h2 class:list={['nombre', { oscuro: pagina.oscuro }]}>{titulo}</h2>
     </>
   )}
@@ -81,6 +81,8 @@ const año = revista.año ?? proyecto.año;
     text-shadow: 0 0 2cqw rgba(0, 0, 0, 0.12);
   }
   .nombre.oscuro { color: #1a1a1a; text-shadow: none; }
+  /* portada con un dibujo: entero y más pequeño, debajo del nombre */
+  .a-sangre.portada-encajada { object-fit: contain; padding: 22cqw 16cqw 12cqw; background: #fff; }
 
   /* TEXTO: solo el texto, en una columna estrecha, como en la revista de Lusilla */
   .texto { position: absolute; left: 24%; top: 24%; width: 52%; font-size: 2.15cqw; line-height: 1.38; color: #222; }

@@ -1,7 +1,7 @@
 // CADA PROYECTO DE DISEÑO COMO UNA REVISTA (formato A, como la de Lusilla que maquetó Natalia)
 // · Lusilla: son las páginas de su PDF (LUCILLAWEB), tal cual.
 // · El resto sigue el mismo estilo, con estos tipos de página:
-//    portada  → foto a sangre con el nombre del proyecto en mayúsculas muy espaciadas
+//    portada  → foto a sangre con el nombre del proyecto en mayúsculas muy espaciadas (encajar: dibujo entero, más pequeño, sobre blanco)
 //    texto    → página blanca solo con el texto del proyecto (de proyectos.ts), sin títulos
 //    imagen   → una foto a sangre
 //    doble    → una foto que ocupa las dos páginas abiertas (encajar: entera, sobre blanco)
@@ -13,7 +13,7 @@
 // "vistas" (opcional) dice qué páginas se ven juntas en el ordenador (empezando a contar en 0).
 
 export type Pagina =
-  | { tipo: 'portada'; imagen: string; oscuro?: boolean }
+  | { tipo: 'portada'; imagen: string; oscuro?: boolean; encajar?: boolean }
   | { tipo: 'texto' }
   | { tipo: 'imagen'; imagen: string }
   | { tipo: 'doble'; imagen: string; encajar?: boolean }
@@ -69,16 +69,19 @@ export const revistas: Record<string, Revista> = {
   },
   wannabes: {
     disciplina: { es: 'Moda · Ilustración', en: 'Fashion · Illustration' },
+    // portada: el dibujo del diseño 03; después, cada diseño (render) junto a su prototipo (foto)
     paginas: [
-      { tipo: 'portada', imagen: d('wannabes/01-modelo'), oscuro: true },
+      { tipo: 'portada', imagen: d('wannabes/03-diseno'), oscuro: true, encajar: true },
       { tipo: 'texto' },
+      { tipo: 'imagen', imagen: d('wannabes/01-render') },
+      { tipo: 'imagen', imagen: d('wannabes/01-modelo') },
+      { tipo: 'imagen', imagen: d('wannabes/02-render') },
       { tipo: 'imagen', imagen: d('wannabes/02-modelo') },
-      { tipo: 'par', imagenes: [d('wannabes/01-diseno'), d('wannabes/01-mockup')] },
+      { tipo: 'imagen', imagen: d('wannabes/03-render') },
       { tipo: 'imagen', imagen: d('wannabes/03-modelo') },
-      { tipo: 'par', imagenes: [d('wannabes/03-diseno'), d('wannabes/03-mockup')] },
-      { tipo: 'pequena', imagen: d('wannabes/02-mockup') },
       { tipo: 'contra', imagen: d('wannabes/01-diseno') },
     ],
+    vistas: [[0], [1], [2, 3], [4, 5], [6, 7], [8]],
   },
   moda: {
     disciplina: { es: 'Moda · Dirección de arte', en: 'Fashion · Art direction' },

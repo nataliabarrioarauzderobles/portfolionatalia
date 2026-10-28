@@ -47,10 +47,10 @@ export const proyectos: Proyecto[] = [
   {
     id: 'wannabes',
     titulo: { es: 'Wannabes', en: 'Wannabes' },
-    portada: 'diseno/wannabes/03-modelo.jpg',
+    portada: 'diseno/wannabes/03-diseno.jpg',
     texto: {
-      es: 'Diseños de camiseta para la marca Wannabes a partir de mis dibujos de rostros a línea. Cada diseño se muestra con su mockup y con la prenda puesta.',
-      en: 'T-shirt designs for the Wannabes brand, based on my line-drawn faces. Each design is shown with its mockup and worn.',
+      es: 'Diseños de camiseta para la marca Wannabes a partir de mis dibujos de rostros a línea. Cada diseño se muestra en render junto a su prototipo, con la prenda puesta.',
+      en: 'T-shirt designs for the Wannabes brand, based on my line-drawn faces. Each design is shown as a render next to its prototype, worn.',
     },
   },
   {
