@@ -1,6 +1,6 @@
 ---
 // CONTACTO: sencillo y centrado, pensado para escribirte fácil
-//  · En el centro, una foto tuya pequeña que crece un poco al entrar (de pequeña a su tamaño, sin hacerse grande).
+//  · Al entrar, una imagen grande: tus 5 fotos (src/assets/sobre-mi/portada) que se van pasando cada 5 segundos.
 //  · Debajo, tu nombre y un texto breve de quién eres.
 //  · Un cuadro para escribir un mensaje, que se envía por WhatsApp o por email (se abre ya escrito).
 //  · Tus redes y datos en una fila, y el CV.
@@ -14,7 +14,14 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 
-const foto = imagen('sobre-mi/fotos/foto-01.jpg');
+// las 5 fotos de la portada y, para cada una, qué parte se ve cuando se recorta (object-position)
+const portada = [
+  { foto: imagen('sobre-mi/portada/foto-1.jpg'), punto: '66% 50%' },
+  { foto: imagen('sobre-mi/portada/foto-2.jpg'), punto: '45% 30%' },
+  { foto: imagen('sobre-mi/portada/foto-3.jpg'), punto: '50% 78%' },
+  { foto: imagen('sobre-mi/portada/foto-4.jpg'), punto: '72% 30%' },
+  { foto: imagen('sobre-mi/portada/foto-5.jpg'), punto: '50% 70%' },
+];
 
 const tx = {
   es: {
@@ -46,13 +53,17 @@ const redes = [
 ---
 
 <Base idioma={idioma} pagina="contacto" titulo={t.contactoTitulo}>
+  <!-- la imagen grande: las fotos se van pasando cada 5 segundos -->
+  <section class="portada" data-portada aria-label={contacto.nombre}>
+    {portada.map((p, i) => (
+      <Image src={p.foto} alt={i === 0 ? contacto.nombre : ''} widths={[800, 1400, 2000]} sizes="100vw"
+        loading={i === 0 ? 'eager' : 'lazy'} class:list={{ activa: i === 0 }} style={`object-position:${p.punto}`} />
+    ))}
+    <p class="contador" aria-hidden="true"><span data-numero>01</span> / {String(portada.length).padStart(2, '0')}</p>
+  </section>
+
   <section class="contacto" data-contacto>
     <h1 class="solo-lector">{t.contactoTitulo}</h1>
-
-    <!-- la foto, pequeña, que crece un poco al entrar -->
-    <figure class="foto">
-      <Image src={foto} alt={contacto.nombre} widths={[300, 600]} sizes="220px" loading="eager" />
-    </figure>
 
     <p class="nombre">{contacto.nombre}</p>
     <p class="breve" lang={idioma}>{tx.breve}</p>
@@ -93,28 +104,23 @@ const redes = [
 <style>
   .contacto {
     display: flex; flex-direction: column; align-items: center; text-align: center;
-    max-width: 34rem; margin: 0 auto; padding: clamp(2rem, 7vh, 4.5rem) var(--margen) 0;
+    max-width: 34rem; margin: 0 auto; padding: clamp(3rem, 9vh, 5.5rem) var(--margen) 0;
   }
   .etiqueta { margin: 0 0 0.7rem; color: var(--texto-tenue); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
 
-  /* LA FOTO: pequeña; al entrar crece de más pequeña a su tamaño */
-  .foto { margin: 0; width: clamp(150px, 16vw, 210px); }
-  .foto :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
-  :global(.js) .foto { animation: crecer 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both; }
-  @keyframes crecer {
-    from { transform: scale(0.55); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+  /* LA IMAGEN GRANDE: las fotos, una encima de otra, se funden al cambiar y se acercan muy despacio */
+  .portada { position: relative; height: calc(100svh - 62px); min-height: 420px; overflow: hidden; background: var(--fondo-suave); }
+  .portada :global(img) {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; transform: scale(1.06); transition: opacity 1.4s ease, transform 6.5s ease-out;
   }
+  .portada :global(img.activa) { opacity: 1; transform: scale(1); }
+  @media (max-width: 760px) { .portada { height: 74svh; min-height: 360px; } }
+  .contador { position: absolute; right: var(--margen); bottom: 1.2rem; margin: 0; color: #fff; font-size: 0.72rem; letter-spacing: 0.02em; mix-blend-mode: difference; }
 
-  .nombre { margin: 1.6rem 0 0.6rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .nombre { margin: 0 0 0.6rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
   .breve { margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--texto-suave); }
   /* el texto y lo demás aparecen justo después de la foto */
-  :global(.js) .nombre, :global(.js) .breve, :global(.js) .mensaje, :global(.js) .redes { animation: subir 0.9s ease both; }
-  :global(.js) .nombre { animation-delay: 0.7s; }
-  :global(.js) .breve { animation-delay: 0.8s; }
-  :global(.js) .mensaje { animation-delay: 0.95s; }
-  :global(.js) .redes { animation-delay: 1.1s; }
-  @keyframes subir { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
   /* ESCRIBIR UN MENSAJE */
   .mensaje { width: 100%; margin-top: clamp(2.5rem, 6vh, 3.5rem); text-align: left; }
@@ -136,13 +142,31 @@ const redes = [
   .cv { display: inline-block; margin-top: 1.4rem; font-size: 0.72rem !important; text-transform: uppercase; color: var(--texto-tenue) !important; }
 
   @media (prefers-reduced-motion: reduce) {
-    :global(.js) .foto, :global(.js) .nombre, :global(.js) .breve, :global(.js) .mensaje, :global(.js) .redes { animation: none; }
+    .portada :global(img) { transition: opacity 0.6s ease; transform: none; }
   }
 
   .firma-animada { margin: clamp(3rem, 8vw, 6rem) 0 0; }
 </style>
 
 <script>
+  // la imagen grande: cambia de foto cada 5 segundos
+  const portada = document.querySelector<HTMLElement>('[data-portada]');
+  if (portada) {
+    const fotos = [...portada.querySelectorAll<HTMLImageElement>('img')];
+    const numero = portada.querySelector<HTMLElement>('[data-numero]')!;
+    let actual = 0;
+    // la primera también se acerca despacio al entrar
+    fotos[0].classList.remove('activa');
+    requestAnimationFrame(() => requestAnimationFrame(() => fotos[0].classList.add('activa')));
+    fotos.slice(1).forEach((f) => (f.loading = 'eager'));
+    setInterval(() => {
+      fotos[actual].classList.remove('activa');
+      actual = (actual + 1) % fotos.length;
+      fotos[actual].classList.add('activa');
+      numero.textContent = String(actual + 1).padStart(2, '0');
+    }, 5000);
+  }
+
   // al enviar: abre WhatsApp o el correo con el mensaje ya escrito
   const formulario = document.querySelector<HTMLFormElement>('[data-mensaje]');
   const datos = (window as unknown as { __contacto: { whatsapp: string; email: string; asunto: string; porDefecto: string } }).__contacto;
