@@ -1,6 +1,6 @@
 ---
 // PINTURA: una galería pensada para vender, que entre por los ojos.
-//  · Arriba, una entrada corta que invita a comprar sin imagen: "obra original, pieza única",
+//  · Arriba a la derecha, tres líneas que invitan a comprar:
 //    cuántas obras hay disponibles, preguntar por WhatsApp y encargar otra medida.
 //  · Debajo, una cuadrícula ordenada: todas las imágenes del mismo tamaño, primero las disponibles.
 //    Al pasar el cursor, la foto cambia del cuadro en una casa al cuadro solo (se ven las dos sin abrir nada).
@@ -17,8 +17,8 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { obra: 'Obra', siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', disponible: 'Disponible', original: 'Obra original.', unica: 'Cada cuadro es una pieza única, pintada a mano.', disponibles: (n: number) => `${n} obras disponibles`, preguntar: 'Pregunta por cualquier obra', encargo: '¿Otra medida? Hazme un encargo', mensaje: 'Hola Natalia, he visto tus cuadros en la web y me gustaría saber más.' },
-  en: { obra: 'Work', siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', disponible: 'Available', original: 'Original work.', unica: 'Every painting is a one-off piece, painted by hand.', disponibles: (n: number) => `${n} works available`, preguntar: 'Ask about any work', encargo: 'Another size? Commission one', mensaje: "Hi Natalia, I've seen your paintings on your website and I'd like to know more." },
+  es: { obra: 'Obra', siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', disponible: 'Disponible', disponibles: (n: number) => `${n} obras disponibles`, preguntar: 'Pregunta por cualquier obra', encargo: '¿Otra medida? Hazme un encargo', mensaje: 'Hola Natalia, he visto tus cuadros en la web y me gustaría saber más.' },
+  en: { obra: 'Work', siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', disponible: 'Available', disponibles: (n: number) => `${n} works available`, preguntar: 'Ask about any work', encargo: 'Another size? Commission one', mensaje: "Hi Natalia, I've seen your paintings on your website and I'd like to know more." },
 }[idioma];
 
 // En DE-formando la imagen de la galería es el mockup; en el panel, primero el cuadro y después los mockups
@@ -55,7 +55,6 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
 <section class="pintura" data-pintura>
   <!-- LA ENTRADA: invita a comprar, sin imagen -->
   <header class="entrada">
-    <p class="frase"><strong>{tx.original}</strong> {tx.unica}</p>
     <ul class="ventajas">
       <li class="estado"><span class="punto" aria-hidden="true"></span>{tx.disponibles(numDisponibles)}</li>
       <li><a href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.preguntar} →</a></li>
@@ -143,9 +142,7 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   .pintura { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
 
   /* LA ENTRADA */
-  .entrada { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.5rem clamp(1.5rem, 4vw, 4rem); align-items: end; padding: clamp(1.5rem, 5vh, 3.5rem) var(--margen) clamp(2rem, 5vh, 3rem); }
-  .frase { font-family: var(--fuente-titulos); margin: 0; max-width: 24ch; text-transform: none; font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.1; letter-spacing: -0.015em; color: var(--texto-tenue); }
-  .frase strong { font-weight: inherit; color: var(--texto); }
+  .entrada { display: flex; justify-content: flex-end; padding: clamp(1.5rem, 5vh, 3.5rem) var(--margen) clamp(2rem, 5vh, 3rem); }
   .ventajas { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; justify-self: end; }
   .ventajas a { color: var(--texto); border-bottom: 1px solid var(--texto); padding-bottom: 0.1rem; transition: opacity 0.2s; }
   .ventajas a:hover { opacity: 0.55; }
@@ -180,7 +177,7 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
 
   @media (max-width: 1000px) { .galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 760px) {
-    .entrada { grid-template-columns: 1fr; }
+    .entrada { justify-content: flex-start; }
     .ventajas { justify-self: start; }
     .galeria { gap: 2rem 0.8rem; }
     .pie { grid-template-columns: 1fr; }
