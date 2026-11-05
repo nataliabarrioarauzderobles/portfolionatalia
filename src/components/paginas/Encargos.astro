@@ -4,7 +4,6 @@
 // 1) Entrada (como el ejemplo de Natalia): el título grande arriba, la foto en el centro, los botones a su derecha
 //    y debajo de la foto el texto breve.
 // 2) Tres garantías que quitan miedo: pieza única, ves el boceto antes, sin compromiso.
-// 3) "Elige tu punto de partida": una serie por tarjeta; al pulsarla queda elegida en el formulario.
 // 4) El formulario: unas pocas preguntas con botones; el mensaje se escribe solo y se envía por WhatsApp o email.
 // 5) Cómo funciona, en cuatro pasos. 6) Preguntas frecuentes. 7) Cierre: "mándame una foto de tu pared".
 // Los pasos y condiciones (señal del 50 %, plazos…) son una propuesta: cámbialos aquí si quieres.
@@ -28,10 +27,6 @@ const tx = {
       { titulo: 'Ves el boceto antes', texto: 'Antes de pintar te enseño un boceto o cómo quedaría en tu pared.' },
       { titulo: 'Sin compromiso', texto: 'Hablar, pedir propuesta y presupuesto no te compromete a nada.' },
     ],
-    partidaTitulo: 'Elige tu punto de partida',
-    partidaNota: 'Parte de una de mis series o de algo totalmente nuevo.',
-    nuevo: 'Algo nuevo',
-    nuevoTexto: 'Tu idea, tus colores',
     formTitulo: 'Cuéntame tu idea',
     formNota: 'Dos minutos. No hace falta tenerlo todo claro: lo hablamos después.',
     preguntas: [
@@ -81,10 +76,6 @@ const tx = {
       { titulo: 'See the sketch first', texto: 'Before I paint, I show you a sketch or how it would look on your wall.' },
       { titulo: 'No commitment', texto: 'Talking, asking for a proposal and a quote commits you to nothing.' },
     ],
-    partidaTitulo: 'Choose your starting point',
-    partidaNota: 'Start from one of my series or from something completely new.',
-    nuevo: 'Something new',
-    nuevoTexto: 'Your idea, your colours',
     formTitulo: 'Tell me your idea',
     formNota: 'Two minutes. You do not need to have it all figured out: we will talk it through.',
     preguntas: [
@@ -126,12 +117,6 @@ const tx = {
   },
 }[idioma];
 
-// las tarjetas de "punto de partida": cada una elige una opción de "Inspirado en"
-const partidas = [
-  { imagen: imagen('pintura/formas/encuentro/encuentro.jpg'), opcion: tx.preguntas[0].opciones[0] },
-  { imagen: imagen('pintura/open/open-iii/open-iii.jpg'), opcion: tx.preguntas[0].opciones[1] },
-  { imagen: imagen('pintura/interfaces/interfaces-i/interfaces-i.jpg'), opcion: tx.preguntas[0].opciones[2] },
-];
 ---
 
 <Base idioma={idioma} pagina="encargos" titulo={tx.titulo}>
@@ -155,23 +140,6 @@ const partidas = [
         <li><span class="num">{String(i + 1).padStart(2, '0')}</span><strong>{g.titulo}</strong><p>{g.texto}</p></li>
       ))}
     </ul>
-
-    <!-- 3. PUNTO DE PARTIDA -->
-    <section class="partida">
-      <header class="cabeza"><h2>{tx.partidaTitulo}</h2><p>{tx.partidaNota}</p></header>
-      <div class="tarjetas">
-        {partidas.map((p) => (
-          <button type="button" class="tarjeta" data-partida={p.opcion}>
-            <span class="marco"><Image src={p.imagen} alt="" widths={[400, 700]} sizes="(max-width: 760px) 50vw, 24vw" loading="lazy" /></span>
-            <span class="nombre-tarjeta">{p.opcion} <span aria-hidden="true">→</span></span>
-          </button>
-        ))}
-        <button type="button" class="tarjeta" data-partida={tx.preguntas[0].opciones[3]}>
-          <span class="marco vacio"><span>{tx.nuevoTexto}</span></span>
-          <span class="nombre-tarjeta">{tx.nuevo} <span aria-hidden="true">→</span></span>
-        </button>
-      </div>
-    </section>
 
     <!-- 4. EL FORMULARIO: el mensaje se escribe solo -->
     <section class="idea" id="idea">
@@ -243,11 +211,15 @@ const partidas = [
 
 <style>
   /* letra: Cascadia Code para todo; los títulos en Archivo, la letra del resto de la web */
+  /* letra: Cascadia Code solo donde marca la jerarquía (el título, el texto de la entrada, los botones,
+     los números y las etiquetas pequeñas); el resto, en Archivo, la letra de la web */
   .encargos {
     --mono: 'Cascadia Code', ui-monospace, monospace;
-    padding: 0 var(--margen); font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em; color: #444;
+    padding: 0 var(--margen); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em;
   }
-  .frase, .cabeza h2, .titulo-entrada { font-family: var(--mono); color: var(--texto); }
+  .titulo-entrada, .entrada .sub, .botones a, .accion, .num, .etiqueta, legend { font-family: var(--mono); }
+  .titulo-entrada, .cabeza h2, .frase { color: var(--texto); }
+  .entrada .sub { color: #444; }
   .encargos p { letter-spacing: 0; }
   /* los botones son solo tipografía: al pasar el cursor, el texto se aclara */
   .botones a, .accion { color: #222; letter-spacing: 0.01em; transition: color 0.25s ease; }
@@ -282,15 +254,6 @@ const partidas = [
   .cabeza h2 { margin: 0; font-size: clamp(1.1rem, 2vw, 1.6rem); font-weight: 400; letter-spacing: -0.01em; }
   .cabeza p { margin: 0; max-width: 46ch; font-size: 0.76rem; }
 
-  /* 3. PUNTO DE PARTIDA */
-  .tarjetas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(0.8rem, 2vw, 1.6rem); }
-  .tarjeta { display: grid; gap: 0.7rem; padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto); text-align: left; cursor: pointer; }
-  .marco { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--fondo-suave); }
-  .marco :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .marco.vacio { display: grid; place-items: center; border: 1px dashed var(--texto-tenue); background: none; color: var(--texto-tenue); }
-  .tarjeta:hover :global(img) { transform: scale(1.04); }
-  .nombre-tarjeta span { display: inline-block; transition: transform 0.3s; }
-  .tarjeta:hover .nombre-tarjeta span { transform: translateX(0.3rem); }
 
   /* 4. FORMULARIO */
   .idea { scroll-margin-top: 5rem; }
@@ -335,7 +298,7 @@ const partidas = [
   .cierre .sub { margin: 0 0 1.6rem; }
 
   @media (max-width: 900px) {
-    .tarjetas, .pasos ol { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2rem; }
+    .pasos ol { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2rem; }
   }
   @media (max-width: 760px) {
     .formulario { grid-template-columns: 1fr; }
@@ -374,14 +337,5 @@ const partidas = [
     caja.addEventListener('input', actualizar);
     caja.addEventListener('change', actualizar);
     actualizar();
-
-    // las tarjetas de "punto de partida": eligen la serie en el formulario y bajan hasta él
-    document.querySelectorAll<HTMLButtonElement>('[data-partida]').forEach((boton) => {
-      boton.addEventListener('click', () => {
-        const opcion = caja.querySelector<HTMLInputElement>(`input[name="serie"][value="${boton.dataset.partida}"]`);
-        if (opcion) { opcion.checked = true; actualizar(); }
-        document.getElementById('idea')?.scrollIntoView({ behavior: 'smooth' });
-      });
-    });
   });
 </script>
