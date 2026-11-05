@@ -7,6 +7,7 @@
 // 4) El formulario: unas pocas preguntas con botones; el mensaje se escribe solo y se envía por WhatsApp o email.
 // 5) Cómo funciona, en cuatro pasos. 6) Preguntas frecuentes. 7) Cierre: "mándame una foto de tu pared".
 // Los pasos y condiciones (señal del 50 %, plazos…) son una propuesta: cámbialos aquí si quieres.
+import '@fontsource/cascadia-code/400.css';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { type Idioma } from '../../i18n/textos';
@@ -21,6 +22,7 @@ const tx = {
     frase: 'Un cuadro que solo existe para ti.',
     sub: 'Obra original por encargo, pintada a mano para tu espacio: desde la primera idea hasta tu pared.',
     empezar: 'Empezar mi encargo',
+    pieArriba: 'Obra original — por encargo',
     whatsapp: 'Hablar por WhatsApp',
     garantias: [
       { titulo: 'Pieza única', texto: 'Nadie más tendrá tu cuadro. Se pinta una sola vez, solo para ti.' },
@@ -75,6 +77,7 @@ const tx = {
     frase: 'A painting that exists only for you.',
     sub: 'Original commissioned work, hand-painted for your space: from the first idea to your wall.',
     empezar: 'Start my commission',
+    pieArriba: 'Original work — commissioned',
     whatsapp: 'Chat on WhatsApp',
     garantias: [
       { titulo: 'One of a kind', texto: 'No one else will have your painting. It is painted once, only for you.' },
@@ -142,14 +145,16 @@ const partidas = [
         <h1 class="etiqueta">{tx.titulo}</h1>
         <p class="frase">{tx.frase}</p>
         <p class="sub">{tx.sub}</p>
-        <div class="botones">
-          <a class="boton boton-principal" href="#idea">{tx.empezar} →</a>
-          <a class="boton" href={enlaceWhatsApp(tx.saludo)} target="_blank" rel="noopener">{tx.whatsapp}</a>
-        </div>
       </div>
       <figure class="foto-entrada">
-        <Image src={imagen('encargos/encargos.jpg')} alt="" widths={[600, 1000, 1400]} sizes="(max-width: 760px) 100vw, 50vw" loading="eager" />
+        <figcaption class="arriba">{tx.pieArriba}</figcaption>
+        <Image src={imagen('encargos/encargos.jpg')} alt="" widths={[500, 800, 1100]} sizes="(max-width: 760px) 90vw, 400px" loading="eager" />
+        <figcaption class="abajo"><span>2026</span><span>{contacto.nombre}</span></figcaption>
       </figure>
+      <div class="botones">
+        <a href="#idea">{tx.empezar} →</a>
+        <a href={enlaceWhatsApp(tx.saludo)} target="_blank" rel="noopener">{tx.whatsapp} →</a>
+      </div>
     </section>
 
     <!-- 2. GARANTÍAS -->
@@ -207,8 +212,8 @@ const partidas = [
         <aside class="mensaje">
           <p class="etiqueta">{tx.vistaPrevia}</p>
           <p class="vista-mensaje" data-vista-mensaje>{tx.saludo}</p>
-          <a class="boton boton-principal" data-enviar-whatsapp href={`https://wa.me/${contacto.whatsapp}`} target="_blank" rel="noopener">{tx.enviar} →</a>
-          <a class="boton" data-enviar-email href={`mailto:${contacto.email}`}>{tx.porEmail}</a>
+          <a class="accion" data-enviar-whatsapp href={`https://wa.me/${contacto.whatsapp}`} target="_blank" rel="noopener">{tx.enviar} →</a>
+          <a class="accion" data-enviar-email href={`mailto:${contacto.email}`}>{tx.porEmail} →</a>
           <p class="consejo">{tx.consejo}</p>
         </aside>
       </div>
@@ -239,36 +244,48 @@ const partidas = [
     <section class="cierre">
       <p class="frase">{tx.cierreFrase}</p>
       <p class="sub">{tx.cierreTexto}</p>
-      <a class="boton boton-principal" href={enlaceWhatsApp(tx.cierreMensaje)} target="_blank" rel="noopener">{tx.cierreBoton} →</a>
+      <a class="accion" href={enlaceWhatsApp(tx.cierreMensaje)} target="_blank" rel="noopener">{tx.cierreBoton} →</a>
     </section>
   </div>
 </Base>
 
 <style>
-  .encargos { padding: 0 var(--margen); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
+  /* letra: Cascadia Code para todo; los títulos en Archivo, la letra del resto de la web */
+  .encargos {
+    --mono: 'Cascadia Code', ui-monospace, monospace;
+    padding: 0 var(--margen); font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em; color: #444;
+  }
+  .frase, .cabeza h2 { font-family: var(--fuente); color: var(--texto); }
+  .encargos p { letter-spacing: 0; }
+  /* los botones son solo tipografía: al pasar el cursor, el texto se aclara */
+  .botones a, .accion { color: #222; text-transform: uppercase; letter-spacing: 0.02em; transition: color 0.25s ease; }
+  .botones a:hover, .botones a:focus-visible, .accion:hover, .accion:focus-visible { color: #aaa; }
   .etiqueta { margin: 0 0 1.2rem; color: var(--texto-tenue); font-size: 0.72rem; font-weight: 400; }
   .num { color: var(--texto-tenue); }
   p { text-transform: none; }
 
   /* 1. ENTRADA */
-  .entrada { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(2rem, 6vw, 6rem); align-items: center; padding-top: clamp(1.5rem, 5vh, 3.5rem); }
-  .frase { margin: 0 0 1.2rem; max-width: 14ch; font-size: clamp(1.8rem, 4vw, 3.4rem); line-height: 1.02; letter-spacing: -0.02em; text-transform: uppercase; }
-  .sub { margin: 0 0 2rem; max-width: 38ch; font-size: 0.9rem; line-height: 1.6; color: var(--texto-suave); }
-  .botones { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  /* la foto en el centro; el texto a la izquierda y los botones a la derecha */
+  .entrada { display: grid; grid-template-columns: minmax(0, 1fr) min(400px, 34vw) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: end; padding-top: clamp(1.5rem, 5vh, 3.5rem); }
+  .frase { margin: 0 0 1.2rem; max-width: 14ch; font-size: clamp(1.6rem, 3vw, 2.8rem); line-height: 1.02; letter-spacing: -0.02em; text-transform: uppercase; }
+  .sub { margin: 0; max-width: 38ch; font-size: 0.78rem; line-height: 1.7; }
+  .botones { display: grid; gap: 0.9rem; justify-items: end; text-align: right; padding-bottom: 1.6rem; }
   .foto-entrada { margin: 0; }
-  .foto-entrada :global(img) { display: block; width: 100%; height: auto; max-height: 80vh; object-fit: cover; object-position: 50% 55%; }
+  .foto-entrada :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 62%; }
+  .arriba { margin-bottom: 0.45rem; text-align: right; }
+  .abajo { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.45rem; }
 
   /* 2. GARANTÍAS */
   .garantias { list-style: none; margin: clamp(3rem, 8vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2.5rem); }
   .garantias li, .pasos li { display: grid; gap: 0.5rem; align-content: start; padding-top: 1rem; border-top: 1px solid var(--texto); }
   .garantias strong, .pasos strong { font-weight: 400; font-size: 0.8rem; }
-  .garantias p, .pasos p { margin: 0; font-size: 0.84rem; line-height: 1.6; color: var(--texto-suave); }
+  .garantias p, .pasos p { margin: 0; font-size: 0.76rem; line-height: 1.7; }
 
   /* cabeceras de bloque */
   section:not(.entrada) { margin-top: clamp(5rem, 12vw, 8rem); }
   .cabeza { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.6rem 2rem; padding-bottom: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--linea); }
   .cabeza h2 { margin: 0; font-size: clamp(1.1rem, 2vw, 1.6rem); font-weight: 400; letter-spacing: -0.01em; }
-  .cabeza p { margin: 0; max-width: 46ch; font-size: 0.84rem; color: var(--texto-suave); }
+  .cabeza p { margin: 0; max-width: 46ch; font-size: 0.76rem; }
 
   /* 3. PUNTO DE PARTIDA */
   .tarjetas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(0.8rem, 2vw, 1.6rem); }
@@ -302,8 +319,7 @@ const partidas = [
   .campo input:focus, .campo textarea:focus { outline: none; border-bottom-color: var(--texto); }
   .mensaje { position: sticky; top: 5.5rem; display: grid; gap: 0.7rem; padding: clamp(1.2rem, 3vw, 2rem); border: 1px solid var(--linea); }
   .mensaje .etiqueta { margin: 0; }
-  .vista-mensaje { margin: 0 0 0.6rem; font-size: 0.86rem; line-height: 1.65; white-space: pre-line; }
-  .mensaje .boton { justify-self: stretch; text-align: center; }
+  .vista-mensaje { margin: 0 0 0.6rem; font-size: 0.78rem; line-height: 1.7; white-space: pre-line; }
   .consejo { margin: 0.4rem 0 0; font-size: 0.76rem; line-height: 1.6; color: var(--texto-tenue); }
 
   /* 5. PASOS */
@@ -316,18 +332,19 @@ const partidas = [
   summary::-webkit-details-marker { display: none; }
   summary span { transition: transform 0.3s; color: var(--texto-tenue); font-size: 1rem; }
   details[open] summary span { transform: rotate(45deg); }
-  details p { margin: 0 0 1.2rem; max-width: 62ch; font-size: 0.86rem; line-height: 1.7; color: var(--texto-suave); }
+  details p { margin: 0 0 1.2rem; max-width: 62ch; font-size: 0.78rem; line-height: 1.7; }
 
   /* 7. CIERRE */
   .cierre { display: grid; justify-items: center; text-align: center; padding: clamp(3rem, 8vw, 5rem) 0 clamp(4rem, 10vw, 7rem); border-top: 1px solid var(--linea); }
   .cierre .frase { max-width: none; }
+  .cierre .sub { margin: 0 0 1.6rem; }
 
   @media (max-width: 900px) {
     .tarjetas, .pasos ol { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2rem; }
   }
   @media (max-width: 760px) {
     .entrada, .formulario { grid-template-columns: 1fr; }
-    .foto-entrada :global(img) { max-height: 56vh; }
+    .botones { justify-items: start; text-align: left; padding-bottom: 0; }
     .garantias { grid-template-columns: 1fr; }
     .mensaje { position: static; }
   }
