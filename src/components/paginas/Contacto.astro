@@ -1,6 +1,6 @@
 ---
 // CONTACTO: una página limpia, con la tipografía Cascadia Code (monoespaciada)
-//  · En el centro, una foto en color de tamaño medio, con pequeñas anotaciones alrededor, como en un catálogo.
+//  · En el centro, una foto en color de tamaño medio, con tu oficio encima y tu nombre debajo, como en un catálogo.
 //  · Debajo, quién eres, en un párrafo breve.
 //  · Y los contactos, solo con tipografía: llamar, Gmail, Instagram y CV. Al pasar el cursor, el texto se aclara.
 import '@fontsource/cascadia-code/400.css';
@@ -45,7 +45,7 @@ const enlaces = [
     <figure class="foto">
       <figcaption class="arriba">{tx.oficio}</figcaption>
       <Image src={foto} alt={contacto.nombre} widths={[600, 1000, 1400]} sizes="(max-width: 760px) 90vw, 520px" loading="eager" />
-      <figcaption class="abajo"><span>2026</span><span>{contacto.nombre}</span></figcaption>
+      <figcaption class="abajo"><span>{contacto.nombre}</span></figcaption>
     </figure>
 
     <p class="breve" lang={idioma}>{tx.breve}</p>
@@ -73,7 +73,7 @@ const enlaces = [
   .foto { margin: 0; }
   .foto :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
   .arriba { margin-bottom: 0.45rem; text-align: right; }
-  .abajo { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.45rem; }
+  .abajo { margin-top: 0.45rem; text-align: right; }
 
   /* QUIÉN SOY */
   .breve { margin: clamp(2.2rem, 6vh, 3.5rem) 0 0; text-transform: none; letter-spacing: 0; line-height: 1.7; }

@@ -1,7 +1,8 @@
 ---
 // ENCARGOS: pedir un cuadro hecho a medida, con el estilo sobrio del resto de la web (avea.studio).
 // Pensado para vender: cada bloque empuja a pedir el encargo, sin agobiar.
-// 1) Entrada: una frase clara, dos botones (empezar / WhatsApp) y una foto de un cuadro en un patio.
+// 1) Entrada (como el ejemplo de Natalia): el título grande arriba, la foto en el centro, los botones a su derecha
+//    y debajo de la foto el texto breve.
 // 2) Tres garantías que quitan miedo: pieza única, ves el boceto antes, sin compromiso.
 // 3) "Elige tu punto de partida": una serie por tarjeta; al pulsarla queda elegida en el formulario.
 // 4) El formulario: unas pocas preguntas con botones; el mensaje se escribe solo y se envía por WhatsApp o email.
@@ -19,10 +20,8 @@ const { idioma } = Astro.props;
 const tx = {
   es: {
     titulo: 'Encargos',
-    frase: 'Un cuadro que solo existe para ti.',
     sub: 'Obra original por encargo, pintada a mano para tu espacio: desde la primera idea hasta tu pared.',
     empezar: 'Empezar mi encargo',
-    pieArriba: 'Obra original — por encargo',
     whatsapp: 'Hablar por WhatsApp',
     garantias: [
       { titulo: 'Pieza única', texto: 'Nadie más tendrá tu cuadro. Se pinta una sola vez, solo para ti.' },
@@ -74,10 +73,8 @@ const tx = {
   },
   en: {
     titulo: 'Commissions',
-    frase: 'A painting that exists only for you.',
     sub: 'Original commissioned work, hand-painted for your space: from the first idea to your wall.',
     empezar: 'Start my commission',
-    pieArriba: 'Original work — commissioned',
     whatsapp: 'Chat on WhatsApp',
     garantias: [
       { titulo: 'One of a kind', texto: 'No one else will have your painting. It is painted once, only for you.' },
@@ -141,20 +138,15 @@ const partidas = [
   <div class="encargos">
     <!-- 1. ENTRADA -->
     <section class="entrada">
-      <div class="texto-entrada">
-        <h1 class="etiqueta">{tx.titulo}</h1>
-        <p class="frase">{tx.frase}</p>
-        <p class="sub">{tx.sub}</p>
-      </div>
+      <h1 class="titulo-entrada">{tx.titulo}</h1>
       <figure class="foto-entrada">
-        <figcaption class="arriba">{tx.pieArriba}</figcaption>
-        <Image src={imagen('encargos/encargos.jpg')} alt="" widths={[500, 800, 1100]} sizes="(max-width: 760px) 90vw, 400px" loading="eager" />
-        <figcaption class="abajo"><span>2026</span><span>{contacto.nombre}</span></figcaption>
+        <Image src={imagen('encargos/encargos.jpg')} alt="" widths={[500, 800, 1100]} sizes="(max-width: 760px) 80vw, 360px" loading="eager" />
       </figure>
       <div class="botones">
         <a href="#idea">{tx.empezar} →</a>
         <a href={enlaceWhatsApp(tx.saludo)} target="_blank" rel="noopener">{tx.whatsapp} →</a>
       </div>
+      <p class="sub">{tx.sub}</p>
     </section>
 
     <!-- 2. GARANTÍAS -->
@@ -255,25 +247,28 @@ const partidas = [
     --mono: 'Cascadia Code', ui-monospace, monospace;
     padding: 0 var(--margen); font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em; color: #444;
   }
-  .frase, .cabeza h2 { font-family: var(--fuente); color: var(--texto); }
+  .frase, .cabeza h2, .titulo-entrada { font-family: var(--mono); color: var(--texto); }
   .encargos p { letter-spacing: 0; }
   /* los botones son solo tipografía: al pasar el cursor, el texto se aclara */
-  .botones a, .accion { color: #222; text-transform: uppercase; letter-spacing: 0.02em; transition: color 0.25s ease; }
+  .botones a, .accion { color: #222; letter-spacing: 0.01em; transition: color 0.25s ease; }
   .botones a:hover, .botones a:focus-visible, .accion:hover, .accion:focus-visible { color: #aaa; }
   .etiqueta { margin: 0 0 1.2rem; color: var(--texto-tenue); font-size: 0.72rem; font-weight: 400; }
   .num { color: var(--texto-tenue); }
   p { text-transform: none; }
 
   /* 1. ENTRADA */
-  /* la foto en el centro; el texto a la izquierda y los botones a la derecha */
-  .entrada { display: grid; grid-template-columns: minmax(0, 1fr) min(400px, 34vw) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: end; padding-top: clamp(1.5rem, 5vh, 3.5rem); }
-  .frase { margin: 0 0 1.2rem; max-width: 14ch; font-size: clamp(1.6rem, 3vw, 2.8rem); line-height: 1.02; letter-spacing: -0.02em; text-transform: uppercase; }
-  .sub { margin: 0; max-width: 38ch; font-size: 0.78rem; line-height: 1.7; }
-  .botones { display: grid; gap: 0.9rem; justify-items: end; text-align: right; padding-bottom: 1.6rem; }
-  .foto-entrada { margin: 0; }
-  .foto-entrada :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 62%; }
-  .arriba { margin-bottom: 0.45rem; text-align: right; }
-  .abajo { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.45rem; }
+  /* el título arriba, la foto en el centro, los botones a su derecha y el texto debajo */
+  .entrada {
+    display: grid; grid-template-columns: minmax(0, 1fr) min(360px, 32vw) minmax(0, 1fr);
+    grid-template-areas: ". titulo ." ". foto botones" ". texto .";
+    column-gap: clamp(1.5rem, 4vw, 3rem); padding-top: clamp(2.5rem, 8vh, 5rem);
+  }
+  .titulo-entrada { grid-area: titulo; justify-self: center; margin: 0 0 clamp(2rem, 6vh, 3.5rem); font-size: clamp(2.2rem, 4.5vw, 3.6rem); font-weight: 400; letter-spacing: 0.06em; line-height: 1; white-space: nowrap; }
+  .foto-entrada { grid-area: foto; margin: 0; }
+  .foto-entrada :global(img) { display: block; width: 100%; height: auto; }
+  .botones { grid-area: botones; align-self: center; display: grid; gap: 1.2rem; justify-items: start; font-size: 0.82rem; text-transform: none; }
+  .sub { grid-area: texto; margin: 1.8rem 0 0; max-width: 34ch; font-size: 0.78rem; line-height: 1.5; }
+  .frase { margin: 0 0 1.2rem; font-size: clamp(1.6rem, 3vw, 2.8rem); line-height: 1.1; letter-spacing: 0.02em; text-transform: uppercase; }
 
   /* 2. GARANTÍAS */
   .garantias { list-style: none; margin: clamp(3rem, 8vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2.5rem); }
@@ -343,8 +338,11 @@ const partidas = [
     .tarjetas, .pasos ol { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2rem; }
   }
   @media (max-width: 760px) {
-    .entrada, .formulario { grid-template-columns: 1fr; }
-    .botones { justify-items: start; text-align: left; padding-bottom: 0; }
+    .formulario { grid-template-columns: 1fr; }
+    .entrada { grid-template-columns: 1fr; grid-template-areas: "titulo" "foto" "texto" "botones"; }
+    .foto-entrada { width: min(80vw, 360px); justify-self: center; }
+    .sub { justify-self: center; width: min(80vw, 360px); }
+    .botones { justify-self: center; width: min(80vw, 360px); margin-top: 1.8rem; }
     .garantias { grid-template-columns: 1fr; }
     .mensaje { position: static; }
   }
