@@ -144,7 +144,7 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
 
   /* LA ENTRADA */
   .entrada { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.5rem clamp(1.5rem, 4vw, 4rem); align-items: end; padding: clamp(1.5rem, 5vh, 3.5rem) var(--margen) clamp(2rem, 5vh, 3rem); }
-  .frase { margin: 0; max-width: 24ch; text-transform: none; font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.1; letter-spacing: -0.015em; color: var(--texto-tenue); }
+  .frase { font-family: var(--fuente-titulos); margin: 0; max-width: 24ch; text-transform: none; font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.1; letter-spacing: -0.015em; color: var(--texto-tenue); }
   .frase strong { font-weight: inherit; color: var(--texto); }
   .ventajas { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; justify-self: end; }
   .ventajas a { color: var(--texto); border-bottom: 1px solid var(--texto); padding-bottom: 0.1rem; transition: opacity 0.2s; }

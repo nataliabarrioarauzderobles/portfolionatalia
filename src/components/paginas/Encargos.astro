@@ -7,7 +7,6 @@
 // 4) El formulario: unas pocas preguntas con botones; el mensaje se escribe solo y se envía por WhatsApp o email.
 // 5) Cómo funciona, en cuatro pasos. 6) Preguntas frecuentes. 7) Cierre: "mándame una foto de tu pared".
 // Los pasos y condiciones (señal del 50 %, plazos…) son una propuesta: cámbialos aquí si quieres.
-import '@fontsource/cascadia-code/400.css';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { type Idioma } from '../../i18n/textos';
@@ -211,13 +210,11 @@ const tx = {
 
 <style>
   /* letra: Cascadia Code para todo; los títulos en Archivo, la letra del resto de la web */
-  /* letra: Cascadia Code solo donde marca la jerarquía (el título, el texto de la entrada, los botones,
-     los números y las etiquetas pequeñas); el resto, en Archivo, la letra de la web */
+  /* letra: los títulos en Cascadia Code (la regla está en global.css); el resto, en Archivo */
   .encargos {
-    --mono: 'Cascadia Code', ui-monospace, monospace;
     padding: 0 var(--margen); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em;
   }
-  .titulo-entrada, .entrada .sub, .botones a, .accion, .num, .etiqueta, legend { font-family: var(--mono); }
+  .cierre .frase { font-family: var(--fuente-titulos); }
   .titulo-entrada, .cabeza h2, .frase { color: var(--texto); }
   .entrada .sub { color: #444; }
   .encargos p { letter-spacing: 0; }
