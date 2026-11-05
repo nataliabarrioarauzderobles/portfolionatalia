@@ -1,185 +1,85 @@
 ---
-// CONTACTO: sencillo y centrado, pensado para escribirte fácil
-//  · Al entrar, una imagen grande: tus 5 fotos (src/assets/sobre-mi/portada) que se van pasando cada 5 segundos.
-//  · Debajo, tu nombre y un texto breve de quién eres.
-//  · Un cuadro para escribir un mensaje, que se envía por WhatsApp o por email (se abre ya escrito).
-//  · Tus redes y datos en una fila, y el CV.
+// CONTACTO: una página limpia, con la tipografía Cascadia Code (monoespaciada)
+//  · En el centro, una foto en color de tamaño medio, con pequeñas anotaciones alrededor, como en un catálogo.
+//  · Debajo, quién eres, en un párrafo breve.
+//  · Y los contactos, solo con tipografía: llamar, Gmail, Instagram y CV. Al pasar el cursor, el texto se aclara.
+import '@fontsource/cascadia-code/400.css';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import LogoAnimado from '../LogoAnimado.astro';
 import { textos, type Idioma } from '../../i18n/textos';
-import { contacto, enlaceWhatsApp, url } from '../../utils/enlaces';
+import { contacto, url } from '../../utils/enlaces';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 
-// las 5 fotos de la portada y, para cada una, qué parte se ve cuando se recorta (object-position)
-const portada = [
-  { foto: imagen('sobre-mi/portada/foto-1.jpg'), punto: '66% 50%' },
-  { foto: imagen('sobre-mi/portada/foto-2.jpg'), punto: '45% 30%' },
-  { foto: imagen('sobre-mi/portada/foto-3.jpg'), punto: '50% 78%' },
-  { foto: imagen('sobre-mi/portada/foto-4.jpg'), punto: '72% 30%' },
-  { foto: imagen('sobre-mi/portada/foto-5.jpg'), punto: '50% 70%' },
-];
+const foto = imagen('sobre-mi/contacto-color.jpg');
 
 const tx = {
   es: {
+    oficio: 'Pintora y diseñadora — Madrid',
     breve: 'Soy Natalia, pintora y diseñadora. Me interesa explorar el subconsciente creativo: empezar un cuadro o un diseño sin saber muy bien adónde va y dejar que la forma se construya por sí misma. Y siempre, de alguna manera, acaba apareciendo un gesto humano.',
-    escribe: 'Escríbeme',
-    placeholder: 'Hola Natalia, me gustaría…',
-    porWhatsApp: 'Enviar por WhatsApp',
-    porEmail: 'Enviar por email',
-    asunto: 'Contacto desde la web',
-    redes: 'Encuéntrame',
+    llamar: 'Llamar',
+    cv: 'CV',
   },
   en: {
+    oficio: 'Painter and designer — Madrid',
     breve: "I'm Natalia, a painter and designer. I'm interested in exploring the creative subconscious: starting a painting or a design without quite knowing where it's going, and letting the form build itself. And somehow, a human gesture always ends up appearing.",
-    escribe: 'Write to me',
-    placeholder: 'Hi Natalia, I would like to…',
-    porWhatsApp: 'Send on WhatsApp',
-    porEmail: 'Send by email',
-    asunto: 'Contact from the website',
-    redes: 'Find me',
+    llamar: 'Call',
+    cv: 'CV',
   },
 }[idioma];
 
-const redes = [
+const enlaces = [
+  { texto: tx.llamar, enlace: `tel:${contacto.telefono.replace(/\s/g, '')}` },
+  { texto: 'Gmail', enlace: `mailto:${contacto.email}` },
   { texto: 'Instagram', enlace: `https://instagram.com/${contacto.instagram}`, fuera: true },
-  { texto: 'WhatsApp', enlace: enlaceWhatsApp(t.mensajeContacto), fuera: true },
-  { texto: 'Email', enlace: `mailto:${contacto.email}` },
-  { texto: contacto.telefono, enlace: `tel:${contacto.telefono.replace(/\s/g, '')}` },
+  { texto: tx.cv, enlace: url('cv-natalia-barrio.pdf'), descarga: true },
 ];
 ---
 
 <Base idioma={idioma} pagina="contacto" titulo={t.contactoTitulo}>
-  <!-- la imagen grande: las fotos se van pasando cada 5 segundos -->
-  <section class="portada" data-portada aria-label={contacto.nombre}>
-    {portada.map((p, i) => (
-      <Image src={p.foto} alt={i === 0 ? contacto.nombre : ''} widths={[800, 1400, 2000]} sizes="100vw"
-        loading={i === 0 ? 'eager' : 'lazy'} class:list={{ activa: i === 0 }} style={`object-position:${p.punto}`} />
-    ))}
-    <p class="contador" aria-hidden="true"><span data-numero>01</span> / {String(portada.length).padStart(2, '0')}</p>
-  </section>
-
-  <section class="contacto" data-contacto>
+  <section class="contacto">
     <h1 class="solo-lector">{t.contactoTitulo}</h1>
 
-    <p class="nombre">{contacto.nombre}</p>
+    <figure class="foto">
+      <figcaption class="arriba">{tx.oficio}</figcaption>
+      <Image src={foto} alt={contacto.nombre} widths={[600, 1000, 1400]} sizes="(max-width: 760px) 90vw, 520px" loading="eager" />
+      <figcaption class="abajo"><span>2026</span><span>{contacto.nombre}</span></figcaption>
+    </figure>
+
     <p class="breve" lang={idioma}>{tx.breve}</p>
 
-    <!-- escribir un mensaje: se abre ya escrito en WhatsApp o en el correo -->
-    <form class="mensaje" data-mensaje>
-      <label for="mensaje" class="etiqueta">{tx.escribe}</label>
-      <textarea id="mensaje" name="mensaje" rows="4" placeholder={tx.placeholder}></textarea>
-      <div class="enviar">
-        <button type="submit" class="boton boton-principal" data-por="whatsapp">{tx.porWhatsApp} →</button>
-        <button type="submit" class="boton" data-por="email">{tx.porEmail} →</button>
-      </div>
-    </form>
-
-    <!-- redes y datos -->
-    <div class="redes">
-      <p class="etiqueta">{tx.redes}</p>
-      <ul>
-        {redes.map((r) => (
-          <li><a href={r.enlace} target={r.fuera ? '_blank' : undefined} rel={r.fuera ? 'noopener' : undefined}>{r.texto}</a></li>
-        ))}
-      </ul>
-      <a class="cv" href={url('cv-natalia-barrio.pdf')} download>{t.descargarCV} →</a>
-    </div>
-  </section>
-
-  <!-- cierre de la página: el personaje se dibuja como una firma -->
-  <section class="firma-animada">
-    <LogoAnimado />
+    <ul class="enlaces">
+      {enlaces.map((e) => (
+        <li>
+          <a href={e.enlace} target={e.fuera ? '_blank' : undefined} rel={e.fuera ? 'noopener' : undefined} download={e.descarga ? '' : undefined}>{e.texto}</a>
+        </li>
+      ))}
+    </ul>
   </section>
 </Base>
 
-<!-- datos para el script -->
-<script is:inline define:vars={{ whatsapp: contacto.whatsapp, email: contacto.email, asunto: tx.asunto, porDefecto: t.mensajeContacto }}>
-  window.__contacto = { whatsapp, email, asunto, porDefecto };
-</script>
-
 <style>
   .contacto {
-    display: flex; flex-direction: column; align-items: center; text-align: center;
-    max-width: 34rem; margin: 0 auto; padding: clamp(3rem, 9vh, 5.5rem) var(--margen) 0;
+    --mono: 'Cascadia Code', ui-monospace, monospace;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: calc(100svh - 62px); padding: clamp(2rem, 6vh, 4rem) var(--margen) clamp(3rem, 8vh, 5rem);
+    font-family: var(--mono); font-size: 0.74rem; line-height: 1.5; text-transform: uppercase; letter-spacing: 0.02em; color: #444;
   }
-  .etiqueta { margin: 0 0 0.7rem; color: var(--texto-tenue); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
+  .contacto > * { width: min(520px, 100%); }
 
-  /* LA IMAGEN GRANDE: las fotos, una encima de otra, se funden al cambiar y se acercan muy despacio */
-  .portada { position: relative; height: calc(100svh - 62px); min-height: 420px; overflow: hidden; background: var(--fondo-suave); }
-  .portada :global(img) {
-    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-    opacity: 0; transform: scale(1.06); transition: opacity 1.4s ease, transform 6.5s ease-out;
-  }
-  .portada :global(img.activa) { opacity: 1; transform: scale(1); }
-  @media (max-width: 760px) { .portada { height: 74svh; min-height: 360px; } }
-  .contador { position: absolute; right: var(--margen); bottom: 1.2rem; margin: 0; color: #fff; font-size: 0.72rem; letter-spacing: 0.02em; mix-blend-mode: difference; }
+  /* LA FOTO, con sus anotaciones */
+  .foto { margin: 0; }
+  .foto :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+  .arriba { margin-bottom: 0.45rem; text-align: right; }
+  .abajo { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.45rem; }
 
-  .nombre { margin: 0 0 0.6rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
-  .breve { margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--texto-suave); }
-  /* el texto y lo demás aparecen justo después de la foto */
+  /* QUIÉN SOY */
+  .breve { margin: clamp(2.2rem, 6vh, 3.5rem) 0 0; text-transform: none; letter-spacing: 0; line-height: 1.7; }
 
-  /* ESCRIBIR UN MENSAJE */
-  .mensaje { width: 100%; margin-top: clamp(2.5rem, 6vh, 3.5rem); text-align: left; }
-  .mensaje .etiqueta { display: block; }
-  textarea {
-    display: block; width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--linea); border-radius: 0;
-    background: transparent; color: var(--texto); font: inherit; font-size: 0.9rem; line-height: 1.5; resize: vertical;
-    transition: border-color 0.2s;
-  }
-  textarea:focus { outline: none; border-color: var(--texto); }
-  .enviar { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.8rem; }
-
-  /* REDES */
-  .redes { margin-top: clamp(2.5rem, 6vh, 3.5rem); padding-top: 1.4rem; width: 100%; border-top: 1px solid var(--linea); }
-  .redes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.8rem; }
-  .redes a { color: var(--texto); font-size: 0.85rem; transition: opacity 0.2s; }
-  .redes ul a { padding-bottom: 0.1rem; border-bottom: 1px solid var(--texto); }
-  .redes a:hover { opacity: 0.55; }
-  .cv { display: inline-block; margin-top: 1.4rem; font-size: 0.72rem !important; text-transform: uppercase; color: var(--texto-tenue) !important; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .portada :global(img) { transition: opacity 0.6s ease; transform: none; }
-  }
-
-  .firma-animada { margin: clamp(3rem, 8vw, 6rem) 0 0; }
+  /* LOS CONTACTOS: solo tipografía; al pasar el cursor se aclara */
+  .enlaces { list-style: none; margin: clamp(1.8rem, 5vh, 2.8rem) 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem 1.5rem; }
+  .enlaces a { color: #222; transition: color 0.25s ease; }
+  .enlaces a:hover, .enlaces a:focus-visible { color: #aaa; }
 </style>
-
-<script>
-  // la imagen grande: cambia de foto cada 5 segundos
-  const portada = document.querySelector<HTMLElement>('[data-portada]');
-  if (portada) {
-    const fotos = [...portada.querySelectorAll<HTMLImageElement>('img')];
-    const numero = portada.querySelector<HTMLElement>('[data-numero]')!;
-    let actual = 0;
-    // la primera también se acerca despacio al entrar
-    fotos[0].classList.remove('activa');
-    requestAnimationFrame(() => requestAnimationFrame(() => fotos[0].classList.add('activa')));
-    fotos.slice(1).forEach((f) => (f.loading = 'eager'));
-    setInterval(() => {
-      fotos[actual].classList.remove('activa');
-      actual = (actual + 1) % fotos.length;
-      fotos[actual].classList.add('activa');
-      numero.textContent = String(actual + 1).padStart(2, '0');
-    }, 5000);
-  }
-
-  // al enviar: abre WhatsApp o el correo con el mensaje ya escrito
-  const formulario = document.querySelector<HTMLFormElement>('[data-mensaje]');
-  const datos = (window as unknown as { __contacto: { whatsapp: string; email: string; asunto: string; porDefecto: string } }).__contacto;
-  if (formulario && datos) {
-    formulario.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const boton = (e as SubmitEvent).submitter as HTMLButtonElement | null;
-      const texto = formulario.querySelector('textarea')!.value.trim() || datos.porDefecto;
-      const destino = boton?.dataset.por === 'email'
-        ? `mailto:${datos.email}?subject=${encodeURIComponent(datos.asunto)}&body=${encodeURIComponent(texto)}`
-        : `https://wa.me/${datos.whatsapp}?text=${encodeURIComponent(texto)}`;
-      if (destino.startsWith('mailto:')) location.href = destino;
-      else window.open(destino, '_blank', 'noopener');
-    });
-  }
-</script>

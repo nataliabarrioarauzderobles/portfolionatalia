@@ -1,7 +1,7 @@
 ---
 // ENCARGOS: pedir un cuadro hecho a medida, con el estilo sobrio del resto de la web (avea.studio).
 // Pensado para vender: cada bloque empuja a pedir el encargo, sin agobiar.
-// 1) Entrada: una frase clara, dos botones (empezar / WhatsApp) y un cuadro colgado en una casa.
+// 1) Entrada: una frase clara, dos botones (empezar / WhatsApp) y una foto de un cuadro en un patio.
 // 2) Tres garantías que quitan miedo: pieza única, ves el boceto antes, sin compromiso.
 // 3) "Elige tu punto de partida": una serie por tarjeta; al pulsarla queda elegida en el formulario.
 // 4) El formulario: unas pocas preguntas con botones; el mensaje se escribe solo y se envía por WhatsApp o email.
@@ -22,7 +22,6 @@ const tx = {
     sub: 'Obra original por encargo, pintada a mano para tu espacio: desde la primera idea hasta tu pared.',
     empezar: 'Empezar mi encargo',
     whatsapp: 'Hablar por WhatsApp',
-    pieFoto: 'Escapatoria, 130 × 90 cm',
     garantias: [
       { titulo: 'Pieza única', texto: 'Nadie más tendrá tu cuadro. Se pinta una sola vez, solo para ti.' },
       { titulo: 'Ves el boceto antes', texto: 'Antes de pintar te enseño un boceto o cómo quedaría en tu pared.' },
@@ -77,7 +76,6 @@ const tx = {
     sub: 'Original commissioned work, hand-painted for your space: from the first idea to your wall.',
     empezar: 'Start my commission',
     whatsapp: 'Chat on WhatsApp',
-    pieFoto: 'Escapatoria, 130 × 90 cm',
     garantias: [
       { titulo: 'One of a kind', texto: 'No one else will have your painting. It is painted once, only for you.' },
       { titulo: 'See the sketch first', texto: 'Before I paint, I show you a sketch or how it would look on your wall.' },
@@ -150,8 +148,7 @@ const partidas = [
         </div>
       </div>
       <figure class="foto-entrada">
-        <Image src={imagen('pintura/formas/escapatoria/escapatoria-mockup.jpg')} alt="" widths={[600, 1000, 1400]} sizes="(max-width: 760px) 100vw, 50vw" loading="eager" />
-        <figcaption>{tx.pieFoto}</figcaption>
+        <Image src={imagen('encargos/encargos.jpg')} alt="" widths={[600, 1000, 1400]} sizes="(max-width: 760px) 100vw, 50vw" loading="eager" />
       </figure>
     </section>
 
@@ -259,8 +256,7 @@ const partidas = [
   .sub { margin: 0 0 2rem; max-width: 38ch; font-size: 0.9rem; line-height: 1.6; color: var(--texto-suave); }
   .botones { display: flex; flex-wrap: wrap; gap: 0.6rem; }
   .foto-entrada { margin: 0; }
-  .foto-entrada :global(img) { display: block; width: 100%; height: auto; max-height: 74vh; object-fit: cover; }
-  .foto-entrada figcaption { margin-top: 0.6rem; color: var(--texto-tenue); }
+  .foto-entrada :global(img) { display: block; width: 100%; height: auto; max-height: 80vh; object-fit: cover; object-position: 50% 55%; }
 
   /* 2. GARANTÍAS */
   .garantias { list-style: none; margin: clamp(3rem, 8vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2.5rem); }
