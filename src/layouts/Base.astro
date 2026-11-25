@@ -119,12 +119,20 @@ const ficha = pagina === '' ? JSON.stringify({
 <script>
   // APARECER: los elementos con data-aparece se muestran suavemente al entrar en pantalla
   const elementos = document.querySelectorAll<HTMLElement>('[data-aparece]');
+  // los de "izquierda" llevan una máscara mientras aparecen; al acabar se quita (clase "fin")
+  const mostrar = (el: HTMLElement) => {
+    el.classList.add('visible');
+    if (el.dataset.aparece === 'izquierda') {
+      const retraso = parseFloat(getComputedStyle(el).getPropertyValue('--retraso')) || 0;
+      setTimeout(() => el.classList.add('fin'), retraso + 1700);
+    }
+  };
   if (!('IntersectionObserver' in window)) {
-    elementos.forEach((el) => el.classList.add('visible'));
+    elementos.forEach(mostrar);
   } else {
     const observador = new IntersectionObserver(
       (entradas) => entradas.forEach((e) => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); observador.unobserve(e.target); }
+        if (e.isIntersecting) { mostrar(e.target as HTMLElement); observador.unobserve(e.target); }
       }),
       { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
     );

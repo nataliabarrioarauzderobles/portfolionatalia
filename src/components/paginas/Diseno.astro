@@ -1,7 +1,8 @@
 ---
 // DISEÑO: los proyectos de diseño, cada uno como una revista que se abre desde su portada.
 // (Las piezas de ojos y labios y el configurador están en su propia sección: "Crea tu pieza".)
-// Al final, "¿Necesitas un logo?": la llamada para que una marca o un estudio te contrate como freelance.
+// Arriba del todo, "¿Necesitas un logo?": la llamada para que una marca o un estudio te contrate como freelance.
+// Todo aparece de izquierda a derecha al entrar en pantalla (data-aparece="izquierda", en global.css).
 import Base from '../../layouts/Base.astro';
 import ProyectosIndice from '../ProyectosIndice.astro';
 import { textos, type Idioma } from '../../i18n/textos';
@@ -32,23 +33,22 @@ const tx = {
 
 <Base idioma={idioma} pagina="diseno" titulo={t.disenoTitulo}>
   <h1 class="solo-lector">{t.disenoTitulo}</h1>
-  <ProyectosIndice idioma={idioma} />
-
   <section class="logo" aria-labelledby="necesitas-logo">
-    <h2 id="necesitas-logo">{tx.titulo}</h2>
-    <p>{tx.texto}</p>
-    <p class="botones">
+    <h2 id="necesitas-logo" data-aparece="izquierda">{tx.titulo}</h2>
+    <p data-aparece="izquierda" style="--retraso:160ms">{tx.texto}</p>
+    <p class="botones" data-aparece="izquierda" style="--retraso:320ms">
       <a class="boton boton-whatsapp" href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.whatsapp} →</a>
       <a class="email" href={`mailto:${contacto.email}?subject=${encodeURIComponent(tx.asunto)}`}>{tx.email}</a>
     </p>
   </section>
+
+  <ProyectosIndice idioma={idioma} />
 </Base>
 
 <style>
   .logo {
     width: min(560px, 100%); margin: 0 auto; text-align: center;
-    padding: clamp(3rem, 10vh, 6rem) var(--margen) clamp(4rem, 12vh, 7rem);
-    border-top: 1px solid var(--linea);
+    padding: clamp(2.5rem, 8vh, 5rem) var(--margen) clamp(2.5rem, 7vh, 4.5rem);
   }
   h2 { margin: 0 0 1.1rem; font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 400; letter-spacing: -0.03em; }
   p { margin: 0; color: #444; font-size: 0.95rem; line-height: 1.6; }
