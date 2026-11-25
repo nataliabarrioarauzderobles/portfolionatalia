@@ -1,7 +1,6 @@
 ---
 // PLANTILLA BASE: todas las páginas se construyen dentro de esta.
 // Aquí está lo que comparten: <head>, tipografías, cabecera y pie.
-import '@fontsource/cascadia-code/400.css';
 import '../styles/global.css';
 import Cabecera from '../components/Cabecera.astro';
 import Pie from '../components/Pie.astro';
@@ -31,7 +30,7 @@ const tituloCompleto = titulo ? `${titulo} — Natalia Barrio Araúz de Robles` 
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Serif:ital@0;1&family=Marcellus&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300..600&family=Instrument+Serif:ital@0;1&display=swap"
     />
     <!-- marca que hay JavaScript: solo entonces se ocultan los elementos que "aparecen" al hacer scroll -->
     <script is:inline>
@@ -40,13 +39,13 @@ const tituloCompleto = titulo ? `${titulo} — Natalia Barrio Araúz de Robles` 
       try { if (sessionStorage.getItem('natalia-visto')) document.documentElement.classList.add('sin-cargador'); else document.documentElement.classList.add('cargando'); } catch (e) { document.documentElement.classList.add('sin-cargador'); }
     </script>
   </head>
-  <body>
+  <body class={pagina === '' ? 'inicio' : undefined}>
     <Cargador />
     <Cabecera idioma={idioma} pagina={pagina} />
     <main>
       <slot />
     </main>
-    <Pie idioma={idioma} />
+    {pagina !== '' && <Pie idioma={idioma} />}
   </body>
 </html>
 

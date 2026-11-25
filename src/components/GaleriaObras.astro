@@ -34,13 +34,17 @@ const obras = series.flatMap((serie) =>
     return { ...obra, serie, imagenes, portada: imagenes[0], segunda: mockup };
   }),
 );
-// en la galería: seis disponibles, después las vendidas destacadas, el resto de disponibles y al final las demás vendidas
-const disponibles = obras.filter((o) => !o.vendida);
+// en la galería: primero toda la serie Open (al entrar se ve color); luego seis disponibles,
+// las vendidas destacadas, el resto de disponibles y al final las demás vendidas
+const open = obras.filter((o) => o.serie.id === 'open');
+const resto = obras.filter((o) => o.serie.id !== 'open');
+const disponibles = resto.filter((o) => !o.vendida);
 const galeria = [
+  ...open,
   ...disponibles.slice(0, 6),
-  ...obras.filter((o) => vendidasDestacadas.has(o.id)),
+  ...resto.filter((o) => vendidasDestacadas.has(o.id)),
   ...disponibles.slice(6),
-  ...obras.filter((o) => o.vendida && !vendidasDestacadas.has(o.id)),
+  ...resto.filter((o) => o.vendida && !vendidasDestacadas.has(o.id)),
 ];
 const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, o.serie.tecnica && t.tecnicas[o.serie.tecnica]].filter(Boolean).join(' · ');
 // precio en euros con separador de miles también en 4 cifras (2.000 €, €2,000)

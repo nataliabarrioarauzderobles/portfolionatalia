@@ -5,7 +5,6 @@
 // Al final la foto se queda tenue, casi un fondo, y la intervención es la protagonista.
 // Capas: foto sin dibujo (tenue) → trazos que se animan y se quedan nítidos encima.
 import Base from '../../layouts/Base.astro';
-import Desfile from '../Desfile.astro';
 import type { Idioma } from '../../i18n/textos';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
@@ -36,13 +35,14 @@ const trazos = [
     </figure>
     <h1 class="nombre" data-nombre>Natalia Barrio Araúz de Robles</h1>
   </section>
-  <!-- debajo: el anillo con las obras y proyectos, que gira al bajar -->
-  <Desfile idioma={idioma} />
 </Base>
 
 <style>
+  /* la home es una sola pantalla: sin scroll y sin pie */
+  :global(body.inicio) { height: 100svh; display: flex; flex-direction: column; overflow: hidden; }
+  :global(body.inicio main) { flex: 1; min-height: 0; display: grid; }
   .portada {
-    min-height: calc(100vh - 64px);
+    min-height: 0;
     display: grid;
     place-items: center;
     align-content: center;
