@@ -6,7 +6,7 @@
 
 :root {
   --fondo: #ffffff;          /* blanco */
-  --fondo-suave: #f6f6f5;    /* gris muy claro para recuadros */
+  --fondo-suave: #ffffff;    /* fondos de recuadros: blanco, como el resto */
   --texto: #1a1a1a;          /* casi negro */
   --texto-suave: #7a7a7a;
   --texto-tenue: #b0b0b0;    /* para "vendida" y detalles muy discretos */

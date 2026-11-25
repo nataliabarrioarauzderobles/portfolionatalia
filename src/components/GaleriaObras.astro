@@ -2,10 +2,12 @@
 // PINTURA: una galería pensada para vender, que entre por los ojos.
 //  · Arriba a la derecha, tres líneas que invitan a comprar:
 //    cuántas obras hay disponibles, preguntar por WhatsApp y encargar otra medida.
-//  · Debajo, una cuadrícula ordenada: todas las imágenes del mismo tamaño, primero las disponibles.
-//    Al pasar el cursor, la foto cambia del cuadro en una casa al cuadro solo (se ven las dos sin abrir nada).
-//  · Al pulsar una obra se abre su información en un panel, debajo de la barra de secciones (que sigue visible).
-//    Pulsando fuera del panel, con Esc o con "Cerrar" se vuelve a la galería.
+//  · Debajo, una cuadrícula ordenada: en todas las casillas, el cuadro de cerca, del mismo tamaño (4:5, recortado
+//    si hace falta). Al pasar el cursor se ve el cuadro colgado en una casa, si tiene esa foto.
+//  · Al pulsar una obra se abre en grande y entera, con su información a la derecha en letra pequeña.
+//    Debajo, las otras fotos de esa misma obra para cambiar entre ellas; con las flechas de los lados
+//    (o deslizando en el móvil, o con las teclas ← →) se pasa a la obra anterior o siguiente, en el orden de la galería.
+//    Pulsando fuera, con Esc o con "Cerrar" se vuelve a la galería.
 //  · Filtros arriba: por serie y "solo disponibles".
 import { Image } from 'astro:assets';
 import { series } from '../data/obras';
@@ -17,24 +19,21 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { obra: 'Obra', siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', disponible: 'Disponible', disponibles: (n: number) => `${n} obras disponibles`, preguntar: 'Pregunta por cualquier obra', encargo: '¿Otra medida? Hazme un encargo', mensaje: 'Hola Natalia, he visto tus cuadros en la web y me gustaría saber más.' },
-  en: { obra: 'Work', siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', disponible: 'Available', disponibles: (n: number) => `${n} works available`, preguntar: 'Ask about any work', encargo: 'Another size? Commission one', mensaje: "Hi Natalia, I've seen your paintings on your website and I'd like to know more." },
+  es: { siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', disponible: 'Disponible', foto: 'Ver foto', disponibles: (n: number) => `${n} obras disponibles`, preguntar: 'Pregunta por cualquier obra', encargo: '¿Otra medida? Hazme un encargo', mensaje: 'Hola Natalia, he visto tus cuadros en la web y me gustaría saber más.' },
+  en: { siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', disponible: 'Available', foto: 'View photo', disponibles: (n: number) => `${n} works available`, preguntar: 'Ask about any work', encargo: 'Another size? Commission one', mensaje: "Hi Natalia, I've seen your paintings on your website and I'd like to know more." },
 }[idioma];
 
-// En DE-formando la imagen de la galería es el mockup; en el panel, primero el cuadro y después los mockups
-const conMockupPrimero = new Set(['formas']);
-// …salvo estas, que se ven primero como cuadro solo y, al pasar el cursor, en la casa
-const pinturaPrimero = new Set(['arquitectura-del-abrazo', 'distorsion-de-la-forma', 'mascara', 'masa']);
-// vendidas que se enseñan pronto en la galería (después de las primeras disponibles), no al final
-const vendidasDestacadas = new Set(['arquitectura-del-abrazo', 'distorsion-de-la-forma', 'mascara', 'masa', 'open-i', 'open-ii']);
+// vendidas que se enseñan pronto en la galería (después de las primeras disponibles), no al final;
+// las de DE-formando van juntas
+const vendidasDestacadas = new Set(['principio-de-la-forma', 'arquitectura-del-abrazo', 'distorsion-de-la-forma', 'mascara', 'masa', 'open-i', 'open-ii']);
+// obras cuya foto tiene margen blanco: en la cuadrícula se acercan un poco más, para que todas se vean igual de cerca
+const acercar: Record<string, number> = { nudo: 1.14 };
 const obras = series.flatMap((serie) =>
   serie.obras.map((obra) => {
     const imagenes = imagenesDe(`pintura/${serie.id}/${obra.id}`);
+    // en la cuadrícula, siempre el cuadro (la primera imagen); al pasar el cursor, el cuadro en una casa
     const mockup = imagenes.find((img) => img.src.includes('-mockup'));
-    const portada = conMockupPrimero.has(serie.id) && !pinturaPrimero.has(obra.id) && mockup ? mockup : imagenes[0];
-    // la segunda imagen (al pasar el cursor): el cuadro solo si la portada es la casa, o la casa si no
-    const segunda = portada === imagenes[0] ? mockup : imagenes[0];
-    return { ...obra, serie, imagenes, portada, segunda };
+    return { ...obra, serie, imagenes, portada: imagenes[0], segunda: mockup };
   }),
 );
 // en la galería: seis disponibles, después las vendidas destacadas, el resto de disponibles y al final las demás vendidas
@@ -45,9 +44,8 @@ const galeria = [
   ...disponibles.slice(6),
   ...obras.filter((o) => o.vendida && !vendidasDestacadas.has(o.id)),
 ];
-const numDisponibles = obras.filter((o) => !o.vendida).length;
+const numDisponibles = disponibles.length;
 const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, o.serie.tecnica && t.tecnicas[o.serie.tecnica]].filter(Boolean).join(' · ');
-const total = String(obras.length).padStart(2, '0');
 // precio en euros con separador de miles también en 4 cifras (2.000 €, €2,000)
 const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0, useGrouping: 'always' } as Intl.NumberFormatOptions).format(n);
 ---
@@ -74,9 +72,9 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   <!-- LA GALERÍA -->
   <ul class="galeria">
     {galeria.map((o, i) => (
-      <li class="cuadro" data-cuadro data-serie={o.serie.id} data-vendida={o.vendida ? '' : undefined}>
+      <li class="cuadro" data-cuadro data-obra={`obra-${o.id}`} data-serie={o.serie.id} data-vendida={o.vendida ? '' : undefined}>
         <button type="button" class="abrir" data-abrir={`obra-${o.id}`} aria-label={`${t.verObra}: ${o.titulo}`}>
-          <Image class="una" src={o.portada} alt={o.titulo} widths={[400, 700, 1000]} sizes="(max-width: 760px) 50vw, 31vw" loading={i < 6 ? 'eager' : 'lazy'} />
+          <Image class="una" style={acercar[o.id] ? `--zoom:${acercar[o.id]}` : undefined} src={o.portada} alt={o.titulo} widths={[400, 700, 1000]} sizes="(max-width: 760px) 50vw, 31vw" loading={i < 6 ? 'eager' : 'lazy'} />
           {o.segunda && <Image class="otra" src={o.segunda} alt="" widths={[400, 700, 1000]} sizes="(max-width: 760px) 50vw, 31vw" loading="lazy" />}
         </button>
         <div class="pie">
@@ -94,47 +92,53 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
 <!-- velo: tapa la galería mientras se ve una obra; pulsarlo cierra -->
 <div class="velo" data-velo hidden></div>
 
-<!-- EL PANEL DE CADA OBRA, debajo de la barra de secciones -->
-{obras.map((o, i) => (
-  <dialog class="visor" id={`obra-${o.id}`} aria-label={o.titulo} data-visor data-indice={i}>
-    <div class="arriba">
-      <span>{tx.obra} {String(i + 1).padStart(2, '0')} / {total}</span>
-      <span class="navegar">
-        <button type="button" data-anterior-obra>← {tx.anterior}</button>
-        <button type="button" data-siguiente-obra>{tx.siguiente} →</button>
-      </span>
-      <button type="button" data-cerrar>{tx.cerrar} ×</button>
+<!-- LA FICHA DE CADA OBRA, debajo de la barra de secciones (en el mismo orden que la galería) -->
+{galeria.map((o) => (
+  <dialog class="visor" id={`obra-${o.id}`} aria-label={o.titulo} data-visor>
+    <button type="button" class="cerrar" data-cerrar>{tx.cerrar} ×</button>
+
+    <!-- la obra entera; las flechas pasan a la obra anterior o siguiente -->
+    <div class="escena" data-escena>
+      <button type="button" class="flecha izquierda" data-anterior-obra aria-label={tx.anterior}>←</button>
+      <div class="lienzo">
+        {o.imagenes.map((img, j) => (
+          <Image class:list={{ activa: j === 0 }} data-foto={j} src={img} alt={j === 0 ? o.titulo : `${o.titulo} — ${j + 1}`}
+            widths={[700, 1200, 1800]} sizes="(max-width: 760px) 92vw, 62vw" loading="lazy" />
+        ))}
+      </div>
+      <button type="button" class="flecha derecha" data-siguiente-obra aria-label={tx.siguiente}>→</button>
     </div>
 
-    <div class="texto-obra">
+    <!-- las otras fotos de esta misma obra -->
+    {o.imagenes.length > 1 && (
+      <div class="miniaturas">
+        {o.imagenes.map((img, j) => (
+          <button type="button" data-ver-foto={j} aria-label={`${tx.foto} ${j + 1}`} aria-pressed={j === 0 ? 'true' : 'false'}>
+            <Image src={img} alt="" widths={[160]} sizes="64px" loading="lazy" />
+          </button>
+        ))}
+      </div>
+    )}
+
+    <!-- la información, a la derecha, en letra pequeña -->
+    <div class="info">
+      <p class="contador" data-contador></p>
       <h3>{o.titulo}</h3>
       <p class="serie-obra">{t.series[o.serie.id]}{o.serie.año ? `, ${o.serie.año}` : ''}</p>
-      {o.texto && <p class="descripcion">{o.texto[idioma]}</p>}
+      {o.vendida
+        ? <p class="estado vendida precio"><span class="punto roja" aria-hidden="true"></span>{t.vendida}</p>
+        : <p class="estado precio"><span class="punto" aria-hidden="true"></span>{o.precio ? euros(o.precio) : t.consultarPrecio}</p>}
       <dl>
         {o.medidas && (<><dt>{t.medidas}</dt><dd>{o.medidas.replace(' x ', ' × ')} cm</dd></>)}
         {o.serie.tecnica && (<><dt>{t.tecnica}</dt><dd>{t.tecnicas[o.serie.tecnica]}</dd></>)}
-        {o.vendida
-          ? (<><dt>{t.estado}</dt><dd>{t.vendida}</dd></>)
-          : (<><dt>{t.precio}</dt><dd>{o.precio ? euros(o.precio) : t.consultarPrecio}</dd></>)}
       </dl>
+      {o.texto && <p class="descripcion">{o.texto[idioma]}</p>}
       {o.vendida ? (
         <a class="enlace" href={rutaIdioma(idioma, 'encargos')}>{t.encargarParecida} →</a>
       ) : (
         <a class="enlace" href={enlaceWhatsApp(t.mensajeObra(o.titulo, o.medidas))} target="_blank" rel="noopener">{t.botonConsultar} →</a>
       )}
     </div>
-
-    <!-- el cuadro y sus mockups, que avanzan de lado con la rueda (o deslizando en el móvil) -->
-    <div class="ventana">
-      <div class="pista" data-pista>
-        {o.imagenes.map((img, j) => (
-          <figure>
-            <Image src={img} alt={j === 0 ? o.titulo : `${o.titulo} — mockup`} widths={[700, 1200, 1800]} sizes="(max-width: 760px) 85vw, 50vw" loading="lazy" />
-          </figure>
-        ))}
-      </div>
-    </div>
-    <p class="progreso" data-progreso>0%</p>
   </dialog>
 ))}
 
@@ -160,15 +164,15 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   .solo-disponibles { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--texto-tenue); cursor: pointer; }
   .solo-disponibles input { accent-color: var(--texto); }
 
-  /* LA GALERÍA: cuadrícula ordenada, todas las imágenes del mismo tamaño */
+  /* LA GALERÍA: el cuadro de cerca, todas las casillas iguales */
   .galeria { list-style: none; margin: 0; padding: 0 var(--margen); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(2.4rem, 5vw, 4rem) clamp(1rem, 2.4vw, 2rem); }
   .cuadro[hidden] { display: none; }
-  .abrir { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 0; background: var(--fondo-suave); cursor: pointer; overflow: hidden; }
-  .abrir :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.6s ease, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  /* al pasar el cursor: de la casa al cuadro solo (o al revés) */
+  .abrir { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 0; background: var(--fondo); cursor: pointer; overflow: hidden; }
+  .abrir :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(var(--zoom, 1)); transition: opacity 0.6s ease, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  /* al pasar el cursor: el cuadro colgado en una casa */
   .abrir :global(img.otra) { opacity: 0; }
   .abrir:hover :global(img.otra), .abrir:focus-visible :global(img.otra) { opacity: 1; }
-  .abrir:hover :global(img) { transform: scale(1.03); }
+  .abrir:hover :global(img) { transform: scale(calc(var(--zoom, 1) * 1.03)); }
   .pie { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 1rem; margin-top: 0.8rem; }
   .pie p { margin: 0; }
   .titulo { font-size: 0.8rem; }
@@ -184,54 +188,65 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
     .pie .estado { grid-column: 1; grid-row: auto; justify-self: start; }
   }
 
-  /* VELO Y PANEL: debajo de la barra de secciones, que sigue visible */
-  .velo { position: fixed; inset: var(--alto-cabecera, 64px) 0 0; z-index: 14; background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: aparecer 0.35s ease; }
+  /* VELO Y FICHA: debajo de la barra de secciones, que sigue visible */
+  .velo { position: fixed; inset: var(--alto-cabecera, 64px) 0 0; z-index: 14; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: aparecer 0.35s ease; }
   .visor {
     position: fixed; inset: calc(var(--alto-cabecera, 64px) + 0.8rem) var(--margen) 0.8rem; z-index: 15;
     width: auto; height: auto; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
     background: var(--fondo); color: var(--texto); overflow: hidden;
     box-shadow: 0 20px 60px -30px rgba(0, 0, 0, 0.35);
-    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em;
+    font-size: 0.72rem; letter-spacing: 0.01em;
   }
-  .visor[open] { display: block; animation: aparecer 0.4s ease; }
+  /* la obra a la izquierda, ocupando todo lo posible; la información a la derecha */
+  .visor[open] {
+    display: grid; grid-template-columns: minmax(0, 1fr) min(300px, 26vw); grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: "escena info" "miniaturas info"; animation: aparecer 0.4s ease;
+  }
   @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
-  .arriba { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; padding: 1rem 1.4rem; }
-  .arriba button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; }
-  .arriba button:hover { color: var(--texto); }
-  .navegar { display: flex; gap: 1.6rem; }
-  .arriba [data-cerrar] { justify-self: end; color: var(--texto); }
 
-  .texto-obra { position: absolute; left: 1.4rem; top: 50%; transform: translateY(-50%); width: min(28vw, 340px); z-index: 1; }
-  .texto-obra h3 { font-size: 0.95rem; margin: 0 0 0.3rem; text-transform: uppercase; }
-  .serie-obra { margin: 0 0 1.4rem; color: var(--texto-tenue); }
-  .descripcion { margin: 0 0 1.4rem; text-transform: none; font-size: 0.82rem; line-height: 1.55; color: var(--texto-suave); }
-  .texto-obra dl { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 1rem; margin: 0 0 1.6rem; }
-  .texto-obra dt { color: var(--texto-tenue); }
-  .texto-obra dd { margin: 0; }
-  .enlace { display: inline-block; padding-bottom: 0.2rem; border-bottom: 1px solid var(--texto); }
+  .cerrar { position: absolute; top: 1rem; right: 1.4rem; z-index: 3; padding: 0; border: 0; background: none; font: inherit; text-transform: uppercase; color: var(--texto); cursor: pointer; }
+  .cerrar:hover { opacity: 0.55; }
+
+  .escena { grid-area: escena; position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; min-height: 0; padding: 1.4rem 0; }
+  .lienzo { position: relative; height: 100%; min-height: 0; cursor: pointer; }
+  .lienzo :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.35s ease; }
+  .lienzo :global(img.activa) { opacity: 1; }
+  .flecha { width: 3.2rem; height: 3.2rem; margin: 0 0.6rem; padding: 0; border: 0; border-radius: 50%; background: none; font: inherit; font-size: 1.2rem; color: var(--texto); cursor: pointer; transition: background 0.2s; }
+  .flecha:hover { background: rgba(0, 0, 0, 0.05); }
+
+  .miniaturas { grid-area: miniaturas; display: flex; justify-content: center; gap: 0.5rem; padding: 0 1rem 1.2rem; }
+  .miniaturas button { width: 52px; height: 52px; padding: 0; border: 1px solid transparent; background: none; cursor: pointer; opacity: 0.5; transition: opacity 0.2s, border-color 0.2s; }
+  .miniaturas button:hover, .miniaturas button[aria-pressed='true'] { opacity: 1; border-color: var(--texto); }
+  .miniaturas :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+  /* la información: letra pequeña, con jerarquía (título, serie, precio; después los datos y el texto) */
+  .info { grid-area: info; align-self: center; max-height: 100%; overflow-y: auto; padding: 3.4rem 1.6rem 1.6rem 0.6rem; }
+  .contador { margin: 0 0 1.2rem; color: var(--texto-tenue); font-variant-numeric: tabular-nums; }
+  .info h3 { margin: 0 0 0.25rem; font-size: 0.95rem; text-transform: uppercase; }
+  .serie-obra { margin: 0 0 0.9rem; color: var(--texto-tenue); text-transform: uppercase; }
+  .info .precio { margin: 0 0 1.2rem; font-size: 0.82rem; }
+  .info .precio.vendida { font-size: 0.72rem; text-transform: uppercase; }
+  .info dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.9rem; margin: 0 0 1.2rem; padding-top: 0.9rem; border-top: 1px solid var(--linea); }
+  .info dt { color: var(--texto-tenue); text-transform: uppercase; }
+  .info dd { margin: 0; }
+  .descripcion { margin: 0 0 1.4rem; font-size: 0.76rem; line-height: 1.6; color: var(--texto-suave); }
+  .enlace { display: inline-block; padding-bottom: 0.2rem; border-bottom: 1px solid var(--texto); text-transform: uppercase; }
   .enlace:hover { opacity: 0.6; }
 
-  .ventana { position: absolute; inset: 3.4rem 0 3rem; z-index: 2; overflow: hidden; pointer-events: none; }
-  .pista { position: absolute; top: 0; bottom: 0; left: 0; display: flex; align-items: center; gap: 1rem; padding: 0 1.4rem 0 max(calc(1.4rem + 30vw), 380px); will-change: transform; pointer-events: auto; }
-  .pista figure { margin: 0; height: 100%; flex: none; }
-  .pista :global(img) { height: 100%; width: auto; display: block; }
-  .progreso { position: absolute; right: 1.4rem; bottom: 1rem; margin: 0; font-variant-numeric: tabular-nums; }
-
   @media (max-width: 760px) {
-    .visor { inset: calc(var(--alto-cabecera, 64px) + 0.5rem) 0.5rem 0.5rem; overflow-y: auto; }
-    .arriba { grid-template-columns: 1fr auto; padding: 0.9rem 1rem; }
-    .navegar { grid-column: 1 / -1; grid-row: 2; justify-content: space-between; }
-    .texto-obra { position: static; transform: none; width: auto; padding: 5.4rem 1rem 1.2rem; }
-    .ventana { position: static; overflow: visible; }
-    .pista { position: static; height: 50vh; padding: 0 1rem; overflow-x: auto; scroll-snap-type: x mandatory; transform: none !important; }
-    .pista figure { scroll-snap-align: center; }
-    .progreso { display: none; }
+    .visor { inset: calc(var(--alto-cabecera, 64px) + 0.4rem) 0.4rem 0.4rem; overflow-y: auto; }
+    .visor[open] { display: block; }
+    .cerrar { top: 0.8rem; right: 1rem; }
+    .escena { height: 58svh; padding: 2.6rem 0 0.6rem; grid-template-columns: auto minmax(0, 1fr) auto; }
+    .flecha { width: 2.4rem; height: 2.4rem; margin: 0 0.2rem; font-size: 1rem; }
+    .miniaturas { padding: 0.4rem 1rem 0.4rem; }
+    .info { padding: 1rem 1.2rem 1.6rem; max-height: none; overflow: visible; }
   }
 </style>
 
 <script>
   const html = document.documentElement;
-  // la altura de la barra de arriba (para colocar el panel justo debajo)
+  // la altura de la barra de arriba (para colocar la ficha justo debajo)
   const medirCabecera = () => html.style.setProperty('--alto-cabecera', `${document.querySelector<HTMLElement>('.cabecera')?.offsetHeight ?? 64}px`);
   medirCabecera();
   window.addEventListener('resize', medirCabecera);
@@ -239,22 +254,66 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   const seccion = document.querySelector<HTMLElement>('[data-pintura]')!;
   const cuadros = [...seccion.querySelectorAll<HTMLElement>('[data-cuadro]')];
 
-  // ── EL PANEL DE CADA OBRA ──
+  // ── LA FICHA DE CADA OBRA ──
   const visores = [...document.querySelectorAll<HTMLDialogElement>('[data-visor]')];
   const velo = document.querySelector<HTMLElement>('[data-velo]')!;
-  const escritorio = matchMedia('(min-width: 761px)');
-  const visorAbierto = () => visores.some((v) => v.open);
+  const visorAbierto = () => visores.find((v) => v.open);
+  // las obras que se ven en la galería (según los filtros), en su orden: por ellas se pasa con las flechas
+  const visibles = () => cuadros.filter((li) => !li.hidden).map((li) => document.getElementById(li.dataset.obra!) as HTMLDialogElement);
+
+  function mostrarFoto(v: HTMLDialogElement, n: number) {
+    const fotos = [...v.querySelectorAll<HTMLElement>('[data-foto]')];
+    const i = (n + fotos.length) % fotos.length;
+    fotos.forEach((f, j) => f.classList.toggle('activa', j === i));
+    v.querySelectorAll<HTMLButtonElement>('[data-ver-foto]').forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+    v.dataset.foto = String(i);
+  }
+
   function abrirVisor(v: HTMLDialogElement | undefined) {
     if (!v) return;
     visores.forEach((x) => x !== v && x.open && x.close());
+    // las fotos de esta obra se cargan ahora (y se empieza por el cuadro)
+    v.querySelectorAll<HTMLImageElement>('img').forEach((img) => (img.loading = 'eager'));
+    mostrarFoto(v, 0);
+    const lista = visibles();
+    const pos = lista.indexOf(v);
+    v.querySelector<HTMLElement>('[data-contador]')!.textContent = pos >= 0 ? `${String(pos + 1).padStart(2, '0')} / ${String(lista.length).padStart(2, '0')}` : '';
     // sin "modal": así la barra de secciones de arriba sigue funcionando
     if (!v.open) v.show();
     velo.hidden = false;
-    v.dispatchEvent(new Event('abierto'));
   }
+  const pasar = (paso: number) => {
+    const v = visorAbierto();
+    if (!v) return;
+    const lista = visibles();
+    const pos = lista.indexOf(v);
+    abrirVisor(lista[(pos + paso + lista.length) % lista.length]);
+  };
   const cerrarTodo = () => { visores.forEach((v) => v.open && v.close()); velo.hidden = true; };
   velo.addEventListener('click', cerrarTodo);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && visorAbierto()) cerrarTodo(); });
+  document.addEventListener('keydown', (e) => {
+    if (!visorAbierto()) return;
+    if (e.key === 'Escape') cerrarTodo();
+    if (e.key === 'ArrowRight') pasar(1);
+    if (e.key === 'ArrowLeft') pasar(-1);
+  });
+
+  visores.forEach((v) => {
+    v.querySelector('[data-siguiente-obra]')!.addEventListener('click', () => pasar(1));
+    v.querySelector('[data-anterior-obra]')!.addEventListener('click', () => pasar(-1));
+    v.querySelector('[data-cerrar]')!.addEventListener('click', cerrarTodo);
+    // las otras fotos de la obra: con las miniaturas, o pulsando sobre la imagen
+    v.querySelectorAll<HTMLButtonElement>('[data-ver-foto]').forEach((b) => b.addEventListener('click', () => mostrarFoto(v, Number(b.dataset.verFoto))));
+    v.querySelector('.lienzo')!.addEventListener('click', () => mostrarFoto(v, Number(v.dataset.foto ?? 0) + 1));
+    // en el móvil: deslizar a los lados pasa de obra
+    const escena = v.querySelector<HTMLElement>('[data-escena]')!;
+    let x0 = 0, y0 = 0;
+    escena.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    escena.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) pasar(dx < 0 ? 1 : -1);
+    });
+  });
 
   // ── filtros ──
   const botonesSerie = [...seccion.querySelectorAll<HTMLButtonElement>('[data-serie]')].filter((b) => b.tagName === 'BUTTON');
@@ -269,32 +328,6 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
     filtrar();
   }));
   disponibles.addEventListener('change', filtrar);
-
-  visores.forEach((v, i) => {
-    const pista = v.querySelector<HTMLElement>('[data-pista]')!;
-    const progreso = v.querySelector<HTMLElement>('[data-progreso]')!;
-    let x = 0, objetivo = 0, animando = false;
-    const maximo = () => Math.max(0, pista.scrollWidth - v.clientWidth);
-    const pintar = () => {
-      x += (objetivo - x) * 0.12;
-      if (Math.abs(objetivo - x) < 0.5) x = objetivo;
-      pista.style.transform = `translate3d(${-x}px, 0, 0)`;
-      progreso.textContent = `${Math.round((x / Math.max(1, maximo())) * 100)}%`;
-      if (x !== objetivo) requestAnimationFrame(pintar); else animando = false;
-    };
-    const mover = () => { if (!animando) { animando = true; requestAnimationFrame(pintar); } };
-    v.addEventListener('wheel', (e) => {
-      if (!escritorio.matches) return;
-      e.preventDefault();
-      const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      objetivo = Math.max(0, Math.min(maximo(), objetivo + d));
-      mover();
-    }, { passive: false });
-    v.addEventListener('abierto', () => { x = objetivo = 0; pista.style.transform = ''; progreso.textContent = '0%'; });
-    v.querySelector('[data-siguiente-obra]')!.addEventListener('click', () => abrirVisor(visores[(i + 1) % visores.length]));
-    v.querySelector('[data-anterior-obra]')!.addEventListener('click', () => abrirVisor(visores[(i - 1 + visores.length) % visores.length]));
-    v.querySelector('[data-cerrar]')!.addEventListener('click', cerrarTodo);
-  });
 
   // botones de la galería
   seccion.querySelectorAll<HTMLButtonElement>('[data-abrir]').forEach((b) => b.addEventListener('click', () => abrirVisor(document.getElementById(b.dataset.abrir!) as HTMLDialogElement)));
