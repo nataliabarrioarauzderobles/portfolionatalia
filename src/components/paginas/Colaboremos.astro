@@ -1,5 +1,7 @@
 ---
-// COLABOREMOS (borrador): arte para espacios, junto a Pablo Barrio.
+// COLABOREMOS (borrador): dos caminos para trabajar juntos.
+//  · Para particulares: cuadros por encargo (lleva a la página de Encargos, que ya no está en el menú).
+//  · Para empresas: arte para espacios, junto a Pablo Barrio (todo lo de abajo).
 // Propuestas de obra original (pintura y escultura) para inmobiliarias, hoteles y restaurantes.
 //  1. Qué es, en una frase, y una llamada clara a pedir propuesta.
 //  2. Para quién: inmobiliarias, hoteles y restaurantes.
@@ -19,10 +21,17 @@ const t = textos[idioma];
 
 const webPablo = 'https://pablobarrioarauz.com/';
 const mural = imagen('diseno/la-cabezona/01-mural.jpg');
+const fotoEncargo = imagen('encargos/encargos.jpg');
 const local = imagen('diseno/la-cabezona/02-local.jpg');
 
 const tx = {
   es: {
+    colaboremos: 'Colaboremos',
+    intro: 'Dos maneras de trabajar juntos: un cuadro pensado para ti, o arte para todo un espacio.',
+    caminos: [
+      { para: 'Para tu casa', titulo: 'Cuadros por encargo', texto: 'Una pieza única, pintada a mano, con las medidas y los colores de tu espacio.', boton: 'Empezar mi encargo', enlace: rutaIdioma(idioma, 'encargos') },
+      { para: 'Para empresas', titulo: 'Arte para espacios', texto: 'Inmobiliarias, hoteles y restaurantes, junto a Pablo Barrio, pintor y escultor.', boton: 'Ver cómo funciona', enlace: '#espacios' },
+    ],
     firma: 'Natalia Barrio & Pablo Barrio',
     titulo: 'Arte para espacios',
     entrada: 'Proponemos obra original, pintura y escultura, para viviendas en venta, hoteles y restaurantes. Cada propuesta se piensa para un espacio concreto y mezcla piezas de los dos.',
@@ -62,6 +71,12 @@ const tx = {
     mensaje: 'Hola, Natalia. Tengo un espacio y me gustaría una propuesta de arte.',
   },
   en: {
+    colaboremos: "Let's collaborate",
+    intro: 'Two ways of working together: a painting made for you, or art for a whole space.',
+    caminos: [
+      { para: 'For your home', titulo: 'Commissioned paintings', texto: 'A one-off piece, painted by hand, with the size and colours of your space.', boton: 'Start my commission', enlace: rutaIdioma(idioma, 'encargos') },
+      { para: 'For businesses', titulo: 'Art for spaces', texto: 'Real estate, hotels and restaurants, together with painter and sculptor Pablo Barrio.', boton: 'See how it works', enlace: '#espacios' },
+    ],
     firma: 'Natalia Barrio & Pablo Barrio',
     titulo: 'Art for spaces',
     entrada: 'We propose original work, painting and sculpture, for homes on sale, hotels and restaurants. Each proposal is made for a specific space and mixes pieces by both of us.',
@@ -108,17 +123,32 @@ const esFuera = (e: string) => e.startsWith('http');
 
 <Base idioma={idioma} pagina="colaboremos" titulo={t.colaboremosTitulo}>
   <article class="colaboremos">
-    <!-- 1. QUÉ ES -->
+    <!-- 0. LOS DOS CAMINOS -->
     <header class="entrada">
+      <h1>{tx.colaboremos}</h1>
+      <p class="lead">{tx.intro}</p>
+    </header>
+    <ul class="caminos">
+      {tx.caminos.map((c, i) => (
+        <li>
+          <a href={c.enlace}>
+            <Image src={i === 0 ? fotoEncargo : mural} alt="" widths={[500, 900, 1300]} sizes="(max-width: 760px) 100vw, 45vw" />
+            <span class="etiqueta">{c.para}</span>
+            <strong>{c.titulo} {i === 0 ? '→' : '↓'}</strong>
+            <span class="texto-camino">{c.texto}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- 1. ARTE PARA ESPACIOS -->
+    <header class="entrada espacios" id="espacios">
       <p class="etiqueta">{tx.firma}</p>
-      <h1>{tx.titulo}</h1>
+      <h2 class="titulo-espacios">{tx.titulo}</h2>
       <p class="lead">{tx.entrada}</p>
       <a class="accion" href="#propuesta">{tx.pedir} →</a>
     </header>
 
-    <figure class="foto-grande">
-      <Image src={mural} alt="Mural de La Cabezona" widths={[800, 1400, 2000]} sizes="(max-width: 760px) 100vw, 90vw" />
-    </figure>
 
     <!-- 2. PARA QUIÉN -->
     <section class="bloque">
@@ -203,6 +233,17 @@ const esFuera = (e: string) => e.startsWith('http');
   .accion { display: inline-block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); transition: color 0.25s ease; }
   .accion:hover, .accion:focus-visible { color: var(--texto-tenue); }
 
+  /* LOS DOS CAMINOS */
+  .caminos { list-style: none; margin: clamp(2.5rem, 7vh, 4rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem clamp(1.5rem, 4vw, 3rem); }
+  .caminos a { display: grid; gap: 0.5rem; color: var(--texto); }
+  .caminos :global(img) { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; margin-bottom: 0.6rem; transition: opacity 0.3s ease; }
+  .caminos .etiqueta { margin: 0; }
+  .caminos strong { font-weight: 400; font-size: 1.15rem; letter-spacing: -0.01em; }
+  .texto-camino { font-size: 0.88rem; line-height: 1.6; color: #555; }
+  .caminos a:hover :global(img) { opacity: 0.85; }
+  .caminos a:hover strong { color: var(--texto-tenue); }
+  .espacios { margin-top: clamp(5rem, 14vh, 8rem); padding-top: clamp(3rem, 8vh, 5rem); border-top: 1px solid var(--linea); scroll-margin-top: 4rem; }
+  .titulo-espacios { font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.03em; margin-bottom: 1.4rem; }
   .foto-grande { margin: clamp(2.5rem, 7vh, 4.5rem) 0 0; }
   .foto-grande :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
 
@@ -232,6 +273,6 @@ const esFuera = (e: string) => e.startsWith('http');
 
   @media (max-width: 900px) { .pasos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 760px) {
-    .tres, .dos { grid-template-columns: 1fr; }
+    .tres, .dos, .caminos { grid-template-columns: 1fr; }
   }
 </style>
