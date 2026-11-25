@@ -1,15 +1,58 @@
 ---
 // DISEÑO: los proyectos de diseño, cada uno como una revista que se abre desde su portada.
 // (Las piezas de ojos y labios y el configurador están en su propia sección: "Crea tu pieza".)
+// Al final, "¿Necesitas un logo?": la llamada para que una marca o un estudio te contrate como freelance.
 import Base from '../../layouts/Base.astro';
 import ProyectosIndice from '../ProyectosIndice.astro';
 import { textos, type Idioma } from '../../i18n/textos';
+import { contacto, enlaceWhatsApp } from '../../utils/enlaces';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
+
+const tx = {
+  es: {
+    titulo: '¿Necesitas un logo?',
+    texto: 'Diseño identidades de marca como freelance: logotipo, packaging y todo lo que hace que tu marca se reconozca. Cuéntame tu proyecto y te digo cómo lo haría.',
+    whatsapp: 'Escríbeme por WhatsApp',
+    email: 'O por email',
+    mensaje: 'Hola Natalia, he visto tus proyectos de diseño y me gustaría hablar contigo sobre un logo / identidad de marca.',
+    asunto: 'Proyecto de diseño',
+  },
+  en: {
+    titulo: 'Need a logo?',
+    texto: 'I design brand identities as a freelancer: logo, packaging and everything that makes your brand recognisable. Tell me about your project and I will tell you how I would approach it.',
+    whatsapp: 'Message me on WhatsApp',
+    email: 'Or by email',
+    mensaje: "Hi Natalia, I've seen your design projects and I'd like to talk to you about a logo / brand identity.",
+    asunto: 'Design project',
+  },
+}[idioma];
 ---
 
 <Base idioma={idioma} pagina="diseno" titulo={t.disenoTitulo}>
   <h1 class="solo-lector">{t.disenoTitulo}</h1>
   <ProyectosIndice idioma={idioma} />
+
+  <section class="logo" aria-labelledby="necesitas-logo">
+    <h2 id="necesitas-logo">{tx.titulo}</h2>
+    <p>{tx.texto}</p>
+    <p class="botones">
+      <a class="boton boton-whatsapp" href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.whatsapp} →</a>
+      <a class="email" href={`mailto:${contacto.email}?subject=${encodeURIComponent(tx.asunto)}`}>{tx.email}</a>
+    </p>
+  </section>
 </Base>
+
+<style>
+  .logo {
+    width: min(560px, 100%); margin: 0 auto; text-align: center;
+    padding: clamp(3rem, 10vh, 6rem) var(--margen) clamp(4rem, 12vh, 7rem);
+    border-top: 1px solid var(--linea);
+  }
+  h2 { margin: 0 0 1.1rem; font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 400; letter-spacing: -0.03em; }
+  p { margin: 0; color: #444; font-size: 0.95rem; line-height: 1.6; }
+  .botones { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1rem 2rem; margin-top: 1.8rem; }
+  .email { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); transition: color 0.25s ease; }
+  .email:hover, .email:focus-visible { color: var(--texto-tenue); }
+</style>

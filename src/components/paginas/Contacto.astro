@@ -2,11 +2,11 @@
 // CONTACTO: una página limpia; tu oficio y tu nombre, como titular, en Cascadia Code, y el resto en Archivo
 //  · En el centro, una foto en color de tamaño medio, con tu oficio encima y tu nombre debajo, como en un catálogo.
 //  · Debajo, quién eres, en un párrafo breve.
-//  · Y los contactos, solo con tipografía: llamar, Gmail, Instagram y CV. Al pasar el cursor, el texto se aclara.
+//  · Y los contactos, solo con tipografía: WhatsApp, llamar, Gmail, Instagram y CV. Al pasar el cursor, el texto se aclara.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { textos, type Idioma } from '../../i18n/textos';
-import { contacto, url } from '../../utils/enlaces';
+import { contacto, url, enlaceWhatsApp } from '../../utils/enlaces';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
@@ -20,16 +20,19 @@ const tx = {
     breve: 'Soy Natalia, pintora y diseñadora. Me interesa explorar el subconsciente creativo: empezar un cuadro o un diseño sin saber muy bien adónde va y dejar que la forma se construya por sí misma. Y siempre, de alguna manera, acaba apareciendo un gesto humano.',
     llamar: 'Llamar',
     cv: 'CV',
+    mensaje: 'Hola Natalia, he visto tu web y me gustaría hablar contigo.',
   },
   en: {
     oficio: 'Painter and designer — Madrid',
     breve: "I'm Natalia, a painter and designer. I'm interested in exploring the creative subconscious: starting a painting or a design without quite knowing where it's going, and letting the form build itself. And somehow, a human gesture always ends up appearing.",
     llamar: 'Call',
     cv: 'CV',
+    mensaje: "Hi Natalia, I've seen your website and I'd like to talk to you.",
   },
 }[idioma];
 
 const enlaces = [
+  { texto: 'WhatsApp', enlace: enlaceWhatsApp(tx.mensaje), fuera: true },
   { texto: tx.llamar, enlace: `tel:${contacto.telefono.replace(/\s/g, '')}` },
   { texto: 'Gmail', enlace: `mailto:${contacto.email}` },
   { texto: 'Instagram', enlace: `https://instagram.com/${contacto.instagram}`, fuera: true },

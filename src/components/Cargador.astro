@@ -1,74 +1,121 @@
 ---
-// PANTALLA DE ENTRADA (inspirada en avea.studio)
-// Al entrar por primera vez en la visita: pantalla blanca con un contador de 000 % a 100 %.
-// En el centro, tu foto en blanco y negro (Natali-20) se va descubriendo de abajo arriba al ritmo del contador.
-// Al llegar al 100 % la pantalla se abre y empieza la web. En el resto de páginas de la misma visita no sale.
-import { Image } from 'astro:assets';
-import { imagen } from '../utils/imagenes';
+// PANTALLA DE ENTRADA (inspirada en 197historiasilustradas.com)
+// Al entrar por primera vez en la visita: pantalla blanca y, en el centro, un texto que se escribe solo
+// con letra de máquina de escribir (DM Mono, la versión libre más parecida a su Simplon Mono).
+//  1. Primero, lo que haces y para quién (para enganchar al cliente).
+//  2. Se borra y se escribe quién eres.
+//  3. La pantalla se abre y empieza la web.
+// Abajo, [ OMITIR ] para saltarla (también con Esc).
+// Solo sale en la portada y solo la primera vez en la visita: quien llega directo a un cuadro
+// (desde Google o un enlace de WhatsApp) lo ve sin esperar.
+import type { Idioma } from '../i18n/textos';
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+
+const tx = {
+  es: {
+    frases: [
+      'Pintora y diseñadora. Pinto cuadros por encargo y creo identidades de marca como freelance: piezas únicas, hechas a mano para tu espacio y tu proyecto.',
+      'Soy Natalia Barrio, artista que trabaja la forma: empiezo sin saber adónde va y dejo que se construya sola. Y siempre acaba apareciendo un gesto humano.',
+    ],
+    omitir: 'Omitir',
+  },
+  en: {
+    frases: [
+      'Painter and designer. I paint commissioned works and create brand identities as a freelancer: one-of-a-kind pieces, handmade for your space and your project.',
+      "I'm Natalia Barrio, an artist who works with form: I start without knowing where it's going and let it build itself. And a human gesture always ends up appearing.",
+    ],
+    omitir: 'Skip',
+  },
+}[idioma];
 ---
 
-<div class="cargador" data-cargador aria-hidden="true">
-  <div class="marco">
-    <Image src={imagen('sobre-mi/fotos/foto-04.jpg')} alt="" widths={[200, 400]} sizes="120px" loading="eager" class="foto" />
-  </div>
-  <span class="porcentaje" data-porcentaje>000%</span>
-  <span class="nombre">Natalia Barrio Araúz de Robles</span>
-  <span class="disciplinas">Pintura · Diseño</span>
+<div class="cargador" data-cargador data-frases={JSON.stringify(tx.frases)} role="dialog" aria-label={tx.frases[0]}>
+  <p class="texto" aria-hidden="true"><span data-escrito></span><span class="cursor"></span></p>
+  <button type="button" class="omitir" data-omitir>[&nbsp; {tx.omitir} &nbsp;]</button>
 </div>
 
 <style>
   .cargador {
     position: fixed; inset: 0; z-index: 100;
-    display: grid; place-items: center;
+    display: grid; place-items: center; grid-template-columns: minmax(0, 1fr);
+    padding: 0 var(--margen);
     background: var(--fondo);
-    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em;
-    transition: opacity 0.7s ease, visibility 0.7s;
+    font-family: 'DM Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-size: clamp(0.82rem, 1.05vw, 0.95rem); line-height: 1.6; letter-spacing: -0.01em;
+    color: var(--texto);
+    transition: opacity 0.8s ease, visibility 0.8s;
   }
   /* solo la primera vez en la visita (lo decide un script en <head>) */
   :global(html.sin-cargador) .cargador, :global(html:not(.js)) .cargador { display: none; }
   .cargador.fuera { opacity: 0; visibility: hidden; }
 
-  .marco { width: clamp(84px, 8vw, 120px); aspect-ratio: 4 / 5; overflow: hidden; }
-  .marco :global(.foto) {
-    display: block; width: 100%; height: 100%; object-fit: cover;
-    clip-path: inset(calc(100% - var(--p, 0%)) 0 0 0);
-    transform: scale(calc(1.25 - var(--f, 0) * 0.25));
+  .texto {
+    margin: 0; width: 100%; max-width: 36rem; min-width: 0;
+    text-align: center; overflow-wrap: break-word; transition: opacity 0.5s ease;
   }
-  .porcentaje { position: absolute; right: var(--margen); top: 50%; transform: translateY(-50%); font-variant-numeric: tabular-nums; }
-  .nombre { position: absolute; left: var(--margen); bottom: 1.2rem; }
-  .disciplinas { position: absolute; right: var(--margen); bottom: 1.2rem; color: var(--texto-tenue); }
+  .texto.borrando { opacity: 0; }
+  .cursor { display: inline-block; width: 0.55em; height: 1.05em; margin-left: 2px; vertical-align: -0.15em; background: currentColor; animation: parpadeo 1s steps(1) infinite; }
+  @keyframes parpadeo { 50% { opacity: 0; } }
+
+  .omitir {
+    position: absolute; left: 50%; bottom: clamp(2.5rem, 10vh, 4.5rem); transform: translateX(-50%);
+    padding: 0.5rem; border: 0; background: none; cursor: pointer;
+    font: inherit; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--texto);
+    transition: color 0.25s ease;
+  }
+  .omitir:hover, .omitir:focus-visible { color: var(--texto-tenue); }
 </style>
 
 <script>
   const cargador = document.querySelector<HTMLElement>('[data-cargador]');
   const html = document.documentElement;
   if (cargador && !html.classList.contains('sin-cargador')) {
-    const numero = cargador.querySelector<HTMLElement>('[data-porcentaje]')!;
-    const DURA = 2300;
-    const inicio = performance.now();
-    // avanza a saltos irregulares, como una carga de verdad
-    const saltos = Array.from({ length: 14 }, () => Math.random());
-    const avance = (x: number) => {
-      const i = Math.min(saltos.length - 1, Math.floor(x * saltos.length));
-      const base = i / saltos.length, siguiente = (i + 1) / saltos.length;
-      const dentro = (x * saltos.length) % 1;
-      return base + (siguiente - base) * Math.pow(dentro, 0.3 + saltos[i] * 2);
-    };
-    const cuadro = (ahora: number) => {
-      const x = Math.min(1, (ahora - inicio) / DURA);
-      const p = x >= 1 ? 1 : avance(x);
-      numero.textContent = `${String(Math.round(p * 100)).padStart(3, '0')}%`;
-      cargador.style.setProperty('--p', `${p * 100}%`);
-      cargador.style.setProperty('--f', String(p));
-      if (x < 1) requestAnimationFrame(cuadro);
-      else setTimeout(terminar, 350);
-    };
+    const frases: string[] = JSON.parse(cargador.dataset.frases || '[]');
+    const texto = cargador.querySelector<HTMLElement>('.texto')!;
+    const escrito = cargador.querySelector<HTMLElement>('[data-escrito]')!;
+    const omitir = cargador.querySelector<HTMLButtonElement>('[data-omitir]')!;
+    const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const LETRA = 32;      // ms por letra
+    const PAUSA = 1700;    // ms quieto al acabar cada frase
+    let acabado = false;
+    let espera: number | undefined;
+
+    const dormir = (ms: number) => new Promise<void>((ok) => { espera = window.setTimeout(ok, ms); });
+
     const terminar = () => {
+      if (acabado) return;
+      acabado = true;
+      clearTimeout(espera);
       try { sessionStorage.setItem('natalia-visto', '1'); } catch { /* sin almacenamiento: no pasa nada */ }
       cargador.classList.add('fuera');
       html.classList.remove('cargando');
+      document.removeEventListener('keydown', tecla);
       window.dispatchEvent(new Event('cargador-fin'));
     };
-    requestAnimationFrame(cuadro);
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') terminar(); };
+
+    omitir.addEventListener('click', terminar);
+    document.addEventListener('keydown', tecla);
+
+    (async () => {
+      for (let n = 0; n < frases.length; n++) {
+        const frase = frases[n];
+        texto.classList.remove('borrando');
+        escrito.textContent = '';
+        if (sinMovimiento) escrito.textContent = frase;
+        else for (let i = 1; i <= frase.length; i++) {
+          if (acabado) return;
+          escrito.textContent = frase.slice(0, i);
+          // un poco más de pausa tras los signos, como al escribir de verdad
+          const c = frase[i - 1];
+          await dormir(c === '.' || c === ':' ? LETRA * 9 : c === ',' ? LETRA * 5 : LETRA);
+        }
+        await dormir(PAUSA);
+        if (acabado) return;
+        if (n < frases.length - 1) { texto.classList.add('borrando'); await dormir(550); }
+      }
+      terminar();
+    })();
   }
 </script>

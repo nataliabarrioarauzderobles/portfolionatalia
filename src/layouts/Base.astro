@@ -6,7 +6,9 @@ import Cabecera from '../components/Cabecera.astro';
 import Pie from '../components/Pie.astro';
 import Cargador from '../components/Cargador.astro';
 import { textos, type Idioma } from '../i18n/textos';
-import { url } from '../utils/enlaces';
+import { url, rutaIdioma, contacto } from '../utils/enlaces';
+import { getImage } from 'astro:assets';
+import { imagen } from '../utils/imagenes';
 
 interface Props {
   idioma: Idioma;
@@ -15,7 +17,53 @@ interface Props {
 }
 const { idioma, pagina, titulo } = Astro.props;
 const t = textos[idioma];
-const tituloCompleto = titulo ? `${titulo} — Natalia Barrio Araúz de Robles` : 'Natalia Barrio Araúz de Robles';
+const tituloCompleto = titulo
+  ? `${titulo} — Natalia Barrio Araúz de Robles`
+  : { es: 'Natalia Barrio Araúz de Robles — Pintora y diseñadora en Madrid', en: 'Natalia Barrio Araúz de Robles — Painter and designer in Madrid' }[idioma];
+
+// PARA GOOGLE Y PARA COMPARTIR: cada página con su propia descripción (lo que sale bajo el título en Google
+// y en la vista previa al mandar el enlace por WhatsApp), y una foto de un cuadro como imagen de vista previa.
+const descripciones = {
+  es: {
+    '': 'Natalia Barrio Araúz de Robles, pintora y diseñadora en Madrid. Cuadros originales y por encargo, arte para espacios (inmobiliarias, hoteles, restaurantes) e identidad de marca freelance.',
+    pintura: 'Cuadros originales de Natalia Barrio Araúz de Robles: óleo sobre madera y técnica mixta. Obras disponibles para comprar; escríbeme por WhatsApp.',
+    diseno: 'Diseño de logotipos, packaging e identidad de marca por Natalia Barrio Araúz de Robles, diseñadora freelance en Madrid.',
+    'crea-tu-pieza': 'Crea tu propia pieza de diseño con Natalia Barrio Araúz de Robles: elige el ojo y los colores, y te la hago a mano.',
+    encargos: 'Cuadros por encargo, pintados a mano y pensados para tu espacio. Pintora en Madrid: cuéntame tu idea por WhatsApp.',
+    colaboremos: 'Arte original para inmobiliarias, hoteles, restaurantes y estudios de interiorismo: propuestas a medida de qué piezas, qué tamaño y dónde van.',
+    contacto: 'Contacta con Natalia Barrio Araúz de Robles, pintora y diseñadora en Madrid: WhatsApp, email e Instagram.',
+  },
+  en: {
+    '': 'Natalia Barrio Araúz de Robles, painter and designer in Madrid. Original and commissioned paintings, art for spaces (real estate, hotels, restaurants) and freelance brand identity.',
+    pintura: 'Original paintings by Natalia Barrio Araúz de Robles: oil on wood and mixed media. Works available to buy; message me on WhatsApp.',
+    diseno: 'Logo, packaging and brand identity design by Natalia Barrio Araúz de Robles, freelance designer in Madrid.',
+    'crea-tu-pieza': 'Create your own design piece with Natalia Barrio Araúz de Robles: choose the eye and the colours, and I make it by hand.',
+    encargos: 'Commissioned paintings, handmade and designed for your space. Painter in Madrid: tell me your idea on WhatsApp.',
+    colaboremos: 'Original art for real estate agencies, hotels, restaurants and interior design studios: tailored proposals of which pieces, what size and where.',
+    contacto: 'Get in touch with Natalia Barrio Araúz de Robles, painter and designer in Madrid: WhatsApp, email and Instagram.',
+  },
+};
+const descripcion = descripciones[idioma][pagina] ?? t.descripcionWeb;
+const sitio = Astro.site ?? new URL('https://nataliabarrioarauz.com');
+const conBarra = (ruta: string) => (ruta.endsWith('/') ? ruta : `${ruta}/`);
+const enlaceEs = new URL(conBarra(rutaIdioma('es', pagina)), sitio).href;
+const enlaceEn = new URL(conBarra(rutaIdioma('en', pagina)), sitio).href;
+const canonica = idioma === 'en' ? enlaceEn : enlaceEs;
+const vistaPrevia = await getImage({ src: imagen('encargos/encargos.jpg'), width: 1200, format: 'jpg' });
+const imagenVistaPrevia = new URL(vistaPrevia.src, sitio).href;
+// Ficha para Google: quién eres y a qué te dedicas (solo en la portada)
+const ficha = pagina === '' ? JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: contacto.nombre,
+  jobTitle: idioma === 'en' ? 'Painter and designer' : 'Pintora y diseñadora',
+  url: enlaceEs,
+  image: imagenVistaPrevia,
+  email: `mailto:${contacto.email}`,
+  telephone: contacto.telefono,
+  address: { '@type': 'PostalAddress', addressLocality: 'Madrid', addressCountry: 'ES' },
+  sameAs: [`https://instagram.com/${contacto.instagram}`],
+}) : null;
 ---
 
 <!doctype html>
@@ -24,23 +72,42 @@ const tituloCompleto = titulo ? `${titulo} — Natalia Barrio Araúz de Robles` 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{tituloCompleto}</title>
-    <meta name="description" content={t.descripcionWeb} />
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={canonica} />
+    <link rel="alternate" hreflang="es" href={enlaceEs} />
+    <link rel="alternate" hreflang="en" href={enlaceEn} />
+    <link rel="alternate" hreflang="x-default" href={enlaceEs} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Natalia Barrio Araúz de Robles" />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:image" content={imagenVistaPrevia} />
+    <meta property="og:locale" content={idioma === 'en' ? 'en_GB' : 'es_ES'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {ficha && <script type="application/ld+json" set:html={ficha} />}
     <link rel="icon" type="image/png" href={url('favicon.png')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300..600&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300..600&family=DM+Mono:wght@400&family=Instrument+Serif:ital@0;1&display=swap"
     />
     <!-- marca que hay JavaScript: solo entonces se ocultan los elementos que "aparecen" al hacer scroll -->
     <script is:inline>
       document.documentElement.classList.add('js');
-      // la pantalla de entrada (contador) solo sale la primera vez en la visita
-      try { if (sessionStorage.getItem('natalia-visto')) document.documentElement.classList.add('sin-cargador'); else document.documentElement.classList.add('cargando'); } catch (e) { document.documentElement.classList.add('sin-cargador'); }
     </script>
+    {pagina === '' ? (
+      <script is:inline>
+        // la pantalla de entrada (texto que se escribe) solo sale en la portada y la primera vez en la visita
+        try { if (sessionStorage.getItem('natalia-visto')) document.documentElement.classList.add('sin-cargador'); else document.documentElement.classList.add('cargando'); } catch (e) { document.documentElement.classList.add('sin-cargador'); }
+      </script>
+    ) : (
+      <script is:inline>document.documentElement.classList.add('sin-cargador');</script>
+    )}
   </head>
   <body>
-    <Cargador />
+    {pagina === '' && <Cargador idioma={idioma} />}
     <Cabecera idioma={idioma} pagina={pagina} />
     <main>
       <slot />
