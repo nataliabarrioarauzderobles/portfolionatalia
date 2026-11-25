@@ -9,7 +9,7 @@
 //    negra    → página negra con una o dos imágenes (dibujos)
 //    par      → dos imágenes, una encima de otra, sobre blanco
 //    contra   → contraportada blanca: nombre y año, una imagen pequeña y tu nombre espaciado
-//    hoja     → una página ya maquetada, como imagen (la usan las páginas de Lusilla)
+//    hoja     → una página ya maquetada, como imagen (Lusilla y La Cabezona); enlace: una zona pulsable (en % de la página)
 // "vistas" (opcional) dice qué páginas se ven juntas en el ordenador (empezando a contar en 0).
 
 export type Pagina =
@@ -21,7 +21,7 @@ export type Pagina =
   | { tipo: 'negra'; imagenes: string[] }
   | { tipo: 'par'; imagenes: string[] }
   | { tipo: 'contra'; imagen: string }
-  | { tipo: 'hoja'; imagen: string };
+  | { tipo: 'hoja'; imagen: string; enlace?: { href: string; texto: string; x: number; y: number; w: number; h: number } };
 
 export interface Revista {
   año?: string;
@@ -44,18 +44,15 @@ export const revistas: Record<string, Revista> = {
   },
   'la-cabezona': {
     disciplina: { es: 'Interiorismo · Identidad', en: 'Interiors · Identity' },
+    // la portada de siempre (el logo con el nombre en la letra de la web); después, las páginas de su PDF (LAcabezonaweb)
     paginas: [
-      // el logo, una sola vez: de portada
       { tipo: 'portada', imagen: d('la-cabezona/03-logo'), oscuro: true, encajar: true },
-      { tipo: 'texto' },
-      { tipo: 'imagen', imagen: d('la-cabezona/02-local') },
-      { tipo: 'pequena', imagen: d('la-cabezona/04-bolsas') },
-      { tipo: 'doble', imagen: d('la-cabezona/01-mural'), encajar: true },
-      // merchandising: las bolsas
-      { tipo: 'imagen', imagen: d('la-cabezona/06-bolsa-pared') },
-      { tipo: 'imagen', imagen: d('la-cabezona/05-bolsa-mesa') },
-      { tipo: 'contra', imagen: d('la-cabezona/01-mural') },
+      // página 2: el texto, con el enlace a la web del restaurante encima de "https://lacabezona.es/"
+      { tipo: 'hoja', imagen: 'diseno/revistas/la-cabezona/pagina-02.jpg', enlace: { href: 'https://lacabezona.es/', texto: 'lacabezona.es', x: 41.5, y: 74.8, w: 24.5, h: 4.4 } },
+      ...hojas('la-cabezona', 12).slice(2),
     ],
+    // portada sola; después, de dos en dos (4-5 es el mural a doble página); contraportada sola
+    vistas: [[0], [1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11]],
   },
   'conservas-fonseca': {
     disciplina: { es: 'Packaging · Identidad', en: 'Packaging · Identity' },

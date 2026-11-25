@@ -26,6 +26,9 @@ const año = revista.año ?? proyecto.año;
   {pagina.tipo === 'hoja' && (
     <Image class="a-sangre" src={imagen(pagina.imagen)} alt={`${titulo} — ${numero}`} widths={anchos} sizes={sizes} loading={miniatura || numero === 1 ? 'eager' : 'lazy'} />
   )}
+  {pagina.tipo === 'hoja' && pagina.enlace && !miniatura && (
+    <a class="enlace-hoja" href={pagina.enlace.href} target="_blank" rel="noopener" aria-label={pagina.enlace.texto} style={`left:${pagina.enlace.x}%;top:${pagina.enlace.y}%;width:${pagina.enlace.w}%;height:${pagina.enlace.h}%`}></a>
+  )}
 
   {pagina.tipo === 'portada' && (
     <>
@@ -105,4 +108,7 @@ const año = revista.año ?? proyecto.año;
   .cabeza { display: flex; justify-content: space-between; margin: 0 0 2cqw; font-size: 1.6cqw; text-transform: uppercase; letter-spacing: 0.02em; }
   .contra :global(img) { width: 100%; aspect-ratio: 4 / 3; height: auto; object-fit: cover; }
   .firma { margin: 4cqw 0 0; text-align: center; font-size: 1.25cqw; letter-spacing: 0.45em; text-transform: uppercase; }
+  /* zona pulsable encima de un enlace impreso en la página (p. ej. la web de La Cabezona) */
+  .enlace-hoja { position: absolute; z-index: 3; cursor: pointer; border-bottom: 1px solid transparent; transition: border-color 0.25s; }
+  .enlace-hoja:hover, .enlace-hoja:focus-visible { border-bottom-color: currentColor; }
 </style>

@@ -370,7 +370,7 @@ pieza.numero = String(lista.length + 1).padStart(2, '0');
       if (deslizado) { deslizado = false; return; }
       const objetivo = e.target as HTMLElement;
       if (!lista.hidden && !objetivo.closest('.lista-revistas, [data-menu-revistas]')) { plegar(false); return; }
-      if (objetivo.closest('.barra, .pasar')) return;
+      if (objetivo.closest('.barra, .pasar, a[href]')) return; // los enlaces dentro de una página funcionan como enlaces
       if (!objetivo.closest('[data-pliego]')) { revista.close(); return; }
       // en el libro, tocar una página no hace nada (se pasa deslizando); tocar el hueco de los lados cierra
       if (esLibro()) { if (!objetivo.closest('.pagina')) revista.close(); return; }
