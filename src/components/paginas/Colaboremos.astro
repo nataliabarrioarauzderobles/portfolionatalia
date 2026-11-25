@@ -1,0 +1,237 @@
+---
+// COLABOREMOS (borrador): arte para espacios, junto a Pablo Barrio.
+// Propuestas de obra original (pintura y escultura) para inmobiliarias, hoteles y restaurantes.
+//  1. Qué es, en una frase, y una llamada clara a pedir propuesta.
+//  2. Para quién: inmobiliarias, hoteles y restaurantes.
+//  3. Cómo funciona, en cuatro pasos.
+//  4. Dos formas de trabajar: encargo cerrado o cobrar con la venta de la vivienda.
+//  5. Proyectos hechos (La Cabezona; la vivienda en venta de Pablo).
+//  6. Quiénes somos, con enlace a cada web.
+//  7. Cierre: pedir una propuesta.
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { textos, type Idioma } from '../../i18n/textos';
+import { contacto, enlaceWhatsApp, rutaIdioma } from '../../utils/enlaces';
+import { imagen } from '../../utils/imagenes';
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+const t = textos[idioma];
+
+const webPablo = 'https://pablobarrioarauz.com/';
+const mural = imagen('diseno/la-cabezona/01-mural.jpg');
+const local = imagen('diseno/la-cabezona/02-local.jpg');
+
+const tx = {
+  es: {
+    firma: 'Natalia Barrio & Pablo Barrio',
+    titulo: 'Arte para espacios',
+    entrada: 'Proponemos obra original, pintura y escultura, para viviendas en venta, hoteles y restaurantes. Cada propuesta se piensa para un espacio concreto y mezcla piezas de los dos.',
+    pedir: 'Pedir una propuesta',
+    paraQuien: 'Para quién',
+    publicos: [
+      { titulo: 'Inmobiliarias', texto: 'Vestimos la vivienda con arte para que se vea y se venda mejor. Si la casa se vende con las obras, se pagan con la venta.' },
+      { titulo: 'Hoteles', texto: 'Una colección para habitaciones y zonas comunes que le da al hotel una identidad propia, que no tiene nadie más.' },
+      { titulo: 'Restaurantes', texto: 'Murales e identidad: el local se convierte en una pieza que la gente recuerda y fotografía.' },
+    ],
+    comoTitulo: 'Cómo funciona',
+    pasos: [
+      { titulo: 'Conocemos el espacio', texto: 'Visita, planos o fotos, y lo que buscáis: el estilo, el público, los plazos.' },
+      { titulo: 'Os enviamos la propuesta', texto: 'Un PDF con cada pieza, dónde iría y lo que cuesta.' },
+      { titulo: 'Producimos e instalamos', texto: 'Con un adelanto para materiales y producción. Nos ocupamos del montaje.' },
+      { titulo: 'Se cierra el acuerdo', texto: 'Según lo pactado: precio cerrado, o las obras se cobran cuando se vende la vivienda.' },
+    ],
+    formasTitulo: 'Dos formas de trabajar',
+    formas: [
+      { titulo: 'Encargo', texto: 'Precio cerrado por la obra, el mural o la identidad. Se paga como cualquier proyecto.', ejemplo: 'Como el mural y la identidad de La Cabezona.' },
+      { titulo: 'Con la venta', texto: 'La inmobiliaria adelanta lo necesario para producir. Si la vivienda se vende con las obras, se cobra el importe acordado; si no, las obras vuelven a los artistas.', ejemplo: 'Como la vivienda de lujo que Pablo vistió con diez cuadros y dos esculturas.' },
+    ],
+    hechosTitulo: 'Proyectos',
+    hechos: [
+      { titulo: 'La Cabezona', quien: 'Natalia Barrio', texto: 'Mural e identidad para un restaurante.', enlace: rutaIdioma(idioma, 'diseno'), verMas: 'Ver el proyecto' },
+      { titulo: 'Vivienda en venta', quien: 'Pablo Barrio', texto: 'Diez cuadros y dos esculturas para vestir una casa de lujo a la venta.', enlace: webPablo, verMas: 'Ver su obra' },
+    ],
+    quienesTitulo: 'Quiénes somos',
+    quienes: [
+      { nombre: 'Natalia Barrio', oficio: 'Pintura y diseño', enlace: rutaIdioma(idioma, 'pintura'), ver: 'Ver su pintura' },
+      { nombre: 'Pablo Barrio', oficio: 'Pintura y escultura', enlace: webPablo, ver: 'Ver su web' },
+    ],
+    cierre: '¿Tienes un espacio? Cuéntanos qué es y te preparamos una propuesta.',
+    escribir: 'Escribirnos',
+    whatsapp: 'Hablar por WhatsApp',
+    asunto: 'Propuesta de arte para un espacio',
+    mensaje: 'Hola, Natalia. Tengo un espacio y me gustaría una propuesta de arte.',
+  },
+  en: {
+    firma: 'Natalia Barrio & Pablo Barrio',
+    titulo: 'Art for spaces',
+    entrada: 'We propose original work, painting and sculpture, for homes on sale, hotels and restaurants. Each proposal is made for a specific space and mixes pieces by both of us.',
+    pedir: 'Ask for a proposal',
+    paraQuien: 'Who it is for',
+    publicos: [
+      { titulo: 'Real estate', texto: 'We dress the home with art so it looks and sells better. If the house sells with the works, they are paid with the sale.' },
+      { titulo: 'Hotels', texto: 'A collection for rooms and common areas that gives the hotel an identity nobody else has.' },
+      { titulo: 'Restaurants', texto: 'Murals and identity: the place becomes a piece people remember and photograph.' },
+    ],
+    comoTitulo: 'How it works',
+    pasos: [
+      { titulo: 'We get to know the space', texto: 'A visit, plans or photos, and what you are after: style, audience, timing.' },
+      { titulo: 'We send you the proposal', texto: 'A PDF with each piece, where it would go and what it costs.' },
+      { titulo: 'We produce and install', texto: 'With an advance for materials and production. We take care of the hanging.' },
+      { titulo: 'The deal is closed', texto: 'As agreed: a fixed price, or the works are paid when the home is sold.' },
+    ],
+    formasTitulo: 'Two ways of working',
+    formas: [
+      { titulo: 'Commission', texto: 'A fixed price for the work, the mural or the identity. Paid like any project.', ejemplo: 'Like the mural and identity for La Cabezona.' },
+      { titulo: 'With the sale', texto: 'The agency advances what is needed to produce. If the home sells with the works, the agreed amount is paid; if not, the works go back to the artists.', ejemplo: 'Like the luxury home Pablo dressed with ten paintings and two sculptures.' },
+    ],
+    hechosTitulo: 'Projects',
+    hechos: [
+      { titulo: 'La Cabezona', quien: 'Natalia Barrio', texto: 'Mural and identity for a restaurant.', enlace: rutaIdioma(idioma, 'diseno'), verMas: 'See the project' },
+      { titulo: 'Home on sale', quien: 'Pablo Barrio', texto: 'Ten paintings and two sculptures to dress a luxury house on sale.', enlace: webPablo, verMas: 'See his work' },
+    ],
+    quienesTitulo: 'Who we are',
+    quienes: [
+      { nombre: 'Natalia Barrio', oficio: 'Painting and design', enlace: rutaIdioma(idioma, 'pintura'), ver: 'See her paintings' },
+      { nombre: 'Pablo Barrio', oficio: 'Painting and sculpture', enlace: webPablo, ver: 'See his website' },
+    ],
+    cierre: 'Do you have a space? Tell us about it and we will prepare a proposal.',
+    escribir: 'Write to us',
+    whatsapp: 'Chat on WhatsApp',
+    asunto: 'Art proposal for a space',
+    mensaje: 'Hi Natalia, I have a space and I would like an art proposal.',
+  },
+}[idioma];
+
+const correo = `mailto:${contacto.email}?subject=${encodeURIComponent(tx.asunto)}`;
+const esFuera = (e: string) => e.startsWith('http');
+---
+
+<Base idioma={idioma} pagina="colaboremos" titulo={t.colaboremosTitulo}>
+  <article class="colaboremos">
+    <!-- 1. QUÉ ES -->
+    <header class="entrada">
+      <p class="etiqueta">{tx.firma}</p>
+      <h1>{tx.titulo}</h1>
+      <p class="lead">{tx.entrada}</p>
+      <a class="accion" href="#propuesta">{tx.pedir} →</a>
+    </header>
+
+    <figure class="foto-grande">
+      <Image src={mural} alt="Mural de La Cabezona" widths={[800, 1400, 2000]} sizes="(max-width: 760px) 100vw, 90vw" />
+    </figure>
+
+    <!-- 2. PARA QUIÉN -->
+    <section class="bloque">
+      <h2 class="etiqueta">{tx.paraQuien}</h2>
+      <ul class="tres">
+        {tx.publicos.map((p) => (
+          <li><h3>{p.titulo}</h3><p>{p.texto}</p></li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 3. CÓMO FUNCIONA -->
+    <section class="bloque">
+      <h2 class="etiqueta">{tx.comoTitulo}</h2>
+      <ol class="pasos">
+        {tx.pasos.map((p, i) => (
+          <li><span class="num">{String(i + 1).padStart(2, '0')}</span><h3>{p.titulo}</h3><p>{p.texto}</p></li>
+        ))}
+      </ol>
+    </section>
+
+    <!-- 4. DOS FORMAS DE TRABAJAR -->
+    <section class="bloque">
+      <h2 class="etiqueta">{tx.formasTitulo}</h2>
+      <ul class="dos">
+        {tx.formas.map((f) => (
+          <li><h3>{f.titulo}</h3><p>{f.texto}</p><p class="ejemplo">{f.ejemplo}</p></li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 5. PROYECTOS -->
+    <section class="bloque">
+      <h2 class="etiqueta">{tx.hechosTitulo}</h2>
+      <ul class="dos hechos">
+        {tx.hechos.map((h, i) => (
+          <li>
+            {i === 0 && <Image src={local} alt={h.titulo} widths={[600, 1000, 1400]} sizes="(max-width: 760px) 100vw, 45vw" />}
+            {i === 1 && <span class="sin-foto" aria-hidden="true">{h.titulo}</span>}
+            <p class="quien">{h.quien}</p>
+            <h3>{h.titulo}</h3>
+            <p>{h.texto}</p>
+            <a class="accion" href={h.enlace} target={esFuera(h.enlace) ? '_blank' : undefined} rel={esFuera(h.enlace) ? 'noopener' : undefined}>{h.verMas} {esFuera(h.enlace) ? '↗' : '→'}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 6. QUIÉNES SOMOS -->
+    <section class="bloque">
+      <h2 class="etiqueta">{tx.quienesTitulo}</h2>
+      <ul class="dos quienes">
+        {tx.quienes.map((q) => (
+          <li>
+            <h3>{q.nombre}</h3>
+            <p>{q.oficio}</p>
+            <a class="accion" href={q.enlace} target={esFuera(q.enlace) ? '_blank' : undefined} rel={esFuera(q.enlace) ? 'noopener' : undefined}>{q.ver} {esFuera(q.enlace) ? '↗' : '→'}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 7. CIERRE -->
+    <section class="cierre" id="propuesta">
+      <p class="frase">{tx.cierre}</p>
+      <p class="botones">
+        <a class="accion" href={correo}>{tx.escribir} →</a>
+        <a class="accion" href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.whatsapp} →</a>
+      </p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .colaboremos { width: min(1100px, 100%); margin: 0 auto; padding: clamp(2.5rem, 8vh, 5rem) var(--margen) clamp(4rem, 10vh, 7rem); }
+  .etiqueta { margin: 0 0 1.4rem; font-family: var(--fuente); font-size: 0.72rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto-tenue); line-height: 1.4; }
+
+  /* 1. ENTRADA */
+  .entrada { max-width: 640px; margin: 0 auto; text-align: center; }
+  .entrada h1 { font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -0.03em; margin-bottom: 1.4rem; }
+  .lead { margin: 0 auto 1.8rem; max-width: 520px; font-size: 0.95rem; line-height: 1.7; color: #444; }
+  .accion { display: inline-block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); transition: color 0.25s ease; }
+  .accion:hover, .accion:focus-visible { color: var(--texto-tenue); }
+
+  .foto-grande { margin: clamp(2.5rem, 7vh, 4.5rem) 0 0; }
+  .foto-grande :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+
+  /* BLOQUES */
+  .bloque { margin-top: clamp(3.5rem, 10vh, 6rem); padding-top: 1.4rem; border-top: 1px solid var(--linea); }
+  .bloque h3 { font-size: 1.05rem; letter-spacing: -0.01em; margin-bottom: 0.5rem; }
+  .bloque p { margin: 0; font-size: 0.88rem; line-height: 1.65; color: #555; }
+  .tres, .dos, .pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 2rem clamp(1.5rem, 4vw, 3rem); }
+  .tres { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pasos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .num { display: block; margin-bottom: 0.8rem; font-size: 0.72rem; color: var(--texto-tenue); font-variant-numeric: tabular-nums; }
+  .ejemplo { margin-top: 0.8rem !important; color: var(--texto-tenue) !important; font-size: 0.8rem !important; }
+
+  /* PROYECTOS */
+  .hechos li { display: grid; gap: 0.4rem; align-content: start; }
+  .hechos :global(img), .sin-foto { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; margin-bottom: 0.8rem; }
+  .sin-foto { display: grid; place-items: center; background: #f2f2f0; color: var(--texto-tenue); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  .quien { font-size: 0.72rem !important; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto-tenue) !important; }
+  .hechos .accion, .quienes .accion { margin-top: 0.6rem; }
+  .quienes li { display: grid; gap: 0.2rem; align-content: start; }
+
+  /* CIERRE */
+  .cierre { margin-top: clamp(4rem, 12vh, 7rem); text-align: center; scroll-margin-top: 6rem; }
+  .frase { margin: 0 auto 1.6rem; max-width: 520px; font-size: clamp(1.2rem, 2.4vw, 1.6rem); line-height: 1.35; letter-spacing: -0.02em; }
+  .botones { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.8rem 2.2rem; margin: 0; }
+
+  @media (max-width: 900px) { .pasos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) {
+    .tres, .dos { grid-template-columns: 1fr; }
+  }
+</style>

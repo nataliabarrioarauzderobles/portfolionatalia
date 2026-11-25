@@ -3,7 +3,7 @@
 //  · Izquierda: tu firma (vuelve a la home).
 //  · Centro: "MADRID" y la hora en directo, como detalle.
 //  · Derecha: las secciones en mayúsculas pequeñas (la actual en negro, las demás en gris) y el idioma.
-//  · En el móvil: arriba la firma y el idioma; debajo, las cuatro secciones siempre a la vista.
+//  · En el móvil: arriba la firma y el idioma; debajo, las secciones en dos filas de tres, siempre a la vista.
 import { Image } from 'astro:assets';
 import { textos, type Idioma } from '../i18n/textos';
 import { rutaIdioma } from '../utils/enlaces';
@@ -17,6 +17,7 @@ const enlaces = [
   { pagina: 'diseno', texto: t.menuDiseno },
   { pagina: 'crea-tu-pieza', texto: t.menuPieza },
   { pagina: 'encargos', texto: t.menuEncargos },
+  { pagina: 'colaboremos', texto: t.menuColaboremos },
   { pagina: 'contacto', texto: t.menuContacto },
 ];
 const otroIdioma: Idioma = idioma === 'es' ? 'en' : 'es';
@@ -72,7 +73,7 @@ const cambiar = { es: 'Ver en inglés', en: 'Ver en español' }[idioma];
     .fila { position: relative; grid-template-columns: 1fr; row-gap: 0.75rem; padding-top: 0.8rem; padding-bottom: 0.7rem; }
     .hora { display: none; }
     .firma img { height: 26px; }
-    .secciones { justify-self: stretch; justify-content: space-between; gap: 0.5rem; }
+    .secciones { justify-self: stretch; display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 0.45rem 0.5rem; }
     .idioma { position: absolute; top: 0.95rem; right: var(--margen); margin: 0; padding: 0; border: 0; color: var(--texto); }
   }
 </style>
