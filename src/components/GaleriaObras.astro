@@ -1,7 +1,5 @@
 ---
 // PINTURA: una galería pensada para vender, que entre por los ojos.
-//  · Arriba a la derecha, tres líneas que invitan a comprar:
-//    cuántas obras hay disponibles, preguntar por WhatsApp y encargar otra medida.
 //  · Debajo, una cuadrícula ordenada: en todas las casillas, el cuadro de cerca, del mismo tamaño (4:5, recortado
 //    si hace falta). Al pasar el cursor se ve el cuadro colgado en una casa, si tiene esa foto.
 //  · Al pulsar una obra se abre en grande y entera, con su información a la derecha en letra pequeña.
@@ -19,8 +17,8 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 const tx = {
-  es: { siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', disponible: 'Disponible', foto: 'Ver foto', disponibles: (n: number) => `${n} obras disponibles`, preguntar: 'Pregunta por cualquier obra', encargo: '¿Otra medida? Hazme un encargo', mensaje: 'Hola Natalia, he visto tus cuadros en la web y me gustaría saber más.' },
-  en: { siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', disponible: 'Available', foto: 'View photo', disponibles: (n: number) => `${n} works available`, preguntar: 'Ask about any work', encargo: 'Another size? Commission one', mensaje: "Hi Natalia, I've seen your paintings on your website and I'd like to know more." },
+  es: { siguiente: 'Siguiente obra', anterior: 'Obra anterior', cerrar: 'Cerrar', disponible: 'Disponible', foto: 'Ver foto' },
+  en: { siguiente: 'Next work', anterior: 'Previous work', cerrar: 'Close', disponible: 'Available', foto: 'View photo' },
 }[idioma];
 
 // vendidas que se enseñan pronto en la galería (después de las primeras disponibles), no al final;
@@ -44,22 +42,12 @@ const galeria = [
   ...disponibles.slice(6),
   ...obras.filter((o) => o.vendida && !vendidasDestacadas.has(o.id)),
 ];
-const numDisponibles = disponibles.length;
 const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, o.serie.tecnica && t.tecnicas[o.serie.tecnica]].filter(Boolean).join(' · ');
 // precio en euros con separador de miles también en 4 cifras (2.000 €, €2,000)
 const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0, useGrouping: 'always' } as Intl.NumberFormatOptions).format(n);
 ---
 
 <section class="pintura" data-pintura>
-  <!-- LA ENTRADA: invita a comprar, sin imagen -->
-  <header class="entrada">
-    <ul class="ventajas">
-      <li class="estado"><span class="punto" aria-hidden="true"></span>{tx.disponibles(numDisponibles)}</li>
-      <li><a href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.preguntar} →</a></li>
-      <li><a href={rutaIdioma(idioma, 'encargos')}>{tx.encargo} →</a></li>
-    </ul>
-  </header>
-
   <!-- FILTROS -->
   <div class="filtros">
     <div class="series" role="group" aria-label={t.pinturaTitulo}>
@@ -145,11 +133,6 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
 <style>
   .pintura { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em; }
 
-  /* LA ENTRADA */
-  .entrada { display: flex; justify-content: flex-end; padding: clamp(1.5rem, 5vh, 3.5rem) var(--margen) clamp(2rem, 5vh, 3rem); }
-  .ventajas { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; justify-self: end; }
-  .ventajas a { color: var(--texto); border-bottom: 1px solid var(--texto); padding-bottom: 0.1rem; transition: opacity 0.2s; }
-  .ventajas a:hover { opacity: 0.55; }
 
   .estado { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; }
   .punto { width: 7px; height: 7px; border-radius: 50%; background: #3e8e5e; }
@@ -157,7 +140,7 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   .punto.roja { background: #c2362b; }
 
   /* FILTROS */
-  .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; margin: 0 var(--margen) 1.6rem; padding-top: 1.1rem; border-top: 1px solid var(--linea); }
+  .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; margin: 0 var(--margen) clamp(1.6rem, 4vh, 2.4rem); padding-top: clamp(2rem, 7vh, 4rem); }
   .series { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; }
   .series button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; transition: color 0.25s; }
   .series button:hover, .series button[aria-pressed='true'] { color: var(--texto); }
@@ -181,8 +164,6 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
 
   @media (max-width: 1000px) { .galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 760px) {
-    .entrada { justify-content: flex-start; }
-    .ventajas { justify-self: start; }
     .galeria { gap: 2rem 0.8rem; }
     .pie { grid-template-columns: 1fr; }
     .pie .estado { grid-column: 1; grid-row: auto; justify-self: start; }
