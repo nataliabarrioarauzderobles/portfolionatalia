@@ -2,7 +2,7 @@
 // COLABOREMOS: dos caminos, sin más.
 //  · Obras por encargo → lleva a su página (foto, una frase, preguntas frecuentes y WhatsApp).
 //  · Colaboración para inmobiliarias, hoteles y restaurantes → al pulsar se despliega aquí mismo
-//    un texto corto y el botón para pedir una propuesta (junto a Pablo Barrio).
+//    un texto corto y el botón para pedir una propuesta.
 // La foto de la colaboración es provisional (el local de La Cabezona) hasta tener la definitiva.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
@@ -13,7 +13,6 @@ interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 const t = textos[idioma];
 
-const webPablo = 'https://pablobarrioarauz.com/';
 const fotoEncargo = imagen('encargos/encargos.jpg');
 const fotoEspacios = imagen('diseno/la-cabezona/02-local.jpg'); // provisional
 
@@ -21,9 +20,8 @@ const tx = {
   es: {
     encargo: 'Obras por encargo',
     espacios: 'Colaboración para inmobiliarias, hoteles y restaurantes',
-    texto: 'Decoramos tu espacio con obra original, pintura y escultura, en una propuesta personalizada según la vivienda, el hotel o el local. Lo hacemos juntos Pablo Barrio y yo.',
+    texto: 'Decoro tu espacio con obra original, en una propuesta personalizada según la vivienda, el hotel o el local: qué piezas, de qué tamaño y dónde van.',
     pedir: 'Pedir una propuesta',
-    pablo: 'Conoce a Pablo Barrio',
     mensaje: 'Hola Natalia, me gustaría una propuesta de decoración con arte para un espacio.',
     asunto: 'Propuesta de arte para un espacio',
     email: 'Escribir un email',
@@ -31,9 +29,8 @@ const tx = {
   en: {
     encargo: 'Commissioned works',
     espacios: 'Collaborations for real estate, hotels and restaurants',
-    texto: 'We dress your space with original work, painting and sculpture, in a proposal tailored to the home, the hotel or the venue. Pablo Barrio and I do it together.',
+    texto: 'I dress your space with original work, in a proposal tailored to the home, the hotel or the venue: which pieces, what size and where they go.',
     pedir: 'Ask for a proposal',
-    pablo: 'Meet Pablo Barrio',
     mensaje: 'Hi Natalia, I would like an art proposal for a space.',
     asunto: 'Art proposal for a space',
     email: 'Send an email',
@@ -66,7 +63,6 @@ const tx = {
       <p class="botones">
         <a class="accion" href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.pedir} →</a>
         <a class="accion" href={`mailto:${contacto.email}?subject=${encodeURIComponent(tx.asunto)}`}>{tx.email} →</a>
-        <a class="accion" href={webPablo} target="_blank" rel="noopener">{tx.pablo} ↗</a>
       </p>
     </div>
   </section>

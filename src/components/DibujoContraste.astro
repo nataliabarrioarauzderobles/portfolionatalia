@@ -3,7 +3,7 @@
 // Al bajar, el dibujo de línea se queda fijo y sus manchas se van rellenando una a una, de arriba abajo
 // (cabeza, espalda, brazo, cuerpo, bota) hasta la versión de contraste, en gris carbón.
 // A la vez, el dibujo se aparta a la izquierda y a la derecha aparece, línea a línea, lo que hago,
-// con un enlace claro a cada sección: diseño (identidades), encargos (cuadros) y arte para espacios (con Pablo).
+// con un enlace claro a cada sección: diseño (identidades), encargos (cuadros) y arte para espacios.
 // En el móvil, el dibujo se hace pequeño y sube, y el texto aparece debajo.
 import { getImage } from 'astro:assets';
 import type { Idioma } from '../i18n/textos';
@@ -19,7 +19,7 @@ const tx = {
     lineas: [
       { titulo: 'Identidad para marcas', texto: 'Logotipo, packaging y todo lo que hace reconocible a una marca.', enlace: rutaIdioma(idioma, 'diseno') },
       { titulo: 'Cuadros por encargo', texto: 'Una pieza única, pintada a mano, pensada para tu espacio.', enlace: rutaIdioma(idioma, 'encargos') },
-      { titulo: 'Arte para espacios', texto: 'Junto a Pablo Barrio, pintor y escultor: propuestas para hoteles, restaurantes e inmobiliarias.', enlace: `${rutaIdioma(idioma, 'colaboremos')}#espacios` },
+      { titulo: 'Arte para espacios', texto: 'Propuestas de arte a medida para inmobiliarias, hoteles y restaurantes.', enlace: `${rutaIdioma(idioma, 'colaboremos')}#espacios` },
     ],
   },
   en: {
@@ -27,7 +27,7 @@ const tx = {
     lineas: [
       { titulo: 'Brand identity', texto: 'Logo, packaging and everything that makes a brand recognisable.', enlace: rutaIdioma(idioma, 'diseno') },
       { titulo: 'Commissioned paintings', texto: 'A one-off piece, painted by hand, made for your space.', enlace: rutaIdioma(idioma, 'encargos') },
-      { titulo: 'Art for spaces', texto: 'With painter and sculptor Pablo Barrio: proposals for hotels, restaurants and real estate.', enlace: `${rutaIdioma(idioma, 'colaboremos')}#espacios` },
+      { titulo: 'Art for spaces', texto: 'Tailored art proposals for real estate, hotels and restaurants.', enlace: `${rutaIdioma(idioma, 'colaboremos')}#espacios` },
     ],
   },
 }[idioma];
