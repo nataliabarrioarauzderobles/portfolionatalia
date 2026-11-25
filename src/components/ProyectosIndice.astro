@@ -20,12 +20,14 @@ const tx = {
   es: { etiqueta: 'Proyectos', ver: 'Abrir revista', anterior: 'Página anterior', siguiente: 'Página siguiente', ayuda: 'Pulsa fuera de la revista para cerrarla', deslizar: 'Desliza para pasar página' },
   en: { etiqueta: 'Projects', ver: 'Open magazine', anterior: 'Previous page', siguiente: 'Next page', ayuda: 'Tap outside the magazine to close it', deslizar: 'Swipe to turn the page' },
 }[idioma];
-// Crea tu pieza, como un proyecto más al final de la cuadrícula: lleva a su sección (que no cambia)
+// Crea tu pieza, como un proyecto más al final de la cuadrícula: no es una revista, solo el ojo
+// y la invitación escribiéndose sola; al pulsar lleva a su sección (que no cambia)
 const pieza = {
   numero: '',
   titulo: { es: 'Crea tu pieza', en: 'Make your piece' }[idioma],
   disciplina: { es: 'Objeto · Personalización', en: 'Object · Customisation' }[idioma],
-  foto: imagen('diseno/ojo-y-labios/piezas-estanteria.jpg'),
+  foto: imagen('diseno/ojo-y-labios/ojo-lunares.jpg'),
+  llamada: { es: 'Pincha aquí y crea tu propio diseño', en: 'Click here and create your own design' }[idioma],
   enlace: rutaIdioma(idioma, 'crea-tu-pieza'),
 };
 const lista = proyectos.filter((p) => revistas[p.id]).map((p, i) => ({ proyecto: p, revista: revistas[p.id], numero: String(i + 1).padStart(2, '0') }));
@@ -51,9 +53,9 @@ pieza.numero = String(lista.length + 1).padStart(2, '0');
     ))}
     <li data-aparece style={`--retraso:${(lista.length % 3) * 120}ms`}>
       <a class="abrir" href={pieza.enlace}>
-        <span class="tapa tapa-pieza">
-          <Image src={pieza.foto} alt="" widths={[400, 700, 1000]} sizes="(max-width: 760px) 45vw, 30vw" />
-          <span class="nombre-pieza">{pieza.titulo}</span>
+        <span class="tapa-pieza">
+          <Image src={pieza.foto} alt="" widths={[400, 700]} sizes="(max-width: 760px) 40vw, 22vw" />
+          <span class="llamada-pieza" aria-label={pieza.llamada} data-escribir-pieza={pieza.llamada}><span class="hueco" aria-hidden="true">{pieza.llamada}</span><span class="escrito" aria-hidden="true"></span></span>
         </span>
         <span class="pie mono">
           <span class="numero">{pieza.numero}</span>
@@ -117,10 +119,14 @@ pieza.numero = String(lista.length + 1).padStart(2, '0');
   .tapa { display: block; aspect-ratio: 1 / 1.4142; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 30px -12px rgba(0,0,0,0.25); transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.5s; }
   .tapa :global(.pagina) { width: 100%; height: 100%; }
   .abrir:hover .tapa, .abrir:focus-visible .tapa { transform: translateY(-8px) rotate(-1.2deg); box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 24px 40px -16px rgba(0,0,0,0.35); }
-  /* la portada de Crea tu pieza: la foto a sangre con el nombre encima, como las revistas */
-  .tapa-pieza { position: relative; overflow: hidden; container-type: inline-size; }
-  .tapa-pieza :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .nombre-pieza { position: absolute; top: 4.5cqw; left: 5cqw; right: 3cqw; color: #1a1a1a; font-weight: 300; font-size: 7.4cqw; letter-spacing: 0.55em; text-transform: uppercase; line-height: 1.1; text-shadow: 0 0 14px rgba(255,255,255,0.8); }
+  /* Crea tu pieza: sin revista, solo el ojo y la invitación que se escribe sola */
+  .tapa-pieza { display: grid; place-content: center; justify-items: center; gap: 1.6rem; aspect-ratio: 1 / 1.4142; padding: 10%; text-align: center; }
+  .tapa-pieza :global(img) { display: block; width: 78%; height: auto; transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .abrir:hover .tapa-pieza :global(img) { transform: rotate(-4deg) scale(1.04); }
+  .llamada-pieza { position: relative; display: block; font-size: clamp(1rem, 1.6vw, 1.35rem); line-height: 1.3; letter-spacing: -0.01em; }
+  .llamada-pieza .hueco { visibility: hidden; }
+  .llamada-pieza .escrito { position: absolute; inset: 0; }
+  .llamada-pieza .escrito.escribiendo::after { content: ''; display: inline-block; width: 1px; height: 1em; margin-left: 2px; vertical-align: -0.12em; background: currentColor; }
   .pie { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.9rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--linea); }
   .numero, .disciplina { color: var(--texto-tenue); }
   .disciplina { margin-left: auto; }
@@ -207,6 +213,23 @@ pieza.numero = String(lista.length + 1).padStart(2, '0');
 </style>
 
 <script>
+  // CREA TU PIEZA: la invitación se escribe letra a letra cuando la casilla entra en pantalla
+  document.querySelectorAll<HTMLElement>("[data-escribir-pieza]").forEach((caja) => {
+    const texto = caja.dataset.escribirPieza ?? "";
+    const escrito = caja.querySelector<HTMLElement>(".escrito")!;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { escrito.textContent = texto; return; }
+    const escribir = async () => {
+      escrito.classList.add("escribiendo");
+      for (let i = 1; i <= texto.length; i++) {
+        escrito.textContent = texto.slice(0, i);
+        await new Promise((r) => setTimeout(r, 45 + Math.random() * 70));
+      }
+      setTimeout(() => escrito.classList.remove("escribiendo"), 900);
+    };
+    const vigia = new IntersectionObserver((e) => { if (e[0].isIntersecting) { vigia.disconnect(); setTimeout(escribir, 400); } }, { threshold: 0.5 });
+    vigia.observe(caja);
+  });
+
   const escritorio = matchMedia('(min-width: 900px)');
   const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
 

@@ -1,338 +1,105 @@
 ---
-// ENCARGOS: pedir un cuadro hecho a medida, con el estilo sobrio del resto de la web (avea.studio).
-// Pensado para vender: cada bloque empuja a pedir el encargo, sin agobiar.
-// 1) Entrada (como el ejemplo de Natalia): el título grande arriba, la foto en el centro, los botones a su derecha
-//    y debajo de la foto el texto breve.
-// 2) Tres garantías que quitan miedo: pieza única, ves el boceto antes, sin compromiso.
-// 4) El formulario: unas pocas preguntas con botones; el mensaje se escribe solo y se envía por WhatsApp o email.
-// 5) Cómo funciona, en cuatro pasos. 6) Preguntas frecuentes. 7) Cierre: "mándame una foto de tu pared".
-// Los pasos y condiciones (señal del 50 %, plazos…) son una propuesta: cámbialos aquí si quieres.
+// OBRAS POR ENCARGO (dentro de Colaboremos): sencillo y sin carga de texto.
+//  · El título, la foto en el centro y una frase.
+//  · Dos botones: "Preguntas frecuentes" (se despliegan ahí mismo) y "Contacta conmigo" (abre WhatsApp).
+// Las respuestas de las preguntas frecuentes se cambian aquí abajo, en "dudas".
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { type Idioma } from '../../i18n/textos';
-import { contacto, enlaceWhatsApp } from '../../utils/enlaces';
+import { enlaceWhatsApp } from '../../utils/enlaces';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 
 const tx = {
   es: {
-    titulo: 'Encargos',
-    sub: 'Obra original por encargo, pintada a mano para tu espacio: desde la primera idea hasta tu pared.',
-    empezar: 'Empezar mi encargo',
-    whatsapp: 'Hablar por WhatsApp',
-    garantias: [
-      { titulo: 'Pieza única', texto: 'Nadie más tendrá tu cuadro. Se pinta una sola vez, solo para ti.' },
-      { titulo: 'Ves el boceto antes', texto: 'Antes de pintar te enseño un boceto o cómo quedaría en tu pared.' },
-      { titulo: 'Sin compromiso', texto: 'Hablar, pedir propuesta y presupuesto no te compromete a nada.' },
-    ],
-    formTitulo: 'Cuéntame tu idea',
-    formNota: 'Dos minutos. No hace falta tenerlo todo claro: lo hablamos después.',
-    preguntas: [
-      { id: 'serie', etiqueta: 'Inspiración', titulo: 'Inspirado en', opciones: ['Serie DE-formando', 'Serie Open', 'Serie Interfaces', 'Algo nuevo'] },
-      { id: 'tamano', etiqueta: 'Tamaño', titulo: 'Tamaño', opciones: ['Pequeño (hasta 50 cm)', 'Mediano (50–100 cm)', 'Grande (más de 100 cm)', 'Aún no lo sé'] },
-      { id: 'color', etiqueta: 'Colores', titulo: 'Colores', opciones: ['Cálidos', 'Fríos', 'Neutros', 'Que combine con mi espacio'] },
-      { id: 'para', etiqueta: 'Para', titulo: 'Es para', opciones: ['Mi casa', 'Un regalo', 'Una empresa o local'] },
-      { id: 'plazo', etiqueta: 'Plazo', titulo: '¿Para cuándo?', opciones: ['Sin prisa', 'En 1–2 meses', 'Tengo una fecha concreta'] },
-    ],
-    nombre: 'Tu nombre',
-    idea: 'Algo más (opcional)',
-    ideaEjemplo: 'Por ejemplo: es para el salón, la pared mide 3 m, me encanta «Encuentro»…',
-    vistaPrevia: 'Tu mensaje',
-    enviar: 'Enviar por WhatsApp',
-    porEmail: 'Enviar por email',
-    consejo: 'Si puedes, añade una foto de la pared donde irá: me ayuda a proponerte tamaño y colores.',
-    saludo: 'Hola Natalia, me gustaría encargarte un cuadro.',
-    soy: 'Soy',
-    asunto: 'Encargo de un cuadro',
-    pasosTitulo: 'Cómo funciona',
-    pasos: [
-      { titulo: 'Me cuentas tu idea', texto: 'El espacio, los colores, el tamaño y lo que te gustaría sentir al mirarlo.' },
-      { titulo: 'Propuesta y boceto', texto: 'Te envío medidas, precio, plazo y un boceto. Al aprobarlo se abona una señal del 50 %.' },
-      { titulo: 'Lo pinto', texto: 'Te mando fotos del proceso para que veas cómo nace tu obra.' },
-      { titulo: 'En tu pared', texto: 'Con el cuadro terminado se abona el resto y te lo entrego o envío bien protegido.' },
-    ],
-    dudasTitulo: 'Preguntas frecuentes',
+    titulo: 'Obras por encargo',
+    frase: 'Pinto piezas únicas por encargo, pensadas para tu espacio.',
+    preguntas: 'Preguntas frecuentes',
+    contactar: 'Contacta conmigo',
+    mensaje: 'Hola Natalia, me gustaría encargarte un cuadro.',
     dudas: [
-      { p: '¿Cuánto cuesta un encargo?', r: 'Depende sobre todo del tamaño. Como referencia, en mis series un cuadro de 60 × 60 cm está en 900 € y uno de 130 × 90 cm en 2.000 €. Te doy un presupuesto cerrado antes de empezar.' },
-      { p: '¿Cuánto tarda?', r: 'Cada obra tiene su ritmo; te indico el plazo en la propuesta. Si tienes una fecha concreta (un regalo, una inauguración), dímela desde el principio.' },
-      { p: '¿Puedo pedir cambios?', r: 'Sí, sobre el boceto ajustamos todo lo necesario antes de empezar a pintar.' },
-      { p: '¿Haces envíos?', r: 'Sí. El cuadro viaja embalado y protegido; el envío se incluye en el presupuesto.' },
-      { p: '¿Y si no sé lo que quiero?', r: 'Es lo más normal. Mándame una foto del espacio y un par de cuadros míos que te gusten, y te propongo yo.' },
+      { p: '¿Cuánto cuesta?', r: 'Depende sobre todo del tamaño. Como referencia, un cuadro de 60 × 60 cm está en 900 € y uno de 130 × 90 cm en 2.000 €. Te doy un presupuesto cerrado antes de empezar.' },
+      { p: '¿En qué puede estar inspirado?', r: 'En cualquiera de mis series (DE-formando, Open, Interfaces) o en algo nuevo. Mándame un par de cuadros míos que te gusten y una foto del espacio.' },
+      { p: '¿Cómo funciona?', r: 'Me cuentas tu idea, te envío un boceto con medidas, precio y plazo, y al aprobarlo se abona una señal del 50 %. El resto, con el cuadro terminado.' },
+      { p: '¿Cuánto tarda?', r: 'Te indico el plazo en la propuesta. Si tienes una fecha concreta (un regalo, una inauguración), dímela desde el principio.' },
+      { p: '¿Haces envíos?', r: 'Sí. El cuadro viaja embalado y protegido; el envío va incluido en el presupuesto.' },
     ],
-    cierreFrase: '¿Tienes una pared vacía?',
-    cierreTexto: 'Mándame una foto y te propongo un cuadro para ella.',
-    cierreBoton: 'Enviar foto por WhatsApp',
-    cierreMensaje: 'Hola Natalia, te mando una foto de mi pared para que me propongas un cuadro.',
   },
   en: {
-    titulo: 'Commissions',
-    sub: 'Original commissioned work, hand-painted for your space: from the first idea to your wall.',
-    empezar: 'Start my commission',
-    whatsapp: 'Chat on WhatsApp',
-    garantias: [
-      { titulo: 'One of a kind', texto: 'No one else will have your painting. It is painted once, only for you.' },
-      { titulo: 'See the sketch first', texto: 'Before I paint, I show you a sketch or how it would look on your wall.' },
-      { titulo: 'No commitment', texto: 'Talking, asking for a proposal and a quote commits you to nothing.' },
-    ],
-    formTitulo: 'Tell me your idea',
-    formNota: 'Two minutes. You do not need to have it all figured out: we will talk it through.',
-    preguntas: [
-      { id: 'serie', etiqueta: 'Inspiration', titulo: 'Inspired by', opciones: ['DE-formando series', 'Open series', 'Interfaces series', 'Something new'] },
-      { id: 'tamano', etiqueta: 'Size', titulo: 'Size', opciones: ['Small (up to 50 cm)', 'Medium (50–100 cm)', 'Large (over 100 cm)', 'Not sure yet'] },
-      { id: 'color', etiqueta: 'Colours', titulo: 'Colours', opciones: ['Warm', 'Cool', 'Neutral', 'To match my space'] },
-      { id: 'para', etiqueta: 'For', titulo: 'It is for', opciones: ['My home', 'A gift', 'A company or venue'] },
-      { id: 'plazo', etiqueta: 'Timing', titulo: 'When do you need it?', opciones: ['No rush', 'In 1–2 months', 'I have a specific date'] },
-    ],
-    nombre: 'Your name',
-    idea: 'Anything else (optional)',
-    ideaEjemplo: 'For example: it is for the living room, the wall is 3 m wide, I love “Encuentro”…',
-    vistaPrevia: 'Your message',
-    enviar: 'Send on WhatsApp',
-    porEmail: 'Send by email',
-    consejo: 'If you can, add a photo of the wall where it will hang: it helps me suggest size and colours.',
-    saludo: "Hi Natalia, I'd like to commission a painting.",
-    soy: 'My name is',
-    asunto: 'Painting commission',
-    pasosTitulo: 'How it works',
-    pasos: [
-      { titulo: 'Tell me your idea', texto: 'The space, the colours, the size and what you would like to feel when you look at it.' },
-      { titulo: 'Proposal and sketch', texto: 'I send you size, price, timeline and a sketch. Once approved, a 50% deposit is paid.' },
-      { titulo: 'I paint it', texto: 'I send you photos of the process so you can see your work being born.' },
-      { titulo: 'On your wall', texto: 'When it is finished, the balance is paid and I deliver it or ship it carefully packed.' },
-    ],
-    dudasTitulo: 'Frequently asked questions',
+    titulo: 'Commissioned works',
+    frase: 'I paint one-off pieces on commission, made for your space.',
+    preguntas: 'Frequently asked questions',
+    contactar: 'Contact me',
+    mensaje: "Hi Natalia, I'd like to commission a painting.",
     dudas: [
-      { p: 'How much does a commission cost?', r: 'It mainly depends on size. As a reference, in my series a 60 × 60 cm painting is €900 and a 130 × 90 cm one is €2,000. I give you a fixed quote before starting.' },
-      { p: 'How long does it take?', r: 'Every work has its own pace; the timeline is in the proposal. If you have a specific date (a gift, an opening), tell me from the start.' },
-      { p: 'Can I ask for changes?', r: 'Yes, we adjust everything needed on the sketch before I start painting.' },
+      { p: 'How much does it cost?', r: 'It mainly depends on size. As a reference, a 60 × 60 cm painting is €900 and a 130 × 90 cm one is €2,000. I give you a fixed quote before starting.' },
+      { p: 'What can it be inspired by?', r: 'Any of my series (DE-formando, Open, Interfaces) or something new. Send me a couple of my paintings you like and a photo of the space.' },
+      { p: 'How does it work?', r: 'You tell me your idea, I send you a sketch with size, price and timing, and once approved a 50% deposit is paid. The rest when the painting is finished.' },
+      { p: 'How long does it take?', r: 'The timeline is in the proposal. If you have a specific date (a gift, an opening), tell me from the start.' },
       { p: 'Do you ship?', r: 'Yes. The painting travels packed and protected; shipping is included in the quote.' },
-      { p: 'What if I do not know what I want?', r: 'That is completely normal. Send me a photo of the space and a couple of my paintings you like, and I will make a proposal.' },
     ],
-    cierreFrase: 'Got an empty wall?',
-    cierreTexto: 'Send me a photo and I will suggest a painting for it.',
-    cierreBoton: 'Send a photo on WhatsApp',
-    cierreMensaje: "Hi Natalia, I'm sending you a photo of my wall so you can suggest a painting.",
   },
 }[idioma];
-
 ---
 
 <Base idioma={idioma} pagina="encargos" titulo={tx.titulo}>
-  <div class="encargos">
-    <!-- 1. ENTRADA -->
-    <section class="entrada">
-      <h1 class="titulo-entrada">{tx.titulo}</h1>
-      <figure class="foto-entrada">
-        <Image src={imagen('encargos/encargos.jpg')} alt="" widths={[500, 800, 1100]} sizes="(max-width: 760px) 80vw, 360px" loading="eager" />
-      </figure>
-      <div class="botones">
-        <a href="#idea">{tx.empezar} →</a>
-        <a href={enlaceWhatsApp(tx.saludo)} target="_blank" rel="noopener">{tx.whatsapp} →</a>
-      </div>
-      <p class="sub">{tx.sub}</p>
-    </section>
+  <section class="encargo">
+    <h1>{tx.titulo}</h1>
+    <figure class="foto">
+      <Image src={imagen('encargos/encargos.jpg')} alt="" widths={[500, 800, 1100]} sizes="(max-width: 760px) 80vw, 380px" loading="eager" />
+    </figure>
+    <p class="frase">{tx.frase}</p>
+    <p class="botones">
+      <button type="button" class="accion" data-abrir-dudas aria-expanded="false" aria-controls="dudas">{tx.preguntas} ↓</button>
+      <a class="accion" href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.contactar} →</a>
+    </p>
 
-    <!-- 2. GARANTÍAS -->
-    <ul class="garantias">
-      {tx.garantias.map((g, i) => (
-        <li><span class="num">{String(i + 1).padStart(2, '0')}</span><strong>{g.titulo}</strong><p>{g.texto}</p></li>
-      ))}
-    </ul>
-
-    <!-- 4. EL FORMULARIO: el mensaje se escribe solo -->
-    <section class="idea" id="idea">
-      <header class="cabeza"><h2>{tx.formTitulo}</h2><p>{tx.formNota}</p></header>
-      <div class="formulario" data-encargo data-saludo={tx.saludo} data-soy={tx.soy} data-email={contacto.email} data-asunto={tx.asunto} data-whatsapp={contacto.whatsapp}>
-        <div class="preguntas">
-          {tx.preguntas.map((q, i) => (
-            <fieldset data-pregunta={q.etiqueta}>
-              <legend><span class="num">{String(i + 1).padStart(2, '0')}</span>{q.titulo}</legend>
-              <div class="opciones">
-                {q.opciones.map((o) => (
-                  <label class="opcion">
-                    <input type="radio" name={q.id} value={o} />
-                    <span>{o}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          ))}
-          <label class="campo">
-            <span>{tx.nombre}</span>
-            <input type="text" name="nombre" autocomplete="name" />
-          </label>
-          <label class="campo">
-            <span>{tx.idea}</span>
-            <textarea name="idea" rows="3" placeholder={tx.ideaEjemplo}></textarea>
-          </label>
-        </div>
-
-        <aside class="mensaje">
-          <p class="etiqueta">{tx.vistaPrevia}</p>
-          <p class="vista-mensaje" data-vista-mensaje>{tx.saludo}</p>
-          <a class="accion" data-enviar-whatsapp href={`https://wa.me/${contacto.whatsapp}`} target="_blank" rel="noopener">{tx.enviar} →</a>
-          <a class="accion" data-enviar-email href={`mailto:${contacto.email}`}>{tx.porEmail} →</a>
-          <p class="consejo">{tx.consejo}</p>
-        </aside>
-      </div>
-    </section>
-
-    <!-- 5. CÓMO FUNCIONA -->
-    <section class="pasos">
-      <header class="cabeza"><h2>{tx.pasosTitulo}</h2></header>
-      <ol>
-        {tx.pasos.map((p, i) => (
-          <li><span class="num">{String(i + 1).padStart(2, '0')}</span><strong>{p.titulo}</strong><p>{p.texto}</p></li>
-        ))}
-      </ol>
-    </section>
-
-    <!-- 6. PREGUNTAS FRECUENTES -->
-    <section class="dudas">
-      <header class="cabeza"><h2>{tx.dudasTitulo}</h2></header>
-      {tx.dudas.map((d) => (
-        <details>
+    <div class="dudas" id="dudas" hidden>
+      {tx.dudas.map((d, i) => (
+        <details open={i === 0}>
           <summary>{d.p}<span aria-hidden="true">+</span></summary>
           <p>{d.r}</p>
         </details>
       ))}
-    </section>
-
-    <!-- 7. CIERRE -->
-    <section class="cierre">
-      <p class="frase">{tx.cierreFrase}</p>
-      <p class="sub">{tx.cierreTexto}</p>
-      <a class="accion" href={enlaceWhatsApp(tx.cierreMensaje)} target="_blank" rel="noopener">{tx.cierreBoton} →</a>
-    </section>
-  </div>
+    </div>
+  </section>
 </Base>
 
 <style>
-  /* letra: Cascadia Code para todo; los títulos en Archivo, la letra del resto de la web */
-  /* letra: los títulos en Cascadia Code (la regla está en global.css); el resto, en Archivo */
-  .encargos {
-    padding: 0 var(--margen); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.01em;
-  }
-  .cierre .frase { font-family: var(--fuente-titulos); }
-  .titulo-entrada, .cabeza h2, .frase { color: var(--texto); }
-  .entrada .sub { color: #444; }
-  .encargos p { letter-spacing: 0; }
-  /* los botones son solo tipografía: al pasar el cursor, el texto se aclara */
-  .botones a, .accion { color: #222; letter-spacing: 0.01em; transition: color 0.25s ease; }
-  .botones a:hover, .botones a:focus-visible, .accion:hover, .accion:focus-visible { color: #aaa; }
-  .etiqueta { margin: 0 0 1.2rem; color: var(--texto-tenue); font-size: 0.72rem; font-weight: 400; }
-  .num { color: var(--texto-tenue); }
-  p { text-transform: none; }
+  .encargo { width: min(560px, 100%); margin: 0 auto; padding: clamp(2.5rem, 8vh, 5rem) var(--margen) clamp(4rem, 10vh, 7rem); display: grid; justify-items: center; text-align: center; }
+  h1 { margin: 0 0 clamp(1.4rem, 4vh, 2.4rem); font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -0.03em; }
+  .foto { margin: 0; }
+  .foto :global(img) { display: block; height: min(46svh, 440px); width: auto; max-width: 80vw; object-fit: cover; }
+  .frase { margin: 1.8rem 0 1.6rem; font-size: 0.95rem; line-height: 1.6; color: #444; }
+  .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem 2.4rem; margin: 0; }
+  .accion { padding: 0; border: 0; background: none; font: inherit; cursor: pointer; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); transition: color 0.25s ease; }
+  .accion:hover, .accion:focus-visible { color: var(--texto-tenue); }
 
-  /* 1. ENTRADA */
-  /* el título arriba, la foto en el centro, los botones a su derecha y el texto debajo */
-  .entrada {
-    display: grid; grid-template-columns: minmax(0, 1fr) min(360px, 32vw) minmax(0, 1fr);
-    grid-template-areas: ". titulo ." ". foto botones" ". texto .";
-    column-gap: clamp(1.5rem, 4vw, 3rem); padding-top: clamp(2.5rem, 8vh, 5rem);
-  }
-  .titulo-entrada { grid-area: titulo; justify-self: center; margin: 0 0 clamp(2rem, 6vh, 3.5rem); font-size: clamp(2.2rem, 4.5vw, 3.6rem); font-weight: 400; letter-spacing: 0.06em; line-height: 1; white-space: nowrap; }
-  .foto-entrada { grid-area: foto; margin: 0; }
-  .foto-entrada :global(img) { display: block; width: 100%; height: auto; }
-  .botones { grid-area: botones; align-self: center; display: grid; gap: 1.2rem; justify-items: start; font-size: 0.82rem; text-transform: none; }
-  .sub { grid-area: texto; margin: 1.8rem 0 0; max-width: 34ch; font-size: 0.78rem; line-height: 1.5; }
-  .frase { margin: 0 0 1.2rem; font-size: clamp(1.6rem, 3vw, 2.8rem); line-height: 1.1; letter-spacing: 0.02em; text-transform: uppercase; }
-
-  /* 2. GARANTÍAS */
-  .garantias { list-style: none; margin: clamp(3rem, 8vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2.5rem); }
-  .garantias li, .pasos li { display: grid; gap: 0.5rem; align-content: start; padding-top: 1rem; border-top: 1px solid var(--texto); }
-  .garantias strong, .pasos strong { font-weight: 400; font-size: 0.8rem; }
-  .garantias p, .pasos p { margin: 0; font-size: 0.76rem; line-height: 1.7; }
-
-  /* cabeceras de bloque */
-  section:not(.entrada) { margin-top: clamp(5rem, 12vw, 8rem); }
-  .cabeza { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.6rem 2rem; padding-bottom: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--linea); }
-  .cabeza h2 { margin: 0; font-size: clamp(1.1rem, 2vw, 1.6rem); font-weight: 400; letter-spacing: -0.01em; }
-  .cabeza p { margin: 0; max-width: 46ch; font-size: 0.76rem; }
-
-
-  /* 4. FORMULARIO */
-  .idea { scroll-margin-top: 5rem; }
-  .formulario { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 5rem); align-items: start; }
-  fieldset { border: 0; padding: 0; margin: 0 0 1.8rem; }
-  legend { display: flex; gap: 0.8rem; padding: 0; margin-bottom: 0.8rem; font-size: 0.72rem; }
-  .opciones { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-  .opcion input { position: absolute; opacity: 0; pointer-events: none; }
-  .opcion span {
-    display: inline-block; padding: 0.55rem 0.9rem; border: 1px solid var(--linea);
-    font-size: 0.72rem; cursor: pointer; transition: border-color 0.2s, background 0.2s, color 0.2s;
-  }
-  .opcion:hover span { border-color: var(--texto); }
-  .opcion input:checked + span { background: var(--texto); border-color: var(--texto); color: var(--fondo); }
-  .opcion input:focus-visible + span { outline: 2px solid var(--texto); outline-offset: 2px; }
-  .campo { display: grid; gap: 0.5rem; margin-bottom: 1.5rem; color: var(--texto-tenue); }
-  .campo input, .campo textarea {
-    font: inherit; font-size: 0.9rem; text-transform: none; padding: 0.6rem 0; border: 0; border-bottom: 1px solid var(--linea);
-    border-radius: 0; background: none; color: var(--texto); resize: vertical;
-  }
-  .campo input:focus, .campo textarea:focus { outline: none; border-bottom-color: var(--texto); }
-  .mensaje { position: sticky; top: 5.5rem; display: grid; gap: 0.7rem; padding: clamp(1.2rem, 3vw, 2rem); border: 1px solid var(--linea); }
-  .mensaje .etiqueta { margin: 0; }
-  .vista-mensaje { margin: 0 0 0.6rem; font-size: 0.78rem; line-height: 1.7; white-space: pre-line; }
-  .consejo { margin: 0.4rem 0 0; font-size: 0.76rem; line-height: 1.6; color: var(--texto-tenue); }
-
-  /* 5. PASOS */
-  .pasos ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2.5rem); }
-
-  /* 6. DUDAS */
-  .dudas { max-width: 820px; }
+  /* PREGUNTAS FRECUENTES: se despliegan al pulsar */
+  .dudas { width: 100%; margin-top: clamp(2.5rem, 6vh, 3.5rem); text-align: left; border-top: 1px solid var(--linea); scroll-margin-top: 6rem; animation: aparecer 0.4s ease; }
+  @keyframes aparecer { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   details { border-bottom: 1px solid var(--linea); }
-  summary { display: flex; justify-content: space-between; gap: 1rem; padding: 1.1rem 0; cursor: pointer; list-style: none; }
+  summary { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 0; cursor: pointer; list-style: none; font-size: 0.9rem; }
   summary::-webkit-details-marker { display: none; }
-  summary span { transition: transform 0.3s; color: var(--texto-tenue); font-size: 1rem; }
+  summary span { color: var(--texto-tenue); transition: transform 0.3s; }
   details[open] summary span { transform: rotate(45deg); }
-  details p { margin: 0 0 1.2rem; max-width: 62ch; font-size: 0.78rem; line-height: 1.7; }
-
-  /* 7. CIERRE */
-  .cierre { display: grid; justify-items: center; text-align: center; padding: clamp(3rem, 8vw, 5rem) 0 clamp(4rem, 10vw, 7rem); border-top: 1px solid var(--linea); }
-  .cierre .frase { max-width: none; }
-  .cierre .sub { margin: 0 0 1.6rem; }
-
-  @media (max-width: 900px) {
-    .pasos ol { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2rem; }
-  }
-  @media (max-width: 760px) {
-    .formulario { grid-template-columns: 1fr; }
-    .entrada { grid-template-columns: 1fr; grid-template-areas: "titulo" "foto" "texto" "botones"; }
-    .foto-entrada { width: min(80vw, 360px); justify-self: center; }
-    .sub { justify-self: center; width: min(80vw, 360px); }
-    .botones { justify-self: center; width: min(80vw, 360px); margin-top: 1.8rem; }
-    .garantias { grid-template-columns: 1fr; }
-    .mensaje { position: static; }
-  }
+  details p { margin: 0 0 1.1rem; font-size: 0.86rem; line-height: 1.65; color: #555; }
 </style>
 
 <script>
-  document.querySelectorAll<HTMLElement>('[data-encargo]').forEach((caja) => {
-    const vista = caja.querySelector<HTMLElement>('[data-vista-mensaje]')!;
-    const whatsapp = caja.querySelector<HTMLAnchorElement>('[data-enviar-whatsapp]')!;
-    const email = caja.querySelector<HTMLAnchorElement>('[data-enviar-email]')!;
-    const { saludo, soy, asunto } = caja.dataset;
-
-    // escribe el mensaje con lo que se ha elegido
-    const actualizar = () => {
-      const lineas: string[] = [];
-      const nombre = caja.querySelector<HTMLInputElement>('[name="nombre"]')!.value.trim();
-      lineas.push(nombre ? `${saludo} ${soy} ${nombre}.` : saludo!);
-      caja.querySelectorAll<HTMLFieldSetElement>('[data-pregunta]').forEach((grupo) => {
-        const elegida = grupo.querySelector<HTMLInputElement>('input:checked');
-        if (elegida) lineas.push(`· ${grupo.dataset.pregunta}: ${elegida.value}`);
-      });
-      const idea = caja.querySelector<HTMLTextAreaElement>('[name="idea"]')!.value.trim();
-      if (idea) lineas.push('', idea);
-      const texto = lineas.join('\n');
-      vista.textContent = texto;
-      whatsapp.href = `https://wa.me/${caja.dataset.whatsapp}?text=${encodeURIComponent(texto)}`;
-      email.href = `mailto:${caja.dataset.email}?subject=${encodeURIComponent(asunto!)}&body=${encodeURIComponent(texto)}`;
+  const boton = document.querySelector<HTMLButtonElement>('[data-abrir-dudas]');
+  const dudas = document.getElementById('dudas');
+  if (boton && dudas) {
+    const abrir = (abierto: boolean) => {
+      dudas.hidden = !abierto;
+      boton.setAttribute('aria-expanded', String(abierto));
     };
-    caja.addEventListener('input', actualizar);
-    caja.addEventListener('change', actualizar);
-    actualizar();
-  });
+    boton.addEventListener('click', () => {
+      const abierto = dudas.hidden;
+      abrir(abierto);
+      if (abierto) dudas.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    if (location.hash === '#dudas') abrir(true);
+  }
 </script>

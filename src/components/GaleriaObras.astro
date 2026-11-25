@@ -144,7 +144,7 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   .punto.roja { background: #c2362b; }
 
   /* FILTROS */
-  .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; margin: 0 var(--margen) clamp(1.6rem, 4vh, 2.4rem); padding-top: clamp(2rem, 7vh, 4rem); }
+  .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; margin: 0 max(var(--margen), 5vw) clamp(2.4rem, 6vh, 3.6rem); padding-top: clamp(2rem, 7vh, 4rem); }
   .series { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; }
   .series button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; transition: color 0.25s; }
   .series button:hover, .series button[aria-pressed='true'] { color: var(--texto); }
@@ -152,7 +152,8 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   .solo-disponibles input { accent-color: var(--texto); }
 
   /* LA GALERÍA: el cuadro de cerca, todas las casillas iguales */
-  .galeria { list-style: none; margin: 0; padding: 0 var(--margen); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(2.4rem, 5vw, 4rem) clamp(1rem, 2.4vw, 2rem); }
+  /* cuatro por fila, con aire entre obras */
+  .galeria { list-style: none; margin: 0; padding: 0 max(var(--margen), 5vw); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(3rem, 6vw, 5.5rem) clamp(1.6rem, 3.6vw, 3.6rem); }
   .cuadro[hidden] { display: none; }
   .abrir { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 0; background: var(--fondo); cursor: pointer; overflow: hidden; }
   .abrir :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(var(--zoom, 1)); transition: opacity 0.6s ease, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
@@ -166,7 +167,8 @@ const euros = (n: number) => new Intl.NumberFormat(idioma === 'es' ? 'es-ES' : '
   .datos { grid-column: 1; color: var(--texto-tenue); }
   .pie .estado { grid-column: 2; grid-row: 1; justify-self: end; }
 
-  @media (max-width: 1000px) { .galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 1100px) { .galeria { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 860px) { .galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 760px) {
     .galeria { gap: 2rem 0.8rem; }
     .pie { grid-template-columns: 1fr; }
