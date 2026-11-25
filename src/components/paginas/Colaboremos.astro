@@ -21,6 +21,7 @@ const tx = {
     encargo: 'Obras por encargo',
     espacios: 'Colaboración para inmobiliarias, hoteles y restaurantes',
     texto: 'Decoro tu espacio con obra original, en una propuesta personalizada según la vivienda, el hotel o el local: qué piezas, de qué tamaño y dónde van.',
+    aval: 'He pintado murales para La Cabezona y R.A.C.E., y mi obra se ha expuesto en Café DOPA y Zielo Shopping Centre.',
     pedir: 'Pedir una propuesta',
     mensaje: 'Hola Natalia, me gustaría una propuesta de decoración con arte para un espacio.',
     asunto: 'Propuesta de arte para un espacio',
@@ -30,6 +31,7 @@ const tx = {
     encargo: 'Commissioned works',
     espacios: 'Collaborations for real estate, hotels and restaurants',
     texto: 'I dress your space with original work, in a proposal tailored to the home, the hotel or the venue: which pieces, what size and where they go.',
+    aval: 'I have painted murals for La Cabezona and R.A.C.E., and my work has been shown at Café DOPA and Zielo Shopping Centre.',
     pedir: 'Ask for a proposal',
     mensaje: 'Hi Natalia, I would like an art proposal for a space.',
     asunto: 'Art proposal for a space',
@@ -60,6 +62,7 @@ const tx = {
     <!-- al pulsar la colaboración: un texto corto y cómo pedir la propuesta -->
     <div class="espacios" id="espacios" hidden>
       <p>{tx.texto}</p>
+      <p class="aval">{tx.aval}</p>
       <p class="botones">
         <a class="accion" href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.pedir} →</a>
         <a class="accion" href={`mailto:${contacto.email}?subject=${encodeURIComponent(tx.asunto)}`}>{tx.email} →</a>
@@ -86,6 +89,7 @@ const tx = {
   .espacios { max-width: 560px; margin: clamp(2.5rem, 6vh, 3.5rem) auto 0; text-align: center; scroll-margin-top: 6rem; animation: aparecer 0.4s ease; }
   @keyframes aparecer { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   .espacios p { margin: 0; font-size: 0.95rem; line-height: 1.65; color: #444; }
+  .espacios .aval { margin-top: 0.9rem; font-size: 0.82rem; color: var(--texto-suave); }
   .espacios .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem 2.2rem; margin-top: 1.6rem; }
   .accion { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); transition: color 0.25s ease; }
   .accion:hover, .accion:focus-visible { color: var(--texto-tenue); }

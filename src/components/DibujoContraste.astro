@@ -21,6 +21,7 @@ const tx = {
       { titulo: 'Cuadros por encargo', texto: 'Una pieza única, pintada a mano, pensada para tu espacio.', enlace: rutaIdioma(idioma, 'encargos') },
       { titulo: 'Arte para espacios', texto: 'Propuestas de arte a medida para inmobiliarias, hoteles y restaurantes.', enlace: `${rutaIdioma(idioma, 'colaboremos')}#espacios` },
     ],
+    trayectoria: 'Obra expuesta en Caracas, Toledo y Madrid',
   },
   en: {
     entrada: 'I paint and design. This is what I can do for you:',
@@ -29,6 +30,7 @@ const tx = {
       { titulo: 'Commissioned paintings', texto: 'A one-off piece, painted by hand, made for your space.', enlace: rutaIdioma(idioma, 'encargos') },
       { titulo: 'Art for spaces', texto: 'Tailored art proposals for real estate, hotels and restaurants.', enlace: `${rutaIdioma(idioma, 'colaboremos')}#espacios` },
     ],
+    trayectoria: 'Work exhibited in Caracas, Toledo and Madrid',
   },
 }[idioma];
 
@@ -73,6 +75,7 @@ const manchas = await Promise.all(cajas.map(async (c, i) => {
           </li>
         ))}
       </ul>
+      <p class="trayectoria" data-aparece-lo><a href={`${rutaIdioma(idioma, 'contacto')}#exposiciones`}>{tx.trayectoria} <span class="flecha" aria-hidden="true">→</span></a></p>
     </div>
   </div>
 </section>
@@ -103,6 +106,10 @@ const manchas = await Promise.all(cajas.map(async (c, i) => {
   .oferta a strong { transition: color 0.25s ease; }
   .oferta a:hover strong, .oferta a:focus-visible strong { color: var(--texto-tenue); }
   .oferta a:hover .flecha { transform: translateX(4px); }
+  /* una línea discreta que lleva a las exposiciones (en Contacto) */
+  .trayectoria { margin: 1.8rem 0 0; padding-top: 1.1rem; border-top: 1px solid var(--linea); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  .trayectoria a { display: inline; color: var(--texto-suave); transition: color 0.25s ease; }
+  .trayectoria a:hover, .trayectoria a:focus-visible { color: var(--texto); }
   /* aparecen línea a línea (lo controla el script); sin JavaScript se ven directamente */
   :global(.js) [data-aparece-lo] { opacity: 0; transform: translateY(12px); transition: opacity 0.6s ease, transform 0.6s ease; }
   :global(.js) [data-aparece-lo].visto { opacity: 1; transform: none; }

@@ -1,7 +1,7 @@
 ---
 // CONTACTO: una página limpia; tu oficio y tu nombre, como titular, en Cascadia Code, y el resto en Archivo
 //  · En el centro, una foto en color de tamaño medio, con tu oficio encima y tu nombre debajo, como en un catálogo.
-//  · Debajo, quién eres, en un párrafo breve.
+//  · Debajo, quién eres, en un párrafo breve, y tus exposiciones y trayectoria (del CV).
 //  · Y los contactos, solo con tipografía: WhatsApp, llamar, Gmail, Instagram y CV. Al pasar el cursor, el texto se aclara.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
@@ -21,6 +21,11 @@ const tx = {
     llamar: 'Llamar',
     cv: 'CV',
     mensaje: 'Hola Natalia, he visto tu web y me gustaría hablar contigo.',
+    exposiciones: 'Exposiciones',
+    trayectoria: 'Trayectoria',
+    mural: 'Mural en',
+    macarron: 'Asistente en el estudio de Rafael Macarrón, Madrid',
+    grattin: 'Asistente de galería en Grattin, Nueva York',
   },
   en: {
     oficio: 'Painter and designer — Madrid',
@@ -28,8 +33,30 @@ const tx = {
     llamar: 'Call',
     cv: 'CV',
     mensaje: "Hi Natalia, I've seen your website and I'd like to talk to you.",
+    exposiciones: 'Exhibitions',
+    trayectoria: 'Experience',
+    mural: 'Mural at',
+    macarron: "Assistant at Rafael Macarrón's studio, Madrid",
+    grattin: 'Gallery assistant at Grattin, New York',
   },
 }[idioma];
+
+// EXPOSICIONES Y TRAYECTORIA (sacadas del CV): para añadir una nueva, ponla arriba de la lista
+const exposiciones = [
+  { lugar: 'La Torre, Caracas', año: 2026 },
+  { lugar: 'Casa Maiko, Madrid', año: 2026 },
+  { lugar: 'Pintor El Greco, Toledo', año: 2026 },
+  { lugar: 'Artist 360, Madrid', año: 2026 },
+  { lugar: 'Café DOPA, Madrid', año: 2026 },
+  { lugar: 'Zielo Shopping Centre, Madrid', año: 2024 },
+  { lugar: 'Anica, Madrid', año: 2022 },
+  { lugar: `${tx.mural} La Cabezona, Madrid`, año: 2019 },
+  { lugar: `${tx.mural} R.A.C.E., Madrid`, año: 2018 },
+];
+const trayectoria = [
+  { lugar: tx.grattin, año: 2026 },
+  { lugar: tx.macarron, año: 2025 },
+];
 
 const enlaces = [
   { texto: 'WhatsApp', enlace: enlaceWhatsApp(tx.mensaje), fuera: true },
@@ -51,6 +78,17 @@ const enlaces = [
     </figure>
 
     <p class="breve" lang={idioma}>{tx.breve}</p>
+
+    <div class="listas" id="exposiciones">
+      {[{ titulo: tx.exposiciones, filas: exposiciones }, { titulo: tx.trayectoria, filas: trayectoria }].map((l) => (
+        <section>
+          <h2>{l.titulo}</h2>
+          <ul>
+            {l.filas.map((f) => <li><span>{f.lugar}</span><span class="año">{f.año}</span></li>)}
+          </ul>
+        </section>
+      ))}
+    </div>
 
     <ul class="enlaces">
       {enlaces.map((e) => (
@@ -79,6 +117,13 @@ const enlaces = [
 
   /* QUIÉN SOY */
   .breve { margin: clamp(2.2rem, 6vh, 3.5rem) 0 0; text-transform: none; letter-spacing: 0; line-height: 1.7; }
+
+  /* EXPOSICIONES Y TRAYECTORIA: lugar a la izquierda, año a la derecha, sin adornos */
+  .listas { display: grid; gap: clamp(1.6rem, 4vh, 2.2rem); margin-top: clamp(2.2rem, 6vh, 3.5rem); scroll-margin-top: 6rem; }
+  .listas h2 { margin: 0 0 0.7rem; font: inherit; color: var(--texto-tenue); }
+  .listas ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+  .listas li { display: flex; justify-content: space-between; gap: 1.5rem; color: #222; }
+  .año { flex: none; font-variant-numeric: tabular-nums; color: #444; }
 
   /* LOS CONTACTOS: solo tipografía; al pasar el cursor se aclara */
   .enlaces { list-style: none; margin: clamp(1.8rem, 5vh, 2.8rem) 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem 1.5rem; }
