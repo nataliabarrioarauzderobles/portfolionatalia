@@ -5,6 +5,7 @@
 // Al final la foto se queda tenue, casi un fondo, y la intervención es la protagonista.
 // Capas: foto sin dibujo (tenue) → trazos que se animan y se quedan nítidos encima.
 import Base from '../../layouts/Base.astro';
+import DibujoContraste from '../DibujoContraste.astro';
 import type { Idioma } from '../../i18n/textos';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
@@ -35,14 +36,13 @@ const trazos = [
     </figure>
     <h1 class="nombre" data-nombre>Natalia Barrio Araúz de Robles</h1>
   </section>
+  <!-- al bajar: el dibujo de línea que se va llenando hasta la versión de contraste -->
+  <DibujoContraste />
 </Base>
 
 <style>
-  /* la home es una sola pantalla: sin scroll y sin pie */
-  :global(body.inicio) { height: 100svh; display: flex; flex-direction: column; overflow: hidden; }
-  :global(body.inicio main) { flex: 1; min-height: 0; display: grid; }
   .portada {
-    min-height: 0;
+    min-height: calc(100svh - 64px);
     display: grid;
     place-items: center;
     align-content: center;

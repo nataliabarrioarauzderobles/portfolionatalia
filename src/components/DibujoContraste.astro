@@ -1,0 +1,78 @@
+---
+// EL DIBUJO QUE SE LLENA (home, debajo del retrato). Inspirado en el scroll de ottoobjects.com:
+// al bajar, el dibujo de línea se queda quieto en el centro y sus manchas se van rellenando
+// una a una, de arriba abajo (cabeza, espalda, brazo, cuerpo, bota), como tinta que baja,
+// hasta convertirse en la versión de contraste. El relleno es gris carbón, no negro puro.
+// Las piezas salen del dibujo de contraste (las líneas se sacaron de ahí, así que encajan exactas).
+import { getImage } from 'astro:assets';
+import { imagen } from '../utils/imagenes';
+
+const linea = imagen('inicio/dibujo-linea.jpg');
+// posición de cada mancha en % del dibujo, de arriba abajo
+const cajas = [
+  { x: 35.242, y: 0, w: 20.088, h: 13.35 },
+  { x: 43.26, y: 12.45, w: 23.877, h: 18.6 },
+  { x: 0, y: 25.5, w: 25.639, h: 13.25 },
+  { x: 48.458, y: 38.2, w: 44.67, h: 31.95 },
+  { x: 22.643, y: 81.9, w: 29.956, h: 15.6 },
+];
+const ancho = 1100; // px de la imagen servida
+const fondo = await getImage({ src: linea, width: ancho, format: 'webp' });
+const manchas = await Promise.all(cajas.map(async (c, i) => {
+  const img = imagen(`inicio/dibujo-mancha-${i + 1}.png`);
+  const src = (await getImage({ src: img, width: Math.round((ancho * c.w) / 100), format: 'webp' })).src;
+  return { ...c, src };
+}));
+---
+
+<section class="dibujo" data-dibujo aria-label="Dibujo">
+  <div class="escena">
+    <figure class="lienzo" style={`aspect-ratio:${linea.width} / ${linea.height}`}>
+      <img class="linea" src={fondo.src} alt="Dibujo de dos figuras abrazadas, de Natalia Barrio" loading="lazy" decoding="async" />
+      {manchas.map((m) => (
+        <img class="mancha" src={m.src} alt="" loading="lazy" decoding="async" style={`left:${m.x}%;top:${m.y}%;width:${m.w}%;height:${m.h}%`} data-mancha />
+      ))}
+    </figure>
+  </div>
+</section>
+
+<style>
+  /* el dibujo se queda fijo mientras se baja unas tres pantallas */
+  .dibujo { position: relative; height: 320svh; }
+  .escena { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; padding-top: 72px; box-sizing: border-box; }
+  .lienzo { position: relative; margin: 0; width: min(88vw, calc((100svh - 130px) * 0.5675), 510px); }
+  .linea { display: block; width: 100%; height: 100%; }
+  /* cada mancha se llena de arriba abajo con un borde suave, según --t (0 → 1) */
+  .mancha {
+    position: absolute;
+    --t: 0;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(var(--t) * 140% - 40%), transparent calc(var(--t) * 140%));
+    mask-image: linear-gradient(to bottom, #000 calc(var(--t) * 140% - 40%), transparent calc(var(--t) * 140%));
+  }
+  @media (max-width: 760px) { .escena { padding-top: 110px; } .lienzo { width: min(88vw, calc((100svh - 160px) * 0.5675)); } }
+  @media (prefers-reduced-motion: reduce) { .mancha { transition: none; } }
+</style>
+
+<script>
+  const seccion = document.querySelector<HTMLElement>('[data-dibujo]');
+  if (seccion) {
+    const manchas = [...seccion.querySelectorAll<HTMLElement>('[data-mancha]')];
+    const tramo = (x: number, a: number, b: number) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+    let pendiente = false;
+    const pintar = () => {
+      pendiente = false;
+      const r = seccion.getBoundingClientRect();
+      const recorrido = r.height - window.innerHeight; // lo que dura el dibujo fijo
+      const p = Math.min(1, Math.max(0, -r.top / recorrido));
+      // cada mancha tiene su turno, solapándose un poco con la siguiente; al final queda un rato quieto
+      manchas.forEach((m, i) => {
+        const inicio = 0.06 + i * 0.14;
+        m.style.setProperty('--t', tramo(p, inicio, inicio + 0.2).toFixed(4));
+      });
+    };
+    const pedir = () => { if (!pendiente) { pendiente = true; requestAnimationFrame(pintar); } };
+    window.addEventListener('scroll', pedir, { passive: true });
+    window.addEventListener('resize', pedir);
+    pintar();
+  }
+</script>

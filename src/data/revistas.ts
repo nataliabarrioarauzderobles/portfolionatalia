@@ -45,14 +45,16 @@ export const revistas: Record<string, Revista> = {
   'la-cabezona': {
     disciplina: { es: 'Interiorismo · Identidad', en: 'Interiors · Identity' },
     paginas: [
-      { tipo: 'portada', imagen: d('la-cabezona/06-bolsa-pared') },
+      // el logo, una sola vez: de portada
+      { tipo: 'portada', imagen: d('la-cabezona/03-logo'), oscuro: true, encajar: true },
       { tipo: 'texto' },
       { tipo: 'imagen', imagen: d('la-cabezona/02-local') },
-      { tipo: 'pequena', imagen: d('la-cabezona/03-logo') },
-      { tipo: 'doble', imagen: d('la-cabezona/01-mural'), encajar: true },
-      { tipo: 'imagen', imagen: d('la-cabezona/05-bolsa-mesa') },
       { tipo: 'pequena', imagen: d('la-cabezona/04-bolsas') },
-      { tipo: 'contra', imagen: d('la-cabezona/03-logo') },
+      { tipo: 'doble', imagen: d('la-cabezona/01-mural'), encajar: true },
+      // merchandising: las bolsas
+      { tipo: 'imagen', imagen: d('la-cabezona/06-bolsa-pared') },
+      { tipo: 'imagen', imagen: d('la-cabezona/05-bolsa-mesa') },
+      { tipo: 'contra', imagen: d('la-cabezona/01-mural') },
     ],
   },
   'conservas-fonseca': {
