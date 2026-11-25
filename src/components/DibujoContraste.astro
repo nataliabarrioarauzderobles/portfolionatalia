@@ -1,11 +1,36 @@
 ---
-// EL DIBUJO QUE SE LLENA (home, debajo del retrato). Inspirado en el scroll de ottoobjects.com:
-// al bajar, el dibujo de línea se queda quieto en el centro y sus manchas se van rellenando
-// una a una, de arriba abajo (cabeza, espalda, brazo, cuerpo, bota), como tinta que baja,
-// hasta convertirse en la versión de contraste. El relleno es gris carbón, no negro puro.
-// Las piezas salen del dibujo de contraste (las líneas se sacaron de ahí, así que encajan exactas).
+// EL DIBUJO QUE SE LLENA + LO QUE HAGO (home, debajo del retrato). Inspirado en el scroll de ottoobjects.com.
+// Al bajar, el dibujo de línea se queda fijo y sus manchas se van rellenando una a una, de arriba abajo
+// (cabeza, espalda, brazo, cuerpo, bota) hasta la versión de contraste, en gris carbón.
+// A la vez, el dibujo se aparta a la izquierda y a la derecha aparece, línea a línea, lo que hago,
+// con un enlace claro a cada sección: diseño (identidades), encargos (cuadros) y arte para espacios (con Pablo).
+// En el móvil, el dibujo se hace pequeño y sube, y el texto aparece debajo.
 import { getImage } from 'astro:assets';
+import type { Idioma } from '../i18n/textos';
+import { rutaIdioma } from '../utils/enlaces';
 import { imagen } from '../utils/imagenes';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+
+const tx = {
+  es: {
+    entrada: 'Pinto y diseño. Esto es lo que puedo hacer por ti:',
+    lineas: [
+      { titulo: 'Identidad para marcas', texto: 'Logotipo, packaging y todo lo que hace reconocible a una marca.', enlace: rutaIdioma(idioma, 'diseno') },
+      { titulo: 'Cuadros por encargo', texto: 'Una pieza única, pintada a mano, pensada para tu espacio.', enlace: rutaIdioma(idioma, 'encargos') },
+      { titulo: 'Arte para espacios', texto: 'Junto a Pablo Barrio, pintor y escultor: propuestas para hoteles, restaurantes e inmobiliarias.', enlace: 'https://pablobarrioarauz.com/', fuera: true },
+    ],
+  },
+  en: {
+    entrada: 'I paint and design. This is what I can do for you:',
+    lineas: [
+      { titulo: 'Brand identity', texto: 'Logo, packaging and everything that makes a brand recognisable.', enlace: rutaIdioma(idioma, 'diseno') },
+      { titulo: 'Commissioned paintings', texto: 'A one-off piece, painted by hand, made for your space.', enlace: rutaIdioma(idioma, 'encargos') },
+      { titulo: 'Art for spaces', texto: 'With painter and sculptor Pablo Barrio: proposals for hotels, restaurants and real estate.', enlace: 'https://pablobarrioarauz.com/', fuera: true },
+    ],
+  },
+}[idioma];
 
 const linea = imagen('inicio/dibujo-linea.jpg');
 // posición de cada mancha en % del dibujo, de arriba abajo
@@ -25,50 +50,101 @@ const manchas = await Promise.all(cajas.map(async (c, i) => {
 }));
 ---
 
-<section class="dibujo" data-dibujo aria-label="Dibujo">
+<section class="dibujo" data-dibujo>
   <div class="escena">
-    <figure class="lienzo" style={`aspect-ratio:${linea.width} / ${linea.height}`}>
-      <img class="linea" src={fondo.src} alt="Dibujo de dos figuras abrazadas, de Natalia Barrio" loading="lazy" decoding="async" />
-      {manchas.map((m) => (
-        <img class="mancha" src={m.src} alt="" loading="lazy" decoding="async" style={`left:${m.x}%;top:${m.y}%;width:${m.w}%;height:${m.h}%`} data-mancha />
-      ))}
-    </figure>
+    <div class="mover">
+      <figure class="lienzo" style={`aspect-ratio:${linea.width} / ${linea.height}`}>
+        <img class="linea" src={fondo.src} alt="Dibujo de dos figuras, de Natalia Barrio" loading="lazy" decoding="async" />
+        {manchas.map((m) => (
+          <img class="mancha" src={m.src} alt="" loading="lazy" decoding="async" style={`left:${m.x}%;top:${m.y}%;width:${m.w}%;height:${m.h}%`} data-mancha />
+        ))}
+      </figure>
+    </div>
+
+    <div class="oferta">
+      <p class="entrada" data-aparece-lo>{tx.entrada}</p>
+      <ul>
+        {tx.lineas.map((l) => (
+          <li data-aparece-lo>
+            <a href={l.enlace} target={l.fuera ? '_blank' : undefined} rel={l.fuera ? 'noopener' : undefined}>
+              <strong>{l.titulo} <span class="flecha" aria-hidden="true">{l.fuera ? '↗' : '→'}</span></strong>
+              <span class="texto">{l.texto}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   </div>
 </section>
 
 <style>
-  /* el dibujo se queda fijo mientras se baja unas tres pantallas */
-  .dibujo { position: relative; height: 320svh; }
-  .escena { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; padding-top: 72px; box-sizing: border-box; }
+  /* el dibujo se queda fijo mientras se baja unas tres pantallas y media */
+  .dibujo { position: relative; height: 360svh; --m: 0; }
+  .escena { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; padding-top: 72px; box-sizing: border-box; overflow: hidden; }
+  /* el dibujo se aparta a la izquierda según --m (0 → 1) */
+  .mover { transform: translateX(calc(var(--m) * -19vw)); will-change: transform; }
   .lienzo { position: relative; margin: 0; width: min(88vw, calc((100svh - 130px) * 0.5675), 510px); }
   .linea { display: block; width: 100%; height: 100%; }
   /* cada mancha se llena de arriba abajo con un borde suave, según --t (0 → 1) */
   .mancha {
     position: absolute;
-    --t: 0;
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(var(--t) * 140% - 40%), transparent calc(var(--t) * 140%));
-    mask-image: linear-gradient(to bottom, #000 calc(var(--t) * 140% - 40%), transparent calc(var(--t) * 140%));
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(var(--t, 0) * 140% - 40%), transparent calc(var(--t, 0) * 140%));
+    mask-image: linear-gradient(to bottom, #000 calc(var(--t, 0) * 140% - 40%), transparent calc(var(--t, 0) * 140%));
   }
-  @media (max-width: 760px) { .escena { padding-top: 110px; } .lienzo { width: min(88vw, calc((100svh - 160px) * 0.5675)); } }
-  @media (prefers-reduced-motion: reduce) { .mancha { transition: none; } }
+
+  /* LO QUE HAGO, a la derecha */
+  .oferta { position: absolute; left: 53vw; top: 50%; width: min(34vw, 430px); transform: translateY(-40%); }
+  .entrada { margin: 0 0 1.6rem; font-size: 0.95rem; color: var(--texto-tenue); }
+  .oferta ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem; }
+  .oferta a { display: grid; gap: 0.3rem; color: var(--texto); }
+  .oferta strong { font-weight: 500; font-size: clamp(1.15rem, 1.7vw, 1.45rem); letter-spacing: -0.02em; line-height: 1.2; }
+  .flecha { display: inline-block; font-weight: 400; transition: transform 0.3s ease; }
+  .texto { font-size: 0.86rem; line-height: 1.5; color: var(--texto-tenue); }
+  .oferta a:hover strong, .oferta a:focus-visible strong { text-decoration: underline; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+  .oferta a:hover .flecha { transform: translateX(4px); }
+  /* aparecen línea a línea (lo controla el script); sin JavaScript se ven directamente */
+  :global(.js) [data-aparece-lo] { opacity: 0; transform: translateY(12px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  :global(.js) [data-aparece-lo].visto { opacity: 1; transform: none; }
+
+  /* MÓVIL: el dibujo se encoge y sube; el texto, debajo */
+  @media (max-width: 760px) {
+    .escena { padding-top: 110px; place-items: start center; }
+    .mover { transform: scale(calc(1 - var(--m) * 0.32)); transform-origin: top center; }
+    .lienzo { width: min(80vw, calc((100svh - 160px) * 0.5675)); }
+    .oferta { left: var(--margen); right: var(--margen); width: auto; top: auto; bottom: 4svh; transform: none; }
+    .entrada { margin-bottom: 1rem; font-size: 0.85rem; }
+    .oferta ul { gap: 0.9rem; }
+    .oferta strong { font-size: 1.05rem; }
+    .texto { font-size: 0.78rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mover { transform: none !important; }
+    :global(.js) [data-aparece-lo] { transform: none; }
+  }
 </style>
 
 <script>
   const seccion = document.querySelector<HTMLElement>('[data-dibujo]');
   if (seccion) {
     const manchas = [...seccion.querySelectorAll<HTMLElement>('[data-mancha]')];
+    const textos = [...seccion.querySelectorAll<HTMLElement>('[data-aparece-lo]')];
     const tramo = (x: number, a: number, b: number) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+    const suave = (x: number) => x * x * (3 - 2 * x);
     let pendiente = false;
     const pintar = () => {
       pendiente = false;
       const r = seccion.getBoundingClientRect();
       const recorrido = r.height - window.innerHeight; // lo que dura el dibujo fijo
       const p = Math.min(1, Math.max(0, -r.top / recorrido));
-      // cada mancha tiene su turno, solapándose un poco con la siguiente; al final queda un rato quieto
+      // las manchas: cada una tiene su turno, solapándose un poco con la siguiente
       manchas.forEach((m, i) => {
-        const inicio = 0.06 + i * 0.14;
-        m.style.setProperty('--t', tramo(p, inicio, inicio + 0.2).toFixed(4));
+        const inicio = 0.04 + i * 0.12;
+        m.style.setProperty('--t', tramo(p, inicio, inicio + 0.18).toFixed(4));
       });
+      // el dibujo se aparta mientras se llena
+      seccion.style.setProperty('--m', suave(tramo(p, 0.06, 0.4)).toFixed(4));
+      // el texto, línea a línea; al volver a subir, desaparece
+      textos.forEach((t, i) => t.classList.toggle('visto', p > 0.2 + i * 0.09));
     };
     const pedir = () => { if (!pendiente) { pendiente = true; requestAnimationFrame(pintar); } };
     window.addEventListener('scroll', pedir, { passive: true });
