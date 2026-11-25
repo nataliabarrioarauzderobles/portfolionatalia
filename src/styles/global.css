@@ -13,8 +13,8 @@
   --linea: #e4e4e2;
 
   --fuente: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
-  --fuente-mono: 'Archivo', 'Helvetica Neue', Arial, sans-serif; /* etiquetas: la misma letra, en mayúsculas pequeñas */
-  --fuente-titulos: 'Cascadia Code', ui-monospace, monospace; /* solo para los títulos */
+  --fuente-mono: 'Marcellus', 'Times New Roman', serif; /* etiquetas: la misma letra, en mayúsculas pequeñas */
+  --fuente-titulos: 'Marcellus', 'Times New Roman', serif; /* títulos y rótulos (como ottoobjects.com) */
 
   --ancho-max: 1320px;
   --margen: clamp(1.1rem, 4vw, 3.5rem);

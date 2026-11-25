@@ -5,7 +5,7 @@
 // Al final la foto se queda tenue, casi un fondo, y la intervención es la protagonista.
 // Capas: foto sin dibujo (tenue) → trazos que se animan y se quedan nítidos encima.
 import Base from '../../layouts/Base.astro';
-import Escaparate from '../Escaparate.astro';
+import Desfile from '../Desfile.astro';
 import type { Idioma } from '../../i18n/textos';
 import { imagen } from '../../utils/imagenes';
 interface Props { idioma: Idioma }
@@ -37,7 +37,7 @@ const trazos = [
     <h1 class="nombre" data-nombre>Natalia Barrio Araúz de Robles</h1>
   </section>
   <!-- debajo: el anillo con las obras y proyectos, que gira al bajar -->
-  <Escaparate idioma={idioma} />
+  <Desfile idioma={idioma} />
 </Base>
 
 <style>
