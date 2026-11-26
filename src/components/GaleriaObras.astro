@@ -34,13 +34,14 @@ const obras = series.flatMap((serie) =>
     return { ...obra, serie, imagenes, portada: imagenes[0], segunda: mockup };
   }),
 );
-// en la galería: primero toda la serie Open (al entrar se ve color); luego seis disponibles,
-// las vendidas destacadas, el resto de disponibles y al final las demás vendidas
-const open = obras.filter((o) => o.serie.id === 'open');
-const resto = obras.filter((o) => o.serie.id !== 'open');
+// en la galería: primero toda la serie DE-formando (en el orden de obras.ts), luego toda la serie Open;
+// del resto, seis disponibles, las vendidas destacadas, el resto de disponibles y al final las demás vendidas
+const delaSerie = (id: string) => obras.filter((o) => o.serie.id === id);
+const resto = obras.filter((o) => o.serie.id !== 'formas' && o.serie.id !== 'open');
 const disponibles = resto.filter((o) => !o.vendida);
 const galeria = [
-  ...open,
+  ...delaSerie('formas'),
+  ...delaSerie('open'),
   ...disponibles.slice(0, 6),
   ...resto.filter((o) => vendidasDestacadas.has(o.id)),
   ...disponibles.slice(6),
@@ -71,8 +72,8 @@ const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(
           <p class="titulo">{o.titulo}</p>
           <p class="datos">{ficha(o)}</p>
           {o.vendida
-            ? <p class="estado vendida"><span class="punto roja" aria-hidden="true"></span>{t.vendida}</p>
-            : <p class="estado"><span class="punto" aria-hidden="true"></span>{tx.disponible}</p>}
+            ? <p class="estado vendida">{t.vendida}</p>
+            : <p class="estado">{tx.disponible}</p>}
         </div>
       </li>
     ))}
@@ -116,8 +117,8 @@ const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(
       <h3>{o.titulo}</h3>
       <p class="serie-obra">{t.series[o.serie.id]}{o.serie.año ? `, ${o.serie.año}` : ''}</p>
       {o.vendida
-        ? <p class="estado vendida precio"><span class="punto roja" aria-hidden="true"></span>{t.vendida}</p>
-        : <p class="estado precio"><span class="punto" aria-hidden="true"></span>{tx.disponible}</p>}
+        ? <p class="estado vendida precio">{t.vendida}</p>
+        : <p class="estado precio">{tx.disponible}</p>}
       <dl>
         {o.medidas && (<><dt>{t.medidas}</dt><dd>{o.medidas.replace(' x ', ' × ')} cm</dd></>)}
         {o.serie.tecnica && (<><dt>{t.tecnica}</dt><dd>{t.tecnicas[o.serie.tecnica]}</dd></>)}
@@ -137,9 +138,7 @@ const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(
 
 
   .estado { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; }
-  .punto { width: 7px; height: 7px; border-radius: 50%; background: #3e8e5e; }
   .vendida { color: var(--texto-tenue); }
-  .punto.roja { background: #c2362b; }
 
   /* FILTROS */
   .filtros { display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; margin: 0 max(var(--margen), 5vw) clamp(2.4rem, 6vh, 3.6rem); padding-top: clamp(2rem, 7vh, 4rem); }
