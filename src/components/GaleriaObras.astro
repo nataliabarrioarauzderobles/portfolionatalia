@@ -57,7 +57,8 @@ const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(
       <button type="button" data-serie="todas" aria-pressed="true">{t.todas}</button>
       {series.map((s) => <button type="button" data-serie={s.id} aria-pressed="false">{t.series[s.id]}</button>)}
     </div>
-    <label class="solo-disponibles"><input type="checkbox" data-disponibles /> {t.soloDisponibles}</label>
+    <!-- "solo disponibles": una palabra más, como las series; se enciende al pulsarla (sin cuadradito) -->
+    <label class="solo-disponibles"><input type="checkbox" class="solo-lector" data-disponibles /><span>{t.soloDisponibles}</span></label>
   </div>
 
   <!-- LA GALERÍA -->
@@ -145,8 +146,11 @@ const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(
   .series { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; }
   .series button { padding: 0; border: 0; background: none; font: inherit; text-transform: inherit; color: var(--texto-tenue); cursor: pointer; transition: color 0.25s; }
   .series button:hover, .series button[aria-pressed='true'] { color: var(--texto); }
-  .solo-disponibles { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--texto-tenue); cursor: pointer; }
-  .solo-disponibles input { accent-color: var(--texto); }
+  .solo-disponibles { position: relative; display: inline-flex; align-items: center; color: var(--texto-tenue); cursor: pointer; }
+  .solo-disponibles span { transition: color 0.25s; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+  .solo-disponibles:hover span { color: var(--texto); }
+  .solo-disponibles input:checked + span { color: var(--texto); text-decoration-line: underline; }
+  .solo-disponibles input:focus-visible + span { outline: 1px solid var(--texto); outline-offset: 3px; }
 
   /* LA GALERÍA: el cuadro de cerca, todas las casillas iguales */
   /* cuatro por fila, con aire entre obras */
