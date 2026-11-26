@@ -56,15 +56,15 @@ export const revistas: Record<string, Revista> = {
   },
   'conservas-fonseca': {
     disciplina: { es: 'Packaging · Identidad', en: 'Packaging · Identity' },
+    // la portada de siempre (los boquerones con el nombre en la letra de la web); después, las páginas de su PDF (CONSERVASWEB)
     paginas: [
       { tipo: 'portada', imagen: d('boquerones/02-boquerones-vertical'), oscuro: true },
-      { tipo: 'texto' },
-      { tipo: 'imagen', imagen: d('boquerones/04-lata-trasera') },
-      { tipo: 'pequena', imagen: d('boquerones/03-boqueron') },
-      { tipo: 'doble', imagen: d('boquerones/01-anchoas') },
-      { tipo: 'doble', imagen: d('boquerones/05-latas-troquel'), encajar: true },
-      { tipo: 'contra', imagen: d('boquerones/01-anchoas') },
+      // página 2: el texto, con el enlace a la web de la marca encima de "https://www.conservasfonseca.com/"
+      { tipo: 'hoja', imagen: 'diseno/revistas/conservas-fonseca/pagina-02.jpg', enlace: { href: 'https://www.conservasfonseca.com/', texto: 'conservasfonseca.com', x: 36.6, y: 66.1, w: 34.6, h: 3.2 } },
+      ...hojas('conservas-fonseca', 10).slice(2),
     ],
+    // portada sola; después, de dos en dos (4-5 es el troquel de las latas a doble página); contraportada sola
+    vistas: [[0], [1, 2], [3, 4], [5, 6], [7, 8], [9]],
   },
   wannabes: {
     disciplina: { es: 'Moda · Ilustración', en: 'Fashion · Illustration' },
