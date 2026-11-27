@@ -68,19 +68,14 @@ export const revistas: Record<string, Revista> = {
   },
   wannabes: {
     disciplina: { es: 'Moda · Ilustración', en: 'Fashion · Illustration' },
-    // portada: el dibujo del diseño 03; después, cada diseño (render) junto a su prototipo (foto)
+    // la portada de siempre (el dibujo del diseño 03 con el nombre en la letra de la web);
+    // después, las páginas de su PDF (WANNABESWEB) tal cual están maquetadas
     paginas: [
       { tipo: 'portada', imagen: d('wannabes/03-diseno'), oscuro: true, encajar: true },
-      { tipo: 'texto', centrado: true },
-      { tipo: 'imagen', imagen: d('wannabes/01-render') },
-      { tipo: 'imagen', imagen: d('wannabes/01-modelo') },
-      { tipo: 'imagen', imagen: d('wannabes/02-render') },
-      { tipo: 'imagen', imagen: d('wannabes/02-modelo') },
-      { tipo: 'imagen', imagen: d('wannabes/03-render') },
-      { tipo: 'imagen', imagen: d('wannabes/03-modelo') },
-      { tipo: 'contra', imagen: d('wannabes/01-diseno') },
+      ...hojas('wannabes', 20).slice(1),
     ],
-    vistas: [[0], [1], [2, 3], [4, 5], [6, 7], [8]],
+    // portada sola; después, de dos en dos (4-5, 8-9 y 12-13 son fotos a doble página); contraportada sola
+    vistas: [[0], [1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16], [17, 18], [19]],
   },
   moda: {
     disciplina: { es: 'Moda · Dirección de arte', en: 'Fashion · Art direction' },
