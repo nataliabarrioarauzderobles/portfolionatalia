@@ -24,8 +24,10 @@ const tx = {
     exposiciones: 'Exposiciones',
     trayectoria: 'Trayectoria',
     mural: 'Mural en',
-    macarron: 'Asistente en el estudio de Rafael Macarrón, Madrid',
-    grattin: 'Asistente de galería en Grattin, Nueva York',
+    macarron: 'Asistente en el estudio de Rafael Macarrón',
+    grattin: 'Asistente de galería en Grattin',
+    nuba: 'Diseñadora en NUBA, agencia de viajes',
+    nuevaYork: 'Nueva York',
   },
   en: {
     oficio: 'Painter and designer — Madrid',
@@ -36,8 +38,10 @@ const tx = {
     exposiciones: 'Exhibitions',
     trayectoria: 'Experience',
     mural: 'Mural at',
-    macarron: "Assistant at Rafael Macarrón's studio, Madrid",
-    grattin: 'Gallery assistant at Grattin, New York',
+    macarron: "Assistant at Rafael Macarrón's studio",
+    grattin: 'Gallery assistant at Grattin',
+    nuba: 'Designer at NUBA, travel agency',
+    nuevaYork: 'New York',
   },
 }[idioma];
 
@@ -53,9 +57,11 @@ const exposiciones = [
   { lugar: `${tx.mural} La Cabezona, Madrid`, año: 2019 },
   { lugar: `${tx.mural} R.A.C.E., Madrid`, año: 2018 },
 ];
+// en la trayectoria, la ciudad va en negrita
 const trayectoria = [
-  { lugar: tx.grattin, año: 2026 },
-  { lugar: tx.macarron, año: 2025 },
+  { lugar: tx.grattin, ciudad: tx.nuevaYork, año: 2026 },
+  { lugar: tx.macarron, ciudad: 'Madrid', año: 2025 },
+  { lugar: tx.nuba, ciudad: 'Madrid', año: 2023 },
 ];
 
 const enlaces = [
@@ -84,7 +90,7 @@ const enlaces = [
         <section>
           <h2>{l.titulo}</h2>
           <ul>
-            {l.filas.map((f) => <li><span>{f.lugar}</span><span class="año">{f.año}</span></li>)}
+            {l.filas.map((f) => <li><span>{f.lugar}{'ciudad' in f && <>, <strong>{f.ciudad}</strong></>}</span><span class="año">{f.año}</span></li>)}
           </ul>
         </section>
       ))}
@@ -124,6 +130,7 @@ const enlaces = [
   .listas ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
   .listas li { display: flex; justify-content: space-between; gap: 1.5rem; color: #222; }
   .año { flex: none; font-variant-numeric: tabular-nums; color: #444; }
+  .listas strong { font-weight: 600; color: var(--texto); }
 
   /* LOS CONTACTOS: solo tipografía; al pasar el cursor se aclara */
   .enlaces { list-style: none; margin: clamp(1.8rem, 5vh, 2.8rem) 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem 1.5rem; }

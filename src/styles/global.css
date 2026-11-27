@@ -180,16 +180,18 @@ h1, h2, h3, .titulo {
 :focus-visible { outline: 1px solid var(--texto); outline-offset: 3px; }
 
 
-/* CAMBIO DE SECCIÓN: un fundido suave entre páginas (navegadores que lo admiten); la cabecera se queda quieta */
+/* CAMBIO DE SECCIÓN: una página se disuelve en la otra, como tinta en agua (navegadores que lo admiten).
+   Las dos se cruzan a la vez: la que se va se desenfoca y se apaga despacio; la nueva aparece desde
+   un leve desenfoque y se asienta. Curvas suaves y sin saltos. La cabecera se queda quieta. */
 @view-transition { navigation: auto; }
-::view-transition-old(root) { animation: 0.32s ease both salir-pagina; }
-::view-transition-new(root) { animation: 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both entrar-pagina; }
-@keyframes salir-pagina { to { opacity: 0; } }
-@keyframes entrar-pagina { from { opacity: 0; transform: translateY(10px); } }
+::view-transition-old(root) { animation: 0.9s cubic-bezier(0.45, 0, 0.55, 1) both salir-pagina; }
+::view-transition-new(root) { animation: 1.1s cubic-bezier(0.25, 0.1, 0.25, 1) 0.1s both entrar-pagina; }
+@keyframes salir-pagina { to { opacity: 0; filter: blur(8px); } }
+@keyframes entrar-pagina { from { opacity: 0; filter: blur(10px); transform: scale(1.012); } }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
 /* en navegadores sin esa transición, el contenido entra con el mismo fundido */
 @supports not (view-transition-name: a) {
-  main { animation: 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both entrar-pagina; }
+  main { animation: 1.1s cubic-bezier(0.25, 0.1, 0.25, 1) both entrar-pagina; }
 }
