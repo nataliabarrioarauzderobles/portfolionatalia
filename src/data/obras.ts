@@ -8,7 +8,7 @@
 // Los textos en español vienen del cuadernillo CUADERNILLO_VENEZUELA; los ingleses son traducción.
 
 export type Serie = 'formas' | 'open' | 'interfaces' | 'sueltas';
-export type Tecnica = 'oleo' | 'mixta' | 'acrilico';
+export type Tecnica = 'oleo' | 'mixta' | 'acrilico' | 'acrilicoMadera' | 'mixtaMadera';
 type Texto = { es: string; en: string };
 
 export interface Obra {
@@ -17,6 +17,7 @@ export interface Obra {
   medidas?: string;  // en cm, p. ej. '90 x 70'
   precio?: number;   // en euros; sin precio, la web dice "Consultar precio"
   vendida?: boolean;
+  tecnica?: Tecnica; // solo si es distinta de la de su serie (p. ej. en las obras sueltas)
   texto?: Texto;     // descripción de la obra (se lee en el visor, plegada)
 }
 
@@ -135,7 +136,8 @@ export const series: SerieObras[] = [
     },
     // Títulos PROVISIONALES: cámbialos por los definitivos
     obras: [
-      { id: 'color', titulo: 'Color' },
+      { id: 'color', titulo: 'Color', medidas: '120 x 80', tecnica: 'acrilicoMadera' },
+      { id: 'la-danza', titulo: 'La danza', medidas: '60 x 60', tecnica: 'mixtaMadera' },
       { id: 'hombres', titulo: 'Hombres' },
       { id: 'rostros-color', titulo: 'Rostros' },
       { id: 'azul', titulo: 'Azul' },

@@ -47,7 +47,7 @@ const galeria = [
   ...disponibles.slice(6),
   ...resto.filter((o) => o.vendida && !vendidasDestacadas.has(o.id)),
 ];
-const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, o.serie.tecnica && t.tecnicas[o.serie.tecnica]].filter(Boolean).join(' · ');
+const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(' x ', ' × ')} cm`, (o.tecnica ?? o.serie.tecnica) && t.tecnicas[(o.tecnica ?? o.serie.tecnica)!]].filter(Boolean).join(' · ');
 ---
 
 <section class="pintura" data-pintura>
@@ -122,7 +122,7 @@ const ficha = (o: (typeof obras)[number]) => [o.medidas && `${o.medidas.replace(
         : <p class="estado precio">{tx.disponible}</p>}
       <dl>
         {o.medidas && (<><dt>{t.medidas}</dt><dd>{o.medidas.replace(' x ', ' × ')} cm</dd></>)}
-        {o.serie.tecnica && (<><dt>{t.tecnica}</dt><dd>{t.tecnicas[o.serie.tecnica]}</dd></>)}
+        {(o.tecnica ?? o.serie.tecnica) && (<><dt>{t.tecnica}</dt><dd>{t.tecnicas[(o.tecnica ?? o.serie.tecnica)!]}</dd></>)}
       </dl>
       {o.texto && <p class="descripcion">{o.texto[idioma]}</p>}
       {o.vendida ? (
