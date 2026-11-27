@@ -1,9 +1,13 @@
 ---
-// COLABOREMOS: dos caminos, sin más.
+// COLABOREMOS: dos caminos arriba y, debajo, la colaboración para espacios explicada para que cada cliente
+// se reconozca enseguida.
 //  · Obras por encargo → lleva a su página (foto, una frase, preguntas frecuentes y WhatsApp).
-//  · Colaboración para inmobiliarias, hoteles y restaurantes → al pulsar se despliega aquí mismo
-//    un texto corto y el botón para pedir una propuesta.
-// La foto de la colaboración es provisional (el local de La Cabezona) hasta tener la definitiva.
+//  · Arte para espacios → baja a la sección de abajo (#espacios), con dos puertas:
+//      1. Inmobiliarias e interiorismo (#viviendas): vestir con arte una vivienda en venta, de dos formas:
+//         obra nueva pagando solo la producción, o alquiler de obra del catálogo a precio cerrado por proyecto.
+//         Si el comprador quiere una obra, puede comprarla.
+//      2. Murales (#murales) para restaurantes, hoteles, academias, colegios…, por dentro y por fuera.
+//    Y al final, cómo trabajamos, en tres pasos.
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { textos, type Idioma } from '../../i18n/textos';
@@ -14,30 +18,97 @@ const { idioma } = Astro.props;
 const t = textos[idioma];
 
 const fotoEncargo = imagen('encargos/encargos.jpg');
-const fotoEspacios = imagen('diseno/la-cabezona/02-local.jpg'); // provisional
+const fotoEspacios = imagen('pintura/formas/desglose/desglose-mockup.jpg');
+const fotosVivienda = [
+  { foto: imagen('pintura/formas/desglose/desglose-mockup.jpg'), titulo: 'Desglose' },
+  { foto: imagen('pintura/formas/encuentro/encuentro-mockup.jpg'), titulo: 'Encuentro' },
+  { foto: imagen('pintura/formas/nudo/nudo-mockup.jpg'), titulo: 'Nudo' },
+];
+const fotoMural = imagen('diseno/la-cabezona/01-mural.jpg');
+const fotoLocal = imagen('diseno/la-cabezona/02-local.jpg');
 
 const tx = {
   es: {
     encargo: 'Obras por encargo',
-    espacios: 'Colaboración para inmobiliarias, hoteles y restaurantes',
-    texto: 'Decoro tu espacio con obra original, en una propuesta personalizada según la vivienda, el hotel o el local: qué piezas, de qué tamaño y dónde van.',
-    aval: 'He pintado murales para La Cabezona y R.A.C.E., y mi obra se ha expuesto en Café DOPA y Zielo Shopping Centre.',
-    pedir: 'Pedir una propuesta',
-    mensaje: 'Hola Natalia, me gustaría una propuesta de decoración con arte para un espacio.',
-    asunto: 'Propuesta de arte para un espacio',
-    email: 'Escribir un email',
+    espacios: 'Arte para espacios: inmobiliarias, interiorismo y murales',
+    etiqueta: 'Colaboración para espacios',
+    titulo: 'Arte original para los espacios que vendes, diseñas o abres al público.',
+    puertaViviendas: 'Soy una inmobiliaria o un estudio de interiorismo',
+    puertaMurales: 'Tengo un restaurante, una academia, un colegio…',
+
+    vEtiqueta: 'Inmobiliarias · Interiorismo · Home staging',
+    vTitulo: 'Vestimos con arte la vivienda que vendes.',
+    vIntro: 'Una casa con obra original se ve única en las fotos del anuncio y se recuerda después de la visita. Te propongo dos formas de hacerlo:',
+    opciones: [
+      { titulo: 'Obra nueva para esa vivienda', texto: 'Pinto obra pensada para esa casa: su luz, sus medidas y su paleta. Tú solo pagas la producción de las obras, sin honorarios. La obra sigue siendo mía: cuando la vivienda se vende, la recojo.', pie: 'Solo pagas la producción' },
+      { titulo: 'Alquiler de obra de mi catálogo', texto: 'Te enseño mi catálogo, eliges las piezas que mejor van con la vivienda y las alquilas por un precio cerrado para todo el proyecto, mientras se comercializa.', pie: 'Precio cerrado por proyecto' },
+    ],
+    vNota: 'En los dos casos, si al comprador le enamora una obra, puede quedársela: se la vendo directamente. Antes de llevar nada te envío simulaciones con fotos de la propia vivienda, y me encargo del traslado y el montaje.',
+    vPie: 'Simulaciones de Desglose, Encuentro y Nudo en un interior.',
+    vBoton: 'Pedir una propuesta para una vivienda',
+    vMensaje: 'Hola Natalia, soy de una inmobiliaria / estudio de interiorismo y me gustaría una propuesta de arte para una vivienda.',
+    vAsunto: 'Arte para una vivienda',
+
+    mEtiqueta: 'Restaurantes · Hoteles · Academias · Colegios · Tiendas',
+    mTitulo: 'Murales a medida, por dentro y por fuera.',
+    mTexto: 'Diseño y pinto murales para tu establecimiento: la fachada de una academia de baile, el patio de un colegio, la pared principal de un restaurante o la recepción de un hotel. Trabajamos el proyecto según lo que necesita el espacio: medidas, paleta y lo que quieres contar. Te enseño bocetos y simulaciones antes de pintar.',
+    mAval: 'Ya he pintado murales para el restaurante La Cabezona y para R.A.C.E., en Madrid.',
+    mPieFoto: 'Mural y local de La Cabezona, Madrid.',
+    mPie: 'Presupuesto según proyecto',
+    mBoton: 'Contarme tu espacio',
+    mMensaje: 'Hola Natalia, tengo un espacio (restaurante / academia / colegio…) y me gustaría hablar contigo sobre un mural.',
+    mAsunto: 'Mural para un espacio',
+
+    email: 'O por email',
+    pasosTitulo: 'Cómo trabajamos',
+    pasos: [
+      { titulo: 'Conocernos', texto: 'Visito el espacio o me mandas unas fotos, y hablamos de lo que buscas.' },
+      { titulo: 'Propuesta', texto: 'Te envío bocetos o una selección de obras, con simulaciones en tu espacio y las condiciones.' },
+      { titulo: 'Montaje', texto: 'Llevo y cuelgo las obras, o pinto el mural en el sitio.' },
+    ],
   },
   en: {
     encargo: 'Commissioned works',
-    espacios: 'Collaborations for real estate, hotels and restaurants',
-    texto: 'I dress your space with original work, in a proposal tailored to the home, the hotel or the venue: which pieces, what size and where they go.',
-    aval: 'I have painted murals for La Cabezona and R.A.C.E., and my work has been shown at Café DOPA and Zielo Shopping Centre.',
-    pedir: 'Ask for a proposal',
-    mensaje: 'Hi Natalia, I would like an art proposal for a space.',
-    asunto: 'Art proposal for a space',
-    email: 'Send an email',
+    espacios: 'Art for spaces: real estate, interiors and murals',
+    etiqueta: 'Collaborations for spaces',
+    titulo: 'Original art for the spaces you sell, design or open to the public.',
+    puertaViviendas: "I'm a real estate agency or an interior design studio",
+    puertaMurales: 'I run a restaurant, a dance school, a school…',
+
+    vEtiqueta: 'Real estate · Interiors · Home staging',
+    vTitulo: "Let's dress the home you're selling with art.",
+    vIntro: 'A home with original art looks unique in the listing photos and is remembered after the viewing. I offer two ways to do it:',
+    opciones: [
+      { titulo: 'New work for that home', texto: 'I paint work designed for that house: its light, its sizes and its palette. You only pay for producing the works, with no fees. The works remain mine: when the home is sold, I collect them.', pie: 'You only pay for production' },
+      { titulo: 'Renting work from my catalogue', texto: 'I show you my catalogue, you choose the pieces that suit the home best and rent them for a fixed price for the whole project, while it is on the market.', pie: 'Fixed price per project' },
+    ],
+    vNota: 'Either way, if the buyer falls in love with a work, they can keep it: I sell it to them directly. Before bringing anything, I send you mock-ups with photos of the home itself, and I take care of transport and hanging.',
+    vPie: 'Mock-ups of Desglose, Encuentro and Nudo in an interior.',
+    vBoton: 'Ask for a proposal for a home',
+    vMensaje: "Hi Natalia, I'm from a real estate agency / interior design studio and I'd like an art proposal for a home.",
+    vAsunto: 'Art for a home',
+
+    mEtiqueta: 'Restaurants · Hotels · Dance schools · Schools · Shops',
+    mTitulo: 'Bespoke murals, inside and out.',
+    mTexto: "I design and paint murals for your venue: the front of a dance school, a school playground, the main wall of a restaurant or a hotel lobby. We shape the project around what the space needs: size, palette and what you want to say. I show you sketches and mock-ups before painting.",
+    mAval: 'I have painted murals for La Cabezona restaurant and for R.A.C.E., in Madrid.',
+    mPieFoto: 'Mural and venue at La Cabezona, Madrid.',
+    mPie: 'Quote per project',
+    mBoton: 'Tell me about your space',
+    mMensaje: "Hi Natalia, I have a space (restaurant / school / dance school…) and I'd like to talk to you about a mural.",
+    mAsunto: 'Mural for a space',
+
+    email: 'Or by email',
+    pasosTitulo: 'How we work',
+    pasos: [
+      { titulo: 'Getting to know each other', texto: 'I visit the space or you send me some photos, and we talk about what you are looking for.' },
+      { titulo: 'Proposal', texto: 'I send you sketches or a selection of works, with mock-ups in your space and the terms.' },
+      { titulo: 'Installation', texto: 'I bring and hang the works, or paint the mural on site.' },
+    ],
   },
 }[idioma];
+
+const correo = (asunto: string) => `mailto:${contacto.email}?subject=${encodeURIComponent(asunto)}`;
 ---
 
 <Base idioma={idioma} pagina="colaboremos" titulo={t.colaboremosTitulo}>
@@ -52,64 +123,144 @@ const tx = {
         </a>
       </li>
       <li>
-        <button type="button" class="camino" data-abrir-espacios aria-expanded="false" aria-controls="espacios">
+        <a class="camino" href="#espacios">
           <Image src={fotoEspacios} alt="" widths={[500, 900, 1300]} sizes="(max-width: 760px) 100vw, 45vw" loading="eager" />
           <strong>{tx.espacios} <span class="flecha" aria-hidden="true">↓</span></strong>
-        </button>
+        </a>
       </li>
     </ul>
+  </section>
 
-    <!-- al pulsar la colaboración: un texto corto y cómo pedir la propuesta -->
-    <div class="espacios" id="espacios" hidden>
-      <p>{tx.texto}</p>
-      <p class="aval">{tx.aval}</p>
-      <p class="botones">
-        <a class="accion" href={enlaceWhatsApp(tx.mensaje)} target="_blank" rel="noopener">{tx.pedir} →</a>
-        <a class="accion" href={`mailto:${contacto.email}?subject=${encodeURIComponent(tx.asunto)}`}>{tx.email} →</a>
+  <!-- ARTE PARA ESPACIOS -->
+  <section class="espacios" id="espacios" aria-labelledby="espacios-titulo">
+    <div class="cabeza" data-aparece>
+      <p class="etiqueta">{tx.etiqueta}</p>
+      <h2 id="espacios-titulo">{tx.titulo}</h2>
+      <p class="puertas">
+        <a href="#viviendas">{tx.puertaViviendas} ↓</a>
+        <a href="#murales">{tx.puertaMurales} ↓</a>
       </p>
+    </div>
+
+    <!-- 1. INMOBILIARIAS E INTERIORISMO -->
+    <article class="bloque" id="viviendas">
+      <div class="texto" data-aparece>
+        <p class="etiqueta">{tx.vEtiqueta}</p>
+        <h3>{tx.vTitulo}</h3>
+        <p class="intro">{tx.vIntro}</p>
+      </div>
+      <ol class="opciones">
+        {tx.opciones.map((o, i) => (
+          <li data-aparece style={`--retraso:${i * 140}ms`}>
+            <span class="numero">0{i + 1}</span>
+            <h4>{o.titulo}</h4>
+            <p>{o.texto}</p>
+            <span class="pie-opcion">{o.pie}</span>
+          </li>
+        ))}
+      </ol>
+      <p class="nota" data-aparece>{tx.vNota}</p>
+      <figure class="fotos-vivienda">
+        {fotosVivienda.map((f, i) => (
+          <Image src={f.foto} alt={f.titulo} widths={[400, 700, 1000]} sizes="(max-width: 760px) 90vw, 32vw" data-aparece="izquierda" style={`--retraso:${i * 160}ms`} />
+        ))}
+        <figcaption>{tx.vPie}</figcaption>
+      </figure>
+      <p class="botones">
+        <a class="boton boton-whatsapp" href={enlaceWhatsApp(tx.vMensaje)} target="_blank" rel="noopener">{tx.vBoton} →</a>
+        <a class="email" href={correo(tx.vAsunto)}>{tx.email}</a>
+      </p>
+    </article>
+
+    <!-- 2. MURALES -->
+    <article class="bloque" id="murales">
+      <div class="texto" data-aparece>
+        <p class="etiqueta">{tx.mEtiqueta}</p>
+        <h3>{tx.mTitulo}</h3>
+        <p class="intro">{tx.mTexto}</p>
+        <p class="aval">{tx.mAval}</p>
+      </div>
+      <figure class="fotos-mural">
+        <Image src={fotoMural} alt="Mural de La Cabezona" widths={[600, 1000, 1500]} sizes="(max-width: 760px) 90vw, 60vw" data-aparece="izquierda" />
+        <Image src={fotoLocal} alt="Local de La Cabezona" widths={[400, 700, 1000]} sizes="(max-width: 760px) 90vw, 35vw" data-aparece="izquierda" style="--retraso:160ms" />
+        <figcaption>{tx.mPieFoto} · {tx.mPie}</figcaption>
+      </figure>
+      <p class="botones">
+        <a class="boton boton-whatsapp" href={enlaceWhatsApp(tx.mMensaje)} target="_blank" rel="noopener">{tx.mBoton} →</a>
+        <a class="email" href={correo(tx.mAsunto)}>{tx.email}</a>
+      </p>
+    </article>
+
+    <!-- CÓMO TRABAJAMOS -->
+    <div class="pasos" data-aparece>
+      <p class="etiqueta">{tx.pasosTitulo}</p>
+      <ol>
+        {tx.pasos.map((p, i) => (
+          <li><span class="numero">{i + 1}</span><strong>{p.titulo}</strong><span>{p.texto}</span></li>
+        ))}
+      </ol>
     </div>
   </section>
 </Base>
 
 <style>
-  .colaboremos { width: min(1100px, 100%); margin: 0 auto; padding: clamp(2.5rem, 8vh, 5rem) var(--margen) clamp(4rem, 10vh, 7rem); }
+  .colaboremos { width: min(1100px, 100%); margin: 0 auto; padding: clamp(2.5rem, 8vh, 5rem) var(--margen) clamp(3rem, 8vh, 5rem); }
   h1 { margin: 0 0 clamp(2rem, 6vh, 3.5rem); text-align: center; font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -0.03em; }
 
   /* LOS DOS CAMINOS */
   .caminos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem clamp(1.5rem, 4vw, 3rem); align-items: start; }
-  .camino { display: grid; gap: 1rem; width: 100%; padding: 0; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; color: var(--texto); }
+  .camino { display: grid; gap: 1rem; color: var(--texto); }
   .camino :global(img) { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: opacity 0.3s ease; }
   .camino strong { font-weight: 400; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.4; transition: color 0.25s ease; }
   .camino:hover :global(img) { opacity: 0.85; }
   .camino:hover strong, .camino:focus-visible strong { color: var(--texto-tenue); }
-  .flecha { display: inline-block; transition: transform 0.3s ease; }
-  [aria-expanded='true'] .flecha { transform: rotate(180deg); }
 
-  /* EL TEXTO DE LA COLABORACIÓN, desplegado */
-  .espacios { max-width: 560px; margin: clamp(2.5rem, 6vh, 3.5rem) auto 0; text-align: center; scroll-margin-top: 6rem; animation: aparecer 0.4s ease; }
-  @keyframes aparecer { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-  .espacios p { margin: 0; font-size: 0.95rem; line-height: 1.65; color: #444; }
-  .espacios .aval { margin-top: 0.9rem; font-size: 0.82rem; color: var(--texto-suave); }
-  .espacios .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem 2.2rem; margin-top: 1.6rem; }
-  .accion { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); transition: color 0.25s ease; }
-  .accion:hover, .accion:focus-visible { color: var(--texto-tenue); }
+  /* ARTE PARA ESPACIOS */
+  .espacios { width: min(1100px, 100%); margin: 0 auto; padding: clamp(2rem, 6vh, 4rem) var(--margen) clamp(4rem, 10vh, 7rem); scroll-margin-top: 4rem; }
+  .etiqueta { margin: 0 0 0.9rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto-suave); }
+  .cabeza { max-width: 720px; margin: 0 auto clamp(3rem, 8vh, 5rem); text-align: center; border-top: 1px solid var(--linea); padding-top: clamp(2.5rem, 7vh, 4rem); }
+  h2 { margin: 0; font-size: clamp(1.6rem, 3.6vw, 2.5rem); font-weight: 400; line-height: 1.15; letter-spacing: -0.03em; }
+  .puertas { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; margin: 1.8rem 0 0; }
+  .puertas a { padding: 0.7rem 1.1rem; border: 1px solid var(--linea); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); transition: border-color 0.25s, background 0.25s; }
+  .puertas a:hover, .puertas a:focus-visible { border-color: var(--texto); }
 
-  @media (max-width: 760px) { .caminos { grid-template-columns: 1fr; } }
-</style>
+  .bloque { padding: clamp(2.5rem, 7vh, 4rem) 0; border-top: 1px solid var(--linea); scroll-margin-top: 4rem; }
+  .texto { max-width: 640px; }
+  h3 { margin: 0 0 1rem; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 400; line-height: 1.2; letter-spacing: -0.02em; }
+  .intro { margin: 0; font-size: 0.95rem; line-height: 1.65; color: #444; }
+  .aval { margin: 1rem 0 0; font-size: 0.86rem; line-height: 1.6; color: var(--texto-suave); }
 
-<script>
-  const boton = document.querySelector<HTMLButtonElement>('[data-abrir-espacios]');
-  const panel = document.getElementById('espacios');
-  if (boton && panel) {
-    const abrir = (abierto: boolean) => {
-      panel.hidden = !abierto;
-      boton.setAttribute('aria-expanded', String(abierto));
-    };
-    boton.addEventListener('click', () => {
-      const abierto = panel.hidden;
-      abrir(abierto);
-      if (abierto) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-    if (location.hash === '#espacios') abrir(true);
+  /* las dos opciones para viviendas */
+  .opciones { list-style: none; margin: clamp(1.8rem, 5vh, 2.6rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+  .opciones li { display: grid; grid-template-rows: auto auto 1fr auto; gap: 0.6rem; padding: 1.5rem 1.5rem 1.3rem; border: 1px solid var(--linea); }
+  .numero { font-size: 0.72rem; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+  h4 { margin: 0; font-size: 1.15rem; font-weight: 400; letter-spacing: -0.01em; }
+  .opciones p { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #444; }
+  .pie-opcion { margin-top: 0.6rem; padding-top: 0.9rem; border-top: 1px solid var(--linea); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); }
+  .nota { max-width: 760px; margin: 1.4rem 0 0; font-size: 0.86rem; line-height: 1.65; color: var(--texto-suave); }
+
+  /* fotos */
+  figure { margin: clamp(2rem, 5vh, 2.8rem) 0 0; display: grid; gap: 0.8rem; }
+  .fotos-vivienda { grid-template-columns: 1.4fr 1fr 1fr; }
+  .fotos-mural { grid-template-columns: 1.7fr 1fr; }
+  figure :global(img) { display: block; width: 100%; height: clamp(220px, 34vw, 420px); object-fit: cover; }
+  figcaption { grid-column: 1 / -1; font-size: 0.74rem; color: var(--texto-suave); }
+
+  .botones { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; margin: clamp(1.6rem, 4vh, 2.2rem) 0 0; }
+  .email { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--texto); transition: color 0.25s ease; }
+  .email:hover, .email:focus-visible { color: var(--texto-tenue); }
+
+  /* cómo trabajamos */
+  .pasos { padding-top: clamp(2.5rem, 7vh, 4rem); border-top: 1px solid var(--linea); }
+  .pasos ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem clamp(1.5rem, 4vw, 3rem); }
+  .pasos li { display: grid; gap: 0.4rem; font-size: 0.9rem; line-height: 1.6; color: #444; }
+  .pasos .numero { font-size: 1.4rem; color: var(--texto); }
+  .pasos strong { font-weight: 500; color: var(--texto); }
+
+  @media (max-width: 760px) {
+    .caminos, .opciones, .pasos ol { grid-template-columns: 1fr; }
+    .fotos-vivienda, .fotos-mural { grid-template-columns: 1fr; }
+    figure :global(img) { height: auto; aspect-ratio: 4 / 3; }
+    .puertas a { width: 100%; }
   }
-</script>
+</style>
