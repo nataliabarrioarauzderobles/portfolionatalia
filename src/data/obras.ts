@@ -8,7 +8,7 @@
 // Los textos en español vienen del cuadernillo CUADERNILLO_VENEZUELA; los ingleses son traducción.
 
 export type Serie = 'formas' | 'open' | 'interfaces' | 'sueltas';
-export type Tecnica = 'oleo' | 'mixta' | 'acrilico' | 'acrilicoMadera' | 'mixtaMadera';
+export type Tecnica = 'oleo' | 'mixta' | 'acrilico' | 'acrilicoMadera' | 'mixtaMadera' | 'digital';
 type Texto = { es: string; en: string };
 
 export interface Obra {
@@ -140,12 +140,13 @@ export const series: SerieObras[] = [
       { id: 'la-danza', titulo: 'La danza', medidas: '60 x 60', tecnica: 'mixtaMadera' },
       { id: 'hombres', titulo: 'Hombres' },
       { id: 'rostros-color', titulo: 'Rostros' },
-      { id: 'azul', titulo: 'Azul' },
-      { id: 'figuras-amarillo', titulo: 'Figuras en amarillo' },
-      { id: 'figura-azul', titulo: 'Figura en azul' },
-      { id: 'figuras-rojo', titulo: 'Figuras en rojo' },
-      { id: 'cuerpos-i', titulo: 'Cuerpos I' },
-      { id: 'cuerpos-ii', titulo: 'Cuerpos II' },
+      { id: 'azul', titulo: 'Azul', medidas: '280 x 120', vendida: true },
+      // obras digitales: sin medidas
+      { id: 'figuras-amarillo', titulo: 'Figuras en amarillo', tecnica: 'digital' },
+      { id: 'figura-azul', titulo: 'Figura en azul', tecnica: 'digital' },
+      { id: 'figuras-rojo', titulo: 'Figuras en rojo', tecnica: 'digital' },
+      { id: 'cuerpos-i', titulo: 'Cuerpos I', tecnica: 'digital' },
+      { id: 'cuerpos-ii', titulo: 'Cuerpos II', tecnica: 'digital' },
     ],
   },
 ];
